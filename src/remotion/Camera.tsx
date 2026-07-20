@@ -7,6 +7,7 @@ export const CameraStage: React.FC<{
   translateZ?: number;
   rotateX?: number;
   perspective?: number;
+  perspectiveOrigin?: string;
   children: React.ReactNode;
 }> = ({
   translateX = 0,
@@ -14,12 +15,11 @@ export const CameraStage: React.FC<{
   translateZ = 0,
   rotateX = 0,
   perspective = 1400,
+  perspectiveOrigin = '50% 50%',
   children,
 }) => {
   return (
-    <AbsoluteFill
-      style={{perspective, perspectiveOrigin: '50% 50%', overflow: 'hidden'}}
-    >
+    <AbsoluteFill style={{perspective, perspectiveOrigin, overflow: 'hidden'}}>
       <AbsoluteFill
         style={{
           transformStyle: 'preserve-3d',
