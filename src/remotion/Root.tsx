@@ -2,6 +2,7 @@ import React from 'react';
 import {Composition} from 'remotion';
 import {JarbasCugulaTriade} from './JarbasCugulaTriade';
 import {OQueDizALei} from './OQueDizALei';
+import {AConversaoFinal} from './AConversaoFinal';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -18,6 +19,14 @@ export const RemotionRoot: React.FC = () => {
         id="OQueDizALei"
         component={OQueDizALei}
         durationInFrames={90}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="AConversaoFinal"
+        component={AConversaoFinal}
+        durationInFrames={180}
         fps={30}
         width={1080}
         height={1920}
