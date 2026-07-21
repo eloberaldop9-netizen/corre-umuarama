@@ -2,14 +2,15 @@ import React from 'react';
 import {
   AbsoluteFill,
   Easing,
+  Img,
   interpolate,
   spring,
+  staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion';
 import {COLORS} from '../colors';
 import {FONT_FAMILY} from '../fonts';
-import {JCLogoJ, JCLogoC} from '../icons/JCLogo';
 import {CursorTouch, CursorRipple} from '../icons/CursorTouch';
 
 const IG = {
@@ -177,23 +178,15 @@ export const Scene2Instagram: React.FC = () => {
             boxSizing: 'border-box',
           }}
         >
-          <div
+          <Img
+            src={staticFile('images/avatar-jarbas.png')}
             style={{
               width: '100%',
               height: '100%',
               borderRadius: '50%',
-              backgroundColor: COLORS.surface1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative',
+              objectFit: 'cover',
             }}
-          >
-            <div style={{position: 'relative', width: 84, height: 84}}>
-              <JCLogoJ size={84} />
-              <JCLogoC size={84} />
-            </div>
-          </div>
+          />
         </div>
 
         <div style={{display: 'flex', flex: 1, justifyContent: 'space-around'}}>
