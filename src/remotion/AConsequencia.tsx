@@ -48,7 +48,7 @@ export const AConsequencia: React.FC = () => {
   const podemSpring = spring({
     frame: frame - 4,
     fps,
-    config: {damping: 15, mass: 1.5},
+    config: {damping: 22, mass: 1.5},
   });
   const podemY = interpolate(podemSpring, [0, 1], [-400, 0]);
   const podemBlurIn = interpolate(frame, [4, 26], [20, 0], {
@@ -63,7 +63,7 @@ export const AConsequencia: React.FC = () => {
   const advertSpring = spring({
     frame: frame - 10,
     fps,
-    config: {damping: 12, mass: 2.5},
+    config: {damping: 28, mass: 2.5},
   });
   const advertY = interpolate(advertSpring, [0, 1], [-600, 0]);
   const advertBlurIn = interpolate(frame, [10, 38], [30, 0], {
@@ -86,7 +86,7 @@ export const AConsequencia: React.FC = () => {
   const medidasSpring = spring({
     frame: frame - 18,
     fps,
-    config: {damping: 14, mass: 1.2},
+    config: {damping: 20, mass: 1.2},
   });
   const medidasY = interpolate(medidasSpring, [0, 1], [-400, 0]);
   const medidasBlurIn = interpolate(frame, [18, 38], [20, 0], {
