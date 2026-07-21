@@ -12,14 +12,14 @@ import {Noise} from '../Noise';
 import {CameraStage} from '../Camera';
 import {FONT_FAMILY} from '../fonts';
 
-const SECOND_LINE_WORDS: {text: string; accent?: boolean}[] = [
-  {text: 'Então'},
-  {text: 'me'},
-  {text: 'siga', accent: true},
-  {text: 'aqui'},
-  {text: 'para'},
-  {text: 'saber'},
-  {text: 'mais.'},
+const SECOND_LINE_WORDS: {text: string; accent?: boolean; line: 1 | 2}[] = [
+  {text: 'Então', line: 1},
+  {text: 'me', line: 1},
+  {text: 'siga', accent: true, line: 1},
+  {text: 'aqui', line: 1},
+  {text: 'para', line: 2},
+  {text: 'saber', line: 2},
+  {text: 'mais.', line: 2},
 ];
 
 export const Scene1Gancho: React.FC = () => {
@@ -126,44 +126,58 @@ export const Scene1Gancho: React.FC = () => {
               fontSize: 45,
               fontWeight: 400,
               color: COLORS.textSecondary,
-              textAlign: 'center',
-              maxWidth: 820,
               lineHeight: 1.3,
             }}
           >
-            {SECOND_LINE_WORDS.map((word, i) => {
-              const start = 12 + i * 3;
-              const wSpring = spring({
-                frame: frame - start,
-                fps,
-                config: {damping: 14, mass: 0.8},
-              });
-              const wY = interpolate(wSpring, [0, 1], [40, 0]);
-              const wBlur = interpolate(frame, [start, start + 15], [10, 0], {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-              });
-              const wOpacity = interpolate(frame, [start, start + 13], [0, 1], {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-              });
-              return (
-                <span
-                  key={i}
-                  style={{
-                    display: 'inline-block',
-                    transform: `translateY(${wY}px)`,
-                    filter: `blur(${wBlur}px)`,
-                    opacity: wOpacity,
-                    marginRight: '0.3em',
-                    fontWeight: word.accent ? 800 : 400,
-                    color: word.accent ? COLORS.accent : COLORS.textSecondary,
-                  }}
-                >
-                  {word.text}
-                </span>
-              );
-            })}
+            {([1, 2] as const).map((lineNum) => (
+              <div
+                key={lineNum}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {SECOND_LINE_WORDS.map((word, i) => {
+                  if (word.line !== lineNum) return null;
+                  const start = 12 + i * 3;
+                  const wSpring = spring({
+                    frame: frame - start,
+                    fps,
+                    config: {damping: 14, mass: 0.8},
+                  });
+                  const wY = interpolate(wSpring, [0, 1], [40, 0]);
+                  const wBlur = interpolate(
+                    frame,
+                    [start, start + 15],
+                    [10, 0],
+                    {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'},
+                  );
+                  const wOpacity = interpolate(
+                    frame,
+                    [start, start + 13],
+                    [0, 1],
+                    {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'},
+                  );
+                  return (
+                    <span
+                      key={i}
+                      style={{
+                        display: 'inline-block',
+                        transform: `translateY(${wY}px)`,
+                        filter: `blur(${wBlur}px)`,
+                        opacity: wOpacity,
+                        marginRight: '0.3em',
+                        fontWeight: word.accent ? 800 : 400,
+                        color: word.accent ? COLORS.accent : COLORS.textSecondary,
+                      }}
+                    >
+                      {word.text}
+                    </span>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </AbsoluteFill>
       </CameraStage>

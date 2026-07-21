@@ -19,11 +19,11 @@ const IG = {
   textSecondary: '#A8A8A8',
 };
 
-const HEADER_TOP = 110;
-const PROFILE_TOP = 260;
+const HEADER_TOP = 625;
+const PROFILE_TOP = 775;
 const AVATAR_SIZE = 180;
-const BIO_TOP = 480;
-const BUTTON_TOP = 620;
+const BIO_TOP = 995;
+const BUTTON_TOP = 1215;
 const BUTTON_WIDTH = 400;
 const BUTTON_HEIGHT = 80;
 const BUTTON_CENTER_X = 540;
