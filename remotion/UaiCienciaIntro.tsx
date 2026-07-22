@@ -39,14 +39,9 @@ const WORDS = ['UAI,', 'é', 'ciência!'];
 const WORD_DELAYS = [4, 8, 12];
 const SUBTITLE_DELAY = 22;
 
-const EXIT_START = 90;
 const DURATION = 120;
-
-// Ponto aproximado do "!" em "ciência!" (em px, canvas 1080×1920) — foco do flash e da íris de saída.
-const IRIS_X = 788;
-const IRIS_Y = 845;
-// Raio que garante cobertura total do frame a partir desse ponto (diagonal até o canto mais distante).
-const IRIS_MAX_RADIUS = 1400;
+// A saída inteira (cena) começa a esmaecer aqui — janela longa e suave, sem forma geométrica.
+const FADE_START = 94;
 
 const clampCfg = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 
@@ -63,18 +58,7 @@ const Rings: React.FC<{ frame: number }> = ({ frame }) => {
   });
   const pulse = 1 + Math.sin(frame * 0.05) * 0.015;
   const drift = Math.sin(frame * 0.035) * 8;
-
-  // Explosão rápida dos anéis no instante do flash — dispersam antes da íris fechar.
-  const exitProgress = interpolate(frame, [EXIT_START, EXIT_START + 16], [0, 1], {
-    ...clampCfg,
-    easing: Easing.out(Easing.cubic),
-  });
-  const exitScale = interpolate(exitProgress, [0, 1], [1, 2.6]);
-  const exitOpacity = interpolate(exitProgress, [0, 1], [1, 0]);
-
   const rotation = baseSpin + kick;
-  const opacity = entryOpacity * exitOpacity;
-  const scale = pulse * exitScale;
 
   return (
     <svg
@@ -84,9 +68,9 @@ const Rings: React.FC<{ frame: number }> = ({ frame }) => {
         inset: 0,
         width: '100%',
         height: '100%',
-        transform: `translateX(${drift}px) rotate(${rotation}deg) scale(${scale})`,
+        transform: `translateX(${drift}px) rotate(${rotation}deg) scale(${pulse})`,
         transformOrigin: '50% 50%',
-        opacity,
+        opacity: entryOpacity,
       }}
     >
       {[300, 500, 700].map((r) => (
@@ -132,40 +116,21 @@ const Grain: React.FC<{ frame: number }> = ({ frame }) => {
   );
 };
 
-// A faísca do conhecimento: um pulso de luz que acende no instante do corte, no lugar de um zoom de câmera.
-const Flash: React.FC<{ frame: number }> = ({ frame }) => {
-  const t = interpolate(frame, [EXIT_START - 2, EXIT_START + 8, EXIT_START + 22], [0, 1, 0], {
+// Um respiro de luz muito discreto no instante em que a saída começa — não é um flash, é uma insinuação.
+const Glow: React.FC<{ frame: number }> = ({ frame }) => {
+  const t = interpolate(frame, [FADE_START - 6, FADE_START + 6, FADE_START + 18], [0, 1, 0], {
     ...clampCfg,
-    easing: Easing.out(Easing.cubic),
+    easing: Easing.inOut(Easing.sin),
   });
-  const burstScale = interpolate(t, [0, 1], [0.5, 1.6]);
 
   if (t <= 0) return null;
 
   return (
     <AbsoluteFill
       style={{
-        opacity: t,
+        opacity: t * 0.14,
         mixBlendMode: 'screen',
-        background: `radial-gradient(circle at ${IRIS_X}px ${IRIS_Y}px, rgba(255,244,222,0.95) 0%, rgba(255,221,160,0.55) 22%, rgba(246,163,49,0.25) 45%, transparent 70%)`,
-        transform: `scale(${burstScale})`,
-        transformOrigin: `${IRIS_X}px ${IRIS_Y}px`,
-      }}
-    />
-  );
-};
-
-// Obturador científico fechando sobre o "!" — a saída dinâmica que substitui o zoom.
-const Iris: React.FC<{ frame: number }> = ({ frame }) => {
-  const radius = interpolate(frame, [EXIT_START + 4, DURATION], [IRIS_MAX_RADIUS, 0], {
-    ...clampCfg,
-    easing: Easing.inOut(Easing.cubic),
-  });
-
-  return (
-    <AbsoluteFill
-      style={{
-        background: `radial-gradient(circle ${Math.max(radius, 0.5)}px at ${IRIS_X}px ${IRIS_Y}px, transparent 0, transparent 99%, #000 100%)`,
+        background: `radial-gradient(circle at 50% 46%, #fff4de 0%, ${BG_CORE} 45%, transparent 75%)`,
       }}
     />
   );
@@ -213,24 +178,27 @@ export const UaiCienciaIntro: React.FC = () => {
   const bgScale = bgSettle * bgBreathe;
   const bgOpacity = interpolate(frame, [0, 22], [0, 1], clampCfg);
 
-  // Câmera: dolly-in orgânico (ease in-out senoidal), sem mergulho — a saída não usa zoom.
+  // Câmera: dolly-in orgânico (ease in-out senoidal) + um recolhimento quase imperceptível na saída.
   const dolly = interpolate(frame, [0, 90], [1, 1.16], {
     ...clampCfg,
     easing: Easing.inOut(Easing.sin),
   });
-  const cameraScale = dolly;
+  const settle = interpolate(frame, [FADE_START, DURATION], [1, 0.97], {
+    ...clampCfg,
+    easing: Easing.inOut(Easing.cubic),
+  });
+  const cameraScale = dolly * settle;
 
-  // Respiração contínua do bloco tipográfico + pulso de impacto no instante do corte.
+  // Respiração contínua do bloco tipográfico — nada de pulso de impacto, só a vida de sempre.
   const breathe = Math.sin(frame * 0.03) * 2;
-  const impactT = interpolate(
-    frame,
-    [EXIT_START, EXIT_START + 8, EXIT_START + 16],
-    [0, 1, 0],
-    { ...clampCfg, easing: Easing.out(Easing.cubic) }
-  );
-  const impactScale = 1 + impactT * 0.05;
 
-  // Subtítulo — entrada leve e fluida, saída em blur/fade
+  // Toda a cena esmaece junto, devagar e por igual — sem forma geométrica, sem zoom.
+  const sceneOpacity = interpolate(frame, [FADE_START, DURATION], [1, 0], {
+    ...clampCfg,
+    easing: Easing.inOut(Easing.cubic),
+  });
+
+  // Subtítulo — entrada leve e fluida, saída em blur/fade suave (some um pouco antes do resto)
   const subtitleSpring = spring({
     frame: frame - SUBTITLE_DELAY,
     fps,
@@ -241,71 +209,66 @@ export const UaiCienciaIntro: React.FC = () => {
   const subtitleBlurIn = interpolate(subtitleSpring, [0, 1], [8, 0], { extrapolateRight: 'clamp' });
   const subtitleOpacityIn = interpolate(subtitleSpring, [0, 1], [0, 1], { extrapolateRight: 'clamp' });
 
-  const subtitleExitProgress = interpolate(frame, [90, 116], [0, 1], {
+  const subtitleExitProgress = interpolate(frame, [88, 112], [0, 1], {
     ...clampCfg,
     easing: Easing.in(Easing.cubic),
   });
-  const subtitleBlurOut = interpolate(subtitleExitProgress, [0, 1], [0, 20]);
+  const subtitleBlurOut = interpolate(subtitleExitProgress, [0, 1], [0, 14]);
   const subtitleOpacityOut = interpolate(subtitleExitProgress, [0, 1], [1, 0]);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: BG_EDGE, fontFamily }}>
+    <AbsoluteFill style={{ backgroundColor: '#0d0904', fontFamily }}>
       <FontFace />
-      <AbsoluteFill style={{ transform: `scale(${cameraScale})`, transformOrigin: '50% 50%' }}>
-        <AbsoluteFill
-          style={{
-            transform: `scale(${bgScale})`,
-            opacity: bgOpacity,
-            background: `radial-gradient(circle at 50% 50%, ${BG_CORE} 0%, transparent 80%)`,
-          }}
-        />
-        <Rings frame={frame} />
-        <Grain frame={frame} />
-        <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <div
+      <AbsoluteFill style={{ opacity: sceneOpacity }}>
+        <AbsoluteFill style={{ backgroundColor: BG_EDGE }} />
+        <AbsoluteFill style={{ transform: `scale(${cameraScale})`, transformOrigin: '50% 50%' }}>
+          <AbsoluteFill
             style={{
-              transform: `translateY(${breathe}px) scale(${impactScale})`,
-              textAlign: 'center',
-              padding: '0 40px',
+              transform: `scale(${bgScale})`,
+              opacity: bgOpacity,
+              background: `radial-gradient(circle at 50% 50%, ${BG_CORE} 0%, transparent 80%)`,
             }}
-          >
-            <div
-              style={{
-                fontSize: 130,
-                fontWeight: 900,
-                color: TEXT_PRIMARY,
-                letterSpacing: -1,
-                lineHeight: 1,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {WORDS.map((word, i) => (
-                <React.Fragment key={word}>
-                  <TitleWord word={word} delay={WORD_DELAYS[i]} />
-                  {i < WORDS.length - 1 ? ' ' : ''}
-                </React.Fragment>
-              ))}
+          />
+          <Rings frame={frame} />
+          <Grain frame={frame} />
+          <Glow frame={frame} />
+          <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ transform: `translateY(${breathe}px)`, textAlign: 'center', padding: '0 40px' }}>
+              <div
+                style={{
+                  fontSize: 130,
+                  fontWeight: 900,
+                  color: TEXT_PRIMARY,
+                  letterSpacing: -1,
+                  lineHeight: 1,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {WORDS.map((word, i) => (
+                  <React.Fragment key={word}>
+                    <TitleWord word={word} delay={WORD_DELAYS[i]} />
+                    {i < WORDS.length - 1 ? ' ' : ''}
+                  </React.Fragment>
+                ))}
+              </div>
+              <div
+                style={{
+                  fontSize: 54,
+                  fontWeight: 400,
+                  color: TEXT_PRIMARY,
+                  opacity: 0.85 * subtitleOpacityIn * subtitleOpacityOut,
+                  transform: `translateY(${subtitleTranslateY}px) scale(${subtitleScale})`,
+                  filter: `blur(${Math.max(subtitleBlurIn, subtitleBlurOut)}px)`,
+                  marginTop: 22,
+                  letterSpacing: 0.5,
+                }}
+              >
+                com Dr. Éric Slywitch
+              </div>
             </div>
-            <div
-              style={{
-                fontSize: 54,
-                fontWeight: 400,
-                color: TEXT_PRIMARY,
-                opacity: 0.85 * subtitleOpacityIn * subtitleOpacityOut,
-                transform: `translateY(${subtitleTranslateY}px) scale(${subtitleScale})`,
-                filter: `blur(${Math.max(subtitleBlurIn, subtitleBlurOut)}px)`,
-                marginTop: 22,
-                letterSpacing: 0.5,
-              }}
-            >
-              com Dr. Éric Slywitch
-            </div>
-          </div>
+          </AbsoluteFill>
         </AbsoluteFill>
       </AbsoluteFill>
-
-      <Flash frame={frame} />
-      <Iris frame={frame} />
     </AbsoluteFill>
   );
 };
