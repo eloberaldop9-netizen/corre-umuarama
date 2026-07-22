@@ -42,8 +42,11 @@ const SUBTITLE_DELAY = 22;
 const EXIT_START = 90;
 const DURATION = 120;
 
-// Ponto aproximado do "!" em "ciência!" — foco do Z-dive final.
-const DIVE_ORIGIN = '73% 44%';
+// Ponto aproximado do "!" em "ciência!" (em px, canvas 1080×1920) — foco do flash e da íris de saída.
+const IRIS_X = 788;
+const IRIS_Y = 845;
+// Raio que garante cobertura total do frame a partir desse ponto (diagonal até o canto mais distante).
+const IRIS_MAX_RADIUS = 1400;
 
 const clampCfg = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 
@@ -61,11 +64,12 @@ const Rings: React.FC<{ frame: number }> = ({ frame }) => {
   const pulse = 1 + Math.sin(frame * 0.05) * 0.015;
   const drift = Math.sin(frame * 0.035) * 8;
 
-  const exitProgress = interpolate(frame, [EXIT_START, DURATION], [0, 1], {
+  // Explosão rápida dos anéis no instante do flash — dispersam antes da íris fechar.
+  const exitProgress = interpolate(frame, [EXIT_START, EXIT_START + 16], [0, 1], {
     ...clampCfg,
-    easing: Easing.inOut(Easing.cubic),
+    easing: Easing.out(Easing.cubic),
   });
-  const exitScale = interpolate(exitProgress, [0, 1], [1, 2.2]);
+  const exitScale = interpolate(exitProgress, [0, 1], [1, 2.6]);
   const exitOpacity = interpolate(exitProgress, [0, 1], [1, 0]);
 
   const rotation = baseSpin + kick;
@@ -128,6 +132,45 @@ const Grain: React.FC<{ frame: number }> = ({ frame }) => {
   );
 };
 
+// A faísca do conhecimento: um pulso de luz que acende no instante do corte, no lugar de um zoom de câmera.
+const Flash: React.FC<{ frame: number }> = ({ frame }) => {
+  const t = interpolate(frame, [EXIT_START - 2, EXIT_START + 8, EXIT_START + 22], [0, 1, 0], {
+    ...clampCfg,
+    easing: Easing.out(Easing.cubic),
+  });
+  const burstScale = interpolate(t, [0, 1], [0.5, 1.6]);
+
+  if (t <= 0) return null;
+
+  return (
+    <AbsoluteFill
+      style={{
+        opacity: t,
+        mixBlendMode: 'screen',
+        background: `radial-gradient(circle at ${IRIS_X}px ${IRIS_Y}px, rgba(255,244,222,0.95) 0%, rgba(255,221,160,0.55) 22%, rgba(246,163,49,0.25) 45%, transparent 70%)`,
+        transform: `scale(${burstScale})`,
+        transformOrigin: `${IRIS_X}px ${IRIS_Y}px`,
+      }}
+    />
+  );
+};
+
+// Obturador científico fechando sobre o "!" — a saída dinâmica que substitui o zoom.
+const Iris: React.FC<{ frame: number }> = ({ frame }) => {
+  const radius = interpolate(frame, [EXIT_START + 4, DURATION], [IRIS_MAX_RADIUS, 0], {
+    ...clampCfg,
+    easing: Easing.inOut(Easing.cubic),
+  });
+
+  return (
+    <AbsoluteFill
+      style={{
+        background: `radial-gradient(circle ${Math.max(radius, 0.5)}px at ${IRIS_X}px ${IRIS_Y}px, transparent 0, transparent 99%, #000 100%)`,
+      }}
+    />
+  );
+};
+
 const TitleWord: React.FC<{ word: string; delay: number }> = ({ word, delay }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -170,24 +213,22 @@ export const UaiCienciaIntro: React.FC = () => {
   const bgScale = bgSettle * bgBreathe;
   const bgOpacity = interpolate(frame, [0, 22], [0, 1], clampCfg);
 
-  // Câmera: dolly-in orgânico (ease in-out senoidal) → z-dive suave, sem corte de velocidade
+  // Câmera: dolly-in orgânico (ease in-out senoidal), sem mergulho — a saída não usa zoom.
   const dolly = interpolate(frame, [0, 90], [1, 1.16], {
     ...clampCfg,
     easing: Easing.inOut(Easing.sin),
   });
-  const diveProgress = interpolate(frame, [EXIT_START, DURATION], [0, 1], {
-    ...clampCfg,
-    easing: Easing.inOut(Easing.cubic),
-  });
-  const dive = interpolate(diveProgress, [0, 1], [1, 3.4]);
-  const cameraScale = dolly * dive;
-  const cameraBlur = interpolate(diveProgress, [0.45, 1], [0, 9], {
-    ...clampCfg,
-    easing: Easing.in(Easing.cubic),
-  });
+  const cameraScale = dolly;
 
-  // Respiração contínua do bloco tipográfico (viva do início ao fim do hold)
+  // Respiração contínua do bloco tipográfico + pulso de impacto no instante do corte.
   const breathe = Math.sin(frame * 0.03) * 2;
+  const impactT = interpolate(
+    frame,
+    [EXIT_START, EXIT_START + 8, EXIT_START + 16],
+    [0, 1, 0],
+    { ...clampCfg, easing: Easing.out(Easing.cubic) }
+  );
+  const impactScale = 1 + impactT * 0.05;
 
   // Subtítulo — entrada leve e fluida, saída em blur/fade
   const subtitleSpring = spring({
@@ -207,22 +248,10 @@ export const UaiCienciaIntro: React.FC = () => {
   const subtitleBlurOut = interpolate(subtitleExitProgress, [0, 1], [0, 20]);
   const subtitleOpacityOut = interpolate(subtitleExitProgress, [0, 1], [1, 0]);
 
-  // Fade final para o breu — transição gradual (S-curve) até o corte para o vídeo real
-  const darkOpacity = interpolate(frame, [92, 120], [0, 1], {
-    ...clampCfg,
-    easing: Easing.inOut(Easing.cubic),
-  });
-
   return (
     <AbsoluteFill style={{ backgroundColor: BG_EDGE, fontFamily }}>
       <FontFace />
-      <AbsoluteFill
-        style={{
-          transform: `scale(${cameraScale})`,
-          transformOrigin: DIVE_ORIGIN,
-          filter: cameraBlur > 0.1 ? `blur(${cameraBlur}px)` : undefined,
-        }}
-      >
+      <AbsoluteFill style={{ transform: `scale(${cameraScale})`, transformOrigin: '50% 50%' }}>
         <AbsoluteFill
           style={{
             transform: `scale(${bgScale})`,
@@ -233,7 +262,13 @@ export const UaiCienciaIntro: React.FC = () => {
         <Rings frame={frame} />
         <Grain frame={frame} />
         <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ transform: `translateY(${breathe}px)`, textAlign: 'center', padding: '0 40px' }}>
+          <div
+            style={{
+              transform: `translateY(${breathe}px) scale(${impactScale})`,
+              textAlign: 'center',
+              padding: '0 40px',
+            }}
+          >
             <div
               style={{
                 fontSize: 130,
@@ -269,7 +304,8 @@ export const UaiCienciaIntro: React.FC = () => {
         </AbsoluteFill>
       </AbsoluteFill>
 
-      <AbsoluteFill style={{ backgroundColor: '#000000', opacity: darkOpacity }} />
+      <Flash frame={frame} />
+      <Iris frame={frame} />
     </AbsoluteFill>
   );
 };
