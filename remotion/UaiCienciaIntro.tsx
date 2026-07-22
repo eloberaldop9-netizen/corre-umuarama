@@ -63,9 +63,9 @@ const Rings: React.FC<{ frame: number }> = ({ frame }) => {
 
   const exitProgress = interpolate(frame, [EXIT_START, DURATION], [0, 1], {
     ...clampCfg,
-    easing: Easing.in(Easing.cubic),
+    easing: Easing.inOut(Easing.cubic),
   });
-  const exitScale = interpolate(exitProgress, [0, 1], [1, 3.2]);
+  const exitScale = interpolate(exitProgress, [0, 1], [1, 2.2]);
   const exitOpacity = interpolate(exitProgress, [0, 1], [1, 0]);
 
   const rotation = baseSpin + kick;
@@ -170,18 +170,18 @@ export const UaiCienciaIntro: React.FC = () => {
   const bgScale = bgSettle * bgBreathe;
   const bgOpacity = interpolate(frame, [0, 22], [0, 1], clampCfg);
 
-  // Câmera: dolly-in orgânico (ease in-out senoidal) → z-dive contínuo, sem corte de velocidade
+  // Câmera: dolly-in orgânico (ease in-out senoidal) → z-dive suave, sem corte de velocidade
   const dolly = interpolate(frame, [0, 90], [1, 1.16], {
     ...clampCfg,
     easing: Easing.inOut(Easing.sin),
   });
   const diveProgress = interpolate(frame, [EXIT_START, DURATION], [0, 1], {
     ...clampCfg,
-    easing: Easing.in(Easing.cubic),
+    easing: Easing.inOut(Easing.cubic),
   });
-  const dive = interpolate(diveProgress, [0, 1], [1, 10]);
+  const dive = interpolate(diveProgress, [0, 1], [1, 3.4]);
   const cameraScale = dolly * dive;
-  const cameraBlur = interpolate(diveProgress, [0, 1], [0, 16], {
+  const cameraBlur = interpolate(diveProgress, [0.45, 1], [0, 9], {
     ...clampCfg,
     easing: Easing.in(Easing.cubic),
   });
@@ -207,10 +207,10 @@ export const UaiCienciaIntro: React.FC = () => {
   const subtitleBlurOut = interpolate(subtitleExitProgress, [0, 1], [0, 20]);
   const subtitleOpacityOut = interpolate(subtitleExitProgress, [0, 1], [1, 0]);
 
-  // Fade final para o breu — corte seco para o vídeo real
-  const darkOpacity = interpolate(frame, [100, 120], [0, 1], {
+  // Fade final para o breu — transição gradual (S-curve) até o corte para o vídeo real
+  const darkOpacity = interpolate(frame, [92, 120], [0, 1], {
     ...clampCfg,
-    easing: Easing.in(Easing.cubic),
+    easing: Easing.inOut(Easing.cubic),
   });
 
   return (
