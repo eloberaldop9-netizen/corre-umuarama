@@ -28,7 +28,7 @@ const clampCfg = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as cons
 // Posições e tamanhos exatos extraídos da imagem de referência (composição final),
 // já na escala do canvas 1080x1920.
 const BOX = { src: 'box.png', cx: 554, cy: 942, w: 585, h: 733 };
-const LOGO = { src: 'logo.png', cx: 540, cy: 960, w: 518, h: 427 };
+const LOGO = { src: 'logo.png', cx: 554, cy: 942, w: 300, h: 245 };
 
 type SliceConfig = {
   id: number;
@@ -56,8 +56,22 @@ const SLICES: SliceConfig[] = [
   { id: 6, src: 'slice6.png', cx: 262, cy: 1398, w: 388, h: 286, stagger: 30, bulgeAxis: 'y', bulge: -60, rotSeed: 18, idleFreq: 0.041, idlePhase: 5.0, idleAmpY: 4, idleAmpR: 2.0 },
 ];
 
-const CLOSE_FACTOR = 0.18;
+// Raio fixo do "anel/flor" fechado — cada fatia converge para este raio,
+// mantendo sua direção original a partir do centro da caixa, para que as
+// pétalas se toquem de forma consistente (como no storyboard de referência).
+const RING_RADIUS = 128;
+const RING_SCALE = 0.56;
 const EMERGE_TRAVEL = 34;
+
+function ringTarget(cfg: SliceConfig) {
+  const dx = cfg.cx - BOX.cx;
+  const dy = cfg.cy - BOX.cy;
+  const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+  return {
+    x: BOX.cx + (dx / dist) * RING_RADIUS,
+    y: BOX.cy + (dy / dist) * RING_RADIUS,
+  };
+}
 
 const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg, frame, fps }) => {
   const emergeStart = S1_END + cfg.stagger;
@@ -83,11 +97,10 @@ const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg
     ...clampCfg,
     easing: Easing.inOut(Easing.cubic),
   });
-  const closedX = BOX.cx + (cfg.cx - BOX.cx) * CLOSE_FACTOR;
-  const closedY = BOX.cy + (cfg.cy - BOX.cy) * CLOSE_FACTOR;
-  const convergeX = interpolate(closeProgress, [0, 1], [emergeX, closedX] as number[]);
-  const convergeY = interpolate(closeProgress, [0, 1], [emergeY, closedY] as number[]);
-  const convergeScale = interpolate(closeProgress, [0, 1], [emergeScale, emergeScale * 0.55] as number[]);
+  const ring = ringTarget(cfg);
+  const convergeX = interpolate(closeProgress, [0, 1], [emergeX, ring.x] as number[]);
+  const convergeY = interpolate(closeProgress, [0, 1], [emergeY, ring.y] as number[]);
+  const convergeScale = interpolate(closeProgress, [0, 1], [emergeScale, emergeScale * RING_SCALE] as number[]);
 
   // Micro movimento vivo (Cena 3), com entrada/saída suave via envelope.
   const idleEnv = interpolate(
