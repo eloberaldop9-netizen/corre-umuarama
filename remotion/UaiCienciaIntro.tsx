@@ -164,7 +164,13 @@ const TitleWord: React.FC<{ word: string; delay: number }> = ({ word, delay }) =
   );
 };
 
-export const UaiCienciaIntro: React.FC = () => {
+export type UaiCienciaIntroProps = {
+  subtitle?: string;
+};
+
+export const UaiCienciaIntro: React.FC<UaiCienciaIntroProps> = ({
+  subtitle = 'com Dr. Éric Slywitch',
+}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -263,7 +269,7 @@ export const UaiCienciaIntro: React.FC = () => {
                   letterSpacing: 0.5,
                 }}
               >
-                com Dr. Éric Slywitch
+                {subtitle}
               </div>
             </div>
           </AbsoluteFill>

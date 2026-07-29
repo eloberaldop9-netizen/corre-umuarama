@@ -12,6 +12,16 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
+        defaultProps={{ subtitle: 'com Dr. Éric Slywitch' }}
+      />
+      <Composition
+        id="UaiCienciaIntroEntrevista"
+        component={UaiCienciaIntro}
+        durationInFrames={120}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ subtitle: 'Entrevista com Dr. Eric' }}
       />
     </>
   );
