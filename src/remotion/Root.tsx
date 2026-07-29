@@ -4,6 +4,7 @@ import {JarbasCugulaTriade} from './JarbasCugulaTriade';
 import {OQueDizALei} from './OQueDizALei';
 import {AConversaoFinal} from './AConversaoFinal';
 import {AConsequencia} from './AConsequencia';
+import {AFraturaPatrimonio} from './AFraturaPatrimonio';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -36,6 +37,14 @@ export const RemotionRoot: React.FC = () => {
         id="AConsequencia"
         component={AConsequencia}
         durationInFrames={90}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="AFraturaPatrimonio"
+        component={AFraturaPatrimonio}
+        durationInFrames={120}
         fps={30}
         width={1080}
         height={1920}

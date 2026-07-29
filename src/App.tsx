@@ -3,6 +3,7 @@ import {JarbasCugulaTriade} from './remotion/JarbasCugulaTriade';
 import {OQueDizALei} from './remotion/OQueDizALei';
 import {AConversaoFinal} from './remotion/AConversaoFinal';
 import {AConsequencia} from './remotion/AConsequencia';
+import {AFraturaPatrimonio} from './remotion/AFraturaPatrimonio';
 
 export default function App() {
   return (
@@ -141,6 +142,38 @@ export default function App() {
           autoPlay
           muted
           initialFrame={40}
+          numberOfSharedAudioTags={0}
+        />
+      </section>
+
+      <section
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 24,
+        }}
+      >
+        <div style={{textAlign: 'center', color: '#8b8b8d', fontFamily: 'Inter, sans-serif'}}>
+          <h1 style={{color: '#fff', fontSize: 22, marginBottom: 4}}>
+            A Fratura do Patrim&ocirc;nio &mdash; O Mito dos 5 Anos
+          </h1>
+          <p style={{fontSize: 14, margin: 0}}>
+            Preview da anima&ccedil;&atilde;o &middot; 1080&times;1920 &middot; 30fps &middot; 4s
+          </p>
+        </div>
+        <Player
+          component={AFraturaPatrimonio}
+          durationInFrames={120}
+          fps={30}
+          compositionWidth={1080}
+          compositionHeight={1920}
+          style={{width: 'min(90vw, 430px)', aspectRatio: '9 / 16'}}
+          controls
+          loop
+          autoPlay
+          muted
+          initialFrame={70}
           numberOfSharedAudioTags={0}
         />
       </section>
