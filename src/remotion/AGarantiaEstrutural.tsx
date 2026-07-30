@@ -19,6 +19,8 @@ const TEXT_SECONDARY = '#8B8B8D';
 
 const SHIELD_PATH =
   'M180 8 L338 68 V218 C338 320 258 378 180 408 C102 378 22 320 22 218 V68 Z';
+const SHIELD_WIDTH = 640;
+const SHIELD_HEIGHT = 747;
 
 const Dust: React.FC<{frame: number}> = ({frame}) => {
   const particles = useMemo(
@@ -293,16 +295,16 @@ export const AGarantiaEstrutural: React.FC = () => {
             <div
               style={{
                 position: 'relative',
-                width: 360,
-                height: 420,
+                width: SHIELD_WIDTH,
+                height: SHIELD_HEIGHT,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
               <svg
-                width={360}
-                height={420}
+                width={SHIELD_WIDTH}
+                height={SHIELD_HEIGHT}
                 viewBox="0 0 360 420"
                 style={{
                   position: 'absolute',
@@ -320,8 +322,8 @@ export const AGarantiaEstrutural: React.FC = () => {
                 />
               </svg>
               <svg
-                width={360}
-                height={420}
+                width={SHIELD_WIDTH}
+                height={SHIELD_HEIGHT}
                 viewBox="0 0 360 420"
                 style={{
                   position: 'absolute',
@@ -368,7 +370,14 @@ export const AGarantiaEstrutural: React.FC = () => {
                   z: 40,
                 })}
 
-                <div style={{display: 'flex', alignItems: 'baseline'}}>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
                   <div
                     style={{
                       position: 'relative',
@@ -394,12 +403,11 @@ export const AGarantiaEstrutural: React.FC = () => {
                           extrapolateLeft: 'clamp',
                           extrapolateRight: 'clamp',
                         }) * solidezExitOpacity,
-                      fontSize: 66,
+                      fontSize: 78,
                       fontWeight: 900,
                       color: TEXT_PRIMARY,
-                      letterSpacing: -3,
+                      letterSpacing: -2,
                       textTransform: 'uppercase',
-                      marginRight: 20,
                     }}
                   >
                     Solidez
@@ -443,10 +451,10 @@ export const AGarantiaEstrutural: React.FC = () => {
                           extrapolateLeft: 'clamp',
                           extrapolateRight: 'clamp',
                         }) * solidezExitOpacity,
-                      fontSize: 66,
+                      fontSize: 78,
                       fontWeight: 900,
                       color: TEXT_PRIMARY,
-                      letterSpacing: -3,
+                      letterSpacing: -2,
                       textTransform: 'uppercase',
                       whiteSpace: 'nowrap',
                     }}
