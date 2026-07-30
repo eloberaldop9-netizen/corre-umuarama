@@ -247,8 +247,8 @@ export const OProtocoloDeDefesa: React.FC = () => {
               transform: `translateZ(60px) translateY(${introY}px) scale(${introScale})`,
               filter: `blur(${introBlurIn}px)`,
               opacity: introOpacityIn * (1 - introExit),
-              fontSize: 35,
-              fontWeight: 400,
+              fontSize: 50,
+              fontWeight: 500,
               color: TEXT_SECONDARY,
               textShadow: '0 2px 10px rgba(0,0,0,0.8)',
             }}
