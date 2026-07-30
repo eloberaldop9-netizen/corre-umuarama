@@ -15,7 +15,7 @@ const BG_VOID = '#080809';
 const SURFACE = '#151517';
 const ACCENT = '#D35400';
 const TEXT_PRIMARY = '#FFFFFF';
-const TEXT_SECONDARY = '#8B8B8D';
+const TEXT_SECONDARY = '#D8D8DA';
 
 const FRACTURE_PATHS = [
   'M300 640 L430 780 L360 900 L470 1040 L400 1180 L480 1320 L430 1440',
@@ -340,6 +340,8 @@ export const ORaioXDoDefeito: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'center',
             fontFamily: FONT_FAMILY,
+            background:
+              'radial-gradient(ellipse 620px 720px at 50% 50%, rgba(4,4,5,0.6), rgba(4,4,5,0) 72%)',
           }}
         >
           <div
@@ -357,10 +359,11 @@ export const ORaioXDoDefeito: React.FC = () => {
                 }px)`,
                 filter: `blur(${headlineBlur + headlineExit * 20}px)`,
                 opacity: headlineOpacityIn * (1 - headlineExit),
-                fontSize: 38,
-                fontWeight: 500,
+                fontSize: 40,
+                fontWeight: 600,
+                letterSpacing: 0.3,
                 color: TEXT_SECONDARY,
-                textShadow: '0 2px 12px rgba(0,0,0,0.8)',
+                textShadow: '0 1px 3px rgba(0,0,0,1), 0 4px 18px rgba(0,0,0,0.9)',
               }}
             >
               Quando o defeito &eacute;
@@ -391,11 +394,12 @@ export const ORaioXDoDefeito: React.FC = () => {
                 }px)`,
                 opacity: posteriorOpacityIn * (1 - posteriorExit),
                 filter: `blur(${posteriorExit * 20}px)`,
-                fontSize: 32,
-                fontWeight: 400,
+                fontSize: 34,
+                fontWeight: 500,
+                letterSpacing: 0.3,
                 color: TEXT_SECONDARY,
                 textAlign: 'center',
-                textShadow: '0 2px 12px rgba(0,0,0,0.8)',
+                textShadow: '0 1px 3px rgba(0,0,0,1), 0 4px 18px rgba(0,0,0,0.9)',
               }}
             >
               e s&oacute; aparece posteriormente,
