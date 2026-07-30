@@ -11,6 +11,7 @@ import {OProtocoloDeDefesa} from './OProtocoloDeDefesa';
 import {OUltimatoJuridico} from './OUltimatoJuridico';
 import {AResponsabilidadeCincoAnos} from './AResponsabilidadeCincoAnos';
 import {NaoEBemAssim} from './NaoEBemAssim';
+import {CadaCasoExigeAnalise} from './CadaCasoExigeAnalise';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -99,6 +100,14 @@ export const RemotionRoot: React.FC = () => {
         id="NaoEBemAssim"
         component={NaoEBemAssim}
         durationInFrames={234}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="CadaCasoExigeAnalise"
+        component={CadaCasoExigeAnalise}
+        durationInFrames={180}
         fps={30}
         width={1080}
         height={1920}
