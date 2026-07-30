@@ -8,6 +8,7 @@ import {AFraturaPatrimonio} from './AFraturaPatrimonio';
 import {AGarantiaEstrutural} from './AGarantiaEstrutural';
 import {ORaioXDoDefeito} from './ORaioXDoDefeito';
 import {OProtocoloDeDefesa} from './OProtocoloDeDefesa';
+import {OUltimatoJuridico} from './OUltimatoJuridico';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -71,6 +72,14 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="OProtocoloDeDefesa"
         component={OProtocoloDeDefesa}
+        durationInFrames={120}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="OUltimatoJuridico"
+        component={OUltimatoJuridico}
         durationInFrames={120}
         fps={30}
         width={1080}
