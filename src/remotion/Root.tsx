@@ -9,6 +9,7 @@ import {AGarantiaEstrutural} from './AGarantiaEstrutural';
 import {ORaioXDoDefeito} from './ORaioXDoDefeito';
 import {OProtocoloDeDefesa} from './OProtocoloDeDefesa';
 import {OUltimatoJuridico} from './OUltimatoJuridico';
+import {AResponsabilidadeCincoAnos} from './AResponsabilidadeCincoAnos';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -81,6 +82,14 @@ export const RemotionRoot: React.FC = () => {
         id="OUltimatoJuridico"
         component={OUltimatoJuridico}
         durationInFrames={120}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="AResponsabilidadeCincoAnos"
+        component={AResponsabilidadeCincoAnos}
+        durationInFrames={210}
         fps={30}
         width={1080}
         height={1920}
