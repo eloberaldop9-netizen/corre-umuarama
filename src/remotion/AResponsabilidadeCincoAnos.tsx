@@ -22,7 +22,8 @@ const GOLD = '#B98A3A';
 
 const range = (a: number, b: number): readonly number[] => [a, b];
 
-const DROP_SHADOW = 'drop-shadow(0 20px 30px rgba(0,0,0,0.75))';
+const DROP_SHADOW =
+  'drop-shadow(0 2px 4px rgba(0,0,0,0.9)) drop-shadow(0 20px 30px rgba(0,0,0,0.75))';
 
 // ---------- Timing map (30fps, 210 frames / 7s) ----------
 const T = {
@@ -138,8 +139,8 @@ const Building: React.FC<{scannerProgress: number}> = ({scannerProgress}) => {
           <div
             key={i}
             style={{
-              backgroundColor: w.lit ? 'rgba(255,196,120,0.85)' : 'rgba(255,255,255,0.05)',
-              boxShadow: w.lit ? '0 0 14px rgba(255,196,120,0.5)' : 'none',
+              backgroundColor: w.lit ? 'rgba(255,196,120,0.4)' : 'rgba(255,255,255,0.04)',
+              boxShadow: w.lit ? '0 0 8px rgba(255,196,120,0.25)' : 'none',
               borderRadius: 2,
             }}
           />
@@ -462,6 +463,16 @@ export const AResponsabilidadeCincoAnos: React.FC = () => {
         <AbsoluteFill style={{transform: 'translateZ(-200px)', alignItems: 'center', justifyContent: 'center'}}>
           <Building scannerProgress={scannerProgress} />
         </AbsoluteFill>
+
+        <AbsoluteFill
+          style={{
+            transform: 'translateZ(-190px)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background:
+              'radial-gradient(ellipse 640px 720px at 50% 50%, rgba(11,11,11,0.72), rgba(11,11,11,0) 72%)',
+          }}
+        />
 
         <AbsoluteFill
           style={{
