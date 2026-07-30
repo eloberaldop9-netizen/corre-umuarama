@@ -105,7 +105,7 @@ const Card: React.FC<{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        transform: `translateZ(120px) translateY(${y + exitY}px) rotateX(${
+        transform: `translateZ(220px) translateY(${y + exitY}px) rotateX(${
           rotX + exitRotX
         }deg) scale(${exitScale})`,
         opacity: opacityIn,
@@ -247,7 +247,7 @@ export const ORaioXDoDefeito: React.FC = () => {
       >
         <AbsoluteFill
           style={{
-            transform: 'translateZ(-50px)',
+            transform: 'translateZ(-350px)',
             opacity: wallOpacity * wallExit,
           }}
         >
@@ -287,7 +287,7 @@ export const ORaioXDoDefeito: React.FC = () => {
 
         <AbsoluteFill
           style={{
-            transform: 'translateZ(0px)',
+            transform: 'translateZ(-300px)',
             backgroundColor: SURFACE,
             clipPath: concreteClip,
             opacity: wallOpacity * wallExit,
@@ -300,13 +300,13 @@ export const ORaioXDoDefeito: React.FC = () => {
         <div
           style={{
             position: 'absolute',
-            left: beamX,
+            left: beamX - 90,
             top: 0,
-            width: 150,
+            width: 90,
             height: '100%',
-            transform: 'translateZ(10px)',
+            transform: 'translateZ(-290px)',
             background:
-              'linear-gradient(to right, rgba(211,84,0,0.4), transparent 150px)',
+              'linear-gradient(to right, transparent, rgba(211,84,0,0.16) 100%)',
           }}
         />
         <div
@@ -314,11 +314,24 @@ export const ORaioXDoDefeito: React.FC = () => {
             position: 'absolute',
             left: beamX,
             top: 0,
-            width: 4,
+            width: 60,
             height: '100%',
-            transform: 'translateZ(10px)',
+            transform: 'translateZ(-290px)',
+            background:
+              'linear-gradient(to right, rgba(211,84,0,0.22), transparent 100%)',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            left: beamX,
+            top: 0,
+            width: 2,
+            height: '100%',
+            transform: 'translateZ(-290px)',
             backgroundColor: ACCENT,
-            boxShadow: '0 0 30px rgba(211,84,0,0.9)',
+            opacity: 0.75,
+            boxShadow: '0 0 16px rgba(211,84,0,0.5)',
           }}
         />
 
@@ -334,19 +347,20 @@ export const ORaioXDoDefeito: React.FC = () => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 16,
+              gap: 20,
             }}
           >
             <div
               style={{
-                transform: `translateZ(40px) translateY(${headlineY}px) translateX(${
+                transform: `translateZ(140px) translateY(${headlineY}px) translateX(${
                   headlineExit * 300
                 }px)`,
                 filter: `blur(${headlineBlur + headlineExit * 20}px)`,
                 opacity: headlineOpacityIn * (1 - headlineExit),
                 fontSize: 38,
-                fontWeight: 400,
+                fontWeight: 500,
                 color: TEXT_SECONDARY,
+                textShadow: '0 2px 12px rgba(0,0,0,0.8)',
               }}
             >
               Quando o defeito &eacute;
@@ -354,7 +368,7 @@ export const ORaioXDoDefeito: React.FC = () => {
 
             <div
               style={{
-                transform: `translateZ(40px) scale(${ocultoScale}) translateX(${
+                transform: `translateZ(140px) scale(${ocultoScale}) translateX(${
                   ocultoExit * 300
                 }px)`,
                 filter: `blur(${ocultoBlur + ocultoExit * 20}px)`,
@@ -363,7 +377,8 @@ export const ORaioXDoDefeito: React.FC = () => {
                 fontWeight: 900,
                 color: TEXT_PRIMARY,
                 textTransform: 'uppercase',
-                letterSpacing: -2,
+                letterSpacing: -1,
+                textShadow: '0 4px 24px rgba(0,0,0,0.85)',
               }}
             >
               Oculto,
@@ -371,15 +386,16 @@ export const ORaioXDoDefeito: React.FC = () => {
 
             <div
               style={{
-                transform: `translateZ(40px) translateY(${posteriorY}px) translateX(${
+                transform: `translateZ(140px) translateY(${posteriorY}px) translateX(${
                   posteriorExit * 300
                 }px)`,
                 opacity: posteriorOpacityIn * (1 - posteriorExit),
                 filter: `blur(${posteriorExit * 20}px)`,
                 fontSize: 32,
-                fontWeight: 300,
+                fontWeight: 400,
                 color: TEXT_SECONDARY,
                 textAlign: 'center',
+                textShadow: '0 2px 12px rgba(0,0,0,0.8)',
               }}
             >
               e s&oacute; aparece posteriormente,
@@ -408,7 +424,7 @@ export const ORaioXDoDefeito: React.FC = () => {
             top: 0,
             width: 8,
             height: '100%',
-            transform: `translateZ(200px) scaleX(${exitBeamScaleX})`,
+            transform: `translateZ(500px) scaleX(${exitBeamScaleX})`,
             transformOrigin: 'center',
             backgroundColor: ACCENT,
             opacity: exitBeamOpacity,
