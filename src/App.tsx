@@ -387,7 +387,7 @@ export default function App() {
       >
         <div style={{textAlign: 'center', color: '#8b8b8d', fontFamily: 'Inter, sans-serif'}}>
           <h1 style={{color: '#fff', fontSize: 22, marginBottom: 4}}>
-            &ldquo;Cada Caso Exige An&aacute;lise&rdquo; &mdash; Or&iacute;gem, Provas e Prazos
+Origem, Provas e Prazos &mdash; Kinetic Typography
           </h1>
           <p style={{fontSize: 14, margin: 0}}>
             Preview da anima&ccedil;&atilde;o &middot; 1080&times;1920 &middot; 30fps &middot; 6s

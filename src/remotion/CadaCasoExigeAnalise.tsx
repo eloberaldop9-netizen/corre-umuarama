@@ -26,12 +26,11 @@ const DROP_SHADOW =
 
 // ---------- Timing map (30fps, 180 frames / 6.0s) ----------
 const T = {
-  intro: 4,
+  intro: 4, // "…dependendo da"
   p1: 18, // ORIGEM DO PROBLEMA
-  p2: 54, // PROVAS DO CASO
-  p3: 90, // PRAZOS APLICÁVEIS
-  p4: 130, // CADA CASO EXIGE ANÁLISE
-  p5: 156, // NÃO É AUTOMÁTICO. É JURÍDICO.
+  p2: 54, // DAS PROVAS
+  p3: 90, // E DOS PRAZOS APLICÁVEIS AO CASO.
+  p4: 130, // recap: origem | provas | prazos
   end: 180,
 };
 
@@ -338,17 +337,17 @@ export const CadaCasoExigeAnalise: React.FC = () => {
   const scaleOpacity = interpolate(frame, range(T.p4, T.p4 + 20), range(0, 0.14), {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
-  }) * (1 - usePhaseExit(frame, T.p5, 12));
+  });
 
   const connectLineOpacity = interpolate(frame, range(T.p4 + 4, T.p4 + 16), range(0, 1), {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
-  }) * (1 - usePhaseExit(frame, T.p5, 12));
+  });
 
   const recapOpacity = interpolate(frame, range(T.p4, T.p4 + 14), range(0, 0.8), {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
-  }) * (1 - usePhaseExit(frame, T.p5, 12));
+  });
 
   const finalFade = interpolate(frame, range(T.end - 8, T.end), range(0, 1), {
     easing: Easing.in(Easing.cubic),
@@ -387,67 +386,40 @@ export const CadaCasoExigeAnalise: React.FC = () => {
   const doProblema = useFall(frame, T.p1 + 6, 18, 1.5, -60);
   const p1Exit = usePhaseExit(frame, T.p2);
 
-  // ---------- Phase 2: PROVAS DO CASO ----------
-  const provasBlurIn = interpolate(frame, range(T.p2, T.p2 + 10), range(18, 0), {
+  // ---------- Phase 2: DAS PROVAS ----------
+  const das = useFall(frame, T.p2, 14, 0.8, -40);
+  const provasBlurIn = interpolate(frame, range(T.p2 + 6, T.p2 + 16), range(18, 0), {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const provasOpacityIn = interpolate(frame, range(T.p2, T.p2 + 10), range(0, 1), {
+  const provasOpacityIn = interpolate(frame, range(T.p2 + 6, T.p2 + 16), range(0, 1), {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const doCaso = useFall(frame, T.p2 + 8, 14, 0.8, -40);
   const p2Exit = usePhaseExit(frame, T.p3);
 
-  // ---------- Phase 3: PRAZOS APLICÁVEIS ----------
-  const prazosSpring = spring({frame: frame - T.p3, fps, config: {damping: 22, mass: 2.0}});
+  // ---------- Phase 3: E DOS PRAZOS APLICÁVEIS AO CASO. ----------
+  const eDos = useFall(frame, T.p3, 14, 0.8, -40);
+  const prazosSpring = spring({frame: frame - (T.p3 + 6), fps, config: {damping: 22, mass: 2.0}});
   const prazosZ = interpolate(prazosSpring, range(0, 1), range(-700, 0));
-  const prazosBlur = interpolate(frame, range(T.p3, T.p3 + 22), range(24, 0), {
+  const prazosBlur = interpolate(frame, range(T.p3 + 6, T.p3 + 28), range(24, 0), {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const prazosOpacityIn = interpolate(frame, range(T.p3, T.p3 + 14), range(0, 1), {
+  const prazosOpacityIn = interpolate(frame, range(T.p3 + 6, T.p3 + 20), range(0, 1), {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const aplicaveisOpacityIn = interpolate(frame, range(T.p3 + 8, T.p3 + 18), range(0, 1), {
+  const aplicaveisOpacityIn = interpolate(frame, range(T.p3 + 16, T.p3 + 26), range(0, 1), {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const aplicaveisScaleY = interpolate(frame, range(T.p3 + 8, T.p3 + 16), range(0, 1), {
+  const aplicaveisScaleY = interpolate(frame, range(T.p3 + 16, T.p3 + 24), range(0, 1), {
     easing: Easing.out(Easing.cubic),
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
   const p3Exit = usePhaseExit(frame, T.p4, 14);
-
-  // ---------- Phase 4: CADA CASO EXIGE ANÁLISE ----------
-  const cadaCaso = useFall(frame, T.p4, 18, 1.5, -50);
-  const exigeAnalise = useFall(frame, T.p4 + 8, 18, 1.5, -50);
-  const underlineW = interpolate(frame, range(T.p4 + 18, T.p4 + 28), range(0, 1), {
-    easing: Easing.out(Easing.cubic),
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const p4Exit = usePhaseExit(frame, T.p5, 12);
-
-  // ---------- Phase 5: NÃO É AUTOMÁTICO. É JURÍDICO. ----------
-  const naoAuto = useFall(frame, T.p5, 18, 1.5, -50);
-  const eJuridicoSpring = spring({frame: frame - (T.p5 + 8), fps, config: {damping: 22, mass: 2.0}});
-  const eJuridicoY = interpolate(eJuridicoSpring, range(0, 1), range(100, 0));
-  const eJuridicoBlur = interpolate(frame, range(T.p5 + 8, T.p5 + 18), range(16, 0), {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const eJuridicoOpacityIn = interpolate(frame, range(T.p5 + 8, T.p5 + 16), range(0, 1), {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const stampLineW = interpolate(frame, range(T.p5 + 14, T.p5 + 24), range(0, 1), {
-    easing: Easing.out(Easing.cubic),
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
 
   return (
     <AbsoluteFill style={{backgroundColor: BG_DEEP, overflow: 'hidden'}}>
@@ -549,7 +521,7 @@ export const CadaCasoExigeAnalise: React.FC = () => {
                 letterSpacing: 1,
               }}
             >
-              DEPENDE DE 3 FATORES
+              DEPENDENDO DA
             </div>
             <div
               style={{
@@ -604,7 +576,7 @@ export const CadaCasoExigeAnalise: React.FC = () => {
           </div>
         </AbsoluteFill>
 
-        {/* ---- Phase 2: PROVAS DO CASO ---- */}
+        {/* ---- Phase 2: DAS PROVAS ---- */}
         <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
           <div
             style={{
@@ -616,6 +588,19 @@ export const CadaCasoExigeAnalise: React.FC = () => {
               opacity: 1 - p2Exit,
             }}
           >
+            <div
+              style={{
+                transform: `translateZ(60px) translateY(${das.y}px)`,
+                filter: `blur(${das.blur}px) ${DROP_SHADOW}`,
+                opacity: das.opacity,
+                fontSize: 42,
+                fontWeight: 500,
+                color: GRAY_INSTITUTIONAL,
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              DAS
+            </div>
             <div
               style={{
                 transform: 'translateZ(80px)',
@@ -630,23 +615,10 @@ export const CadaCasoExigeAnalise: React.FC = () => {
             >
               PROVAS
             </div>
-            <div
-              style={{
-                transform: `translateZ(60px) translateY(${doCaso.y}px)`,
-                filter: `blur(${doCaso.blur}px) ${DROP_SHADOW}`,
-                opacity: doCaso.opacity,
-                fontSize: 42,
-                fontWeight: 500,
-                color: GRAY_INSTITUTIONAL,
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              DO CASO
-            </div>
           </div>
         </AbsoluteFill>
 
-        {/* ---- Phase 3: PRAZOS APLICÁVEIS ---- */}
+        {/* ---- Phase 3: E DOS PRAZOS APLICÁVEIS AO CASO. ---- */}
         <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
           <div
             style={{
@@ -658,6 +630,19 @@ export const CadaCasoExigeAnalise: React.FC = () => {
               opacity: 1 - p3Exit,
             }}
           >
+            <div
+              style={{
+                transform: `translateZ(60px) translateY(${eDos.y}px)`,
+                filter: `blur(${eDos.blur}px) ${DROP_SHADOW}`,
+                opacity: eDos.opacity,
+                fontSize: 42,
+                fontWeight: 500,
+                color: GRAY_INSTITUTIONAL,
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              E DOS
+            </div>
             <div
               style={{
                 transform: `translateZ(${80 + prazosZ * 0.14}px)`,
@@ -677,118 +662,18 @@ export const CadaCasoExigeAnalise: React.FC = () => {
                 transform: `translateZ(60px) scaleY(${aplicaveisScaleY})`,
                 filter: DROP_SHADOW,
                 opacity: aplicaveisOpacityIn,
-                fontSize: 50,
+                fontSize: 38,
                 fontWeight: 700,
                 color: WHITE_MAIN,
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              APLIC&Aacute;VEIS
-            </div>
-          </div>
-        </AbsoluteFill>
-
-        {/* ---- Phase 4: CADA CASO EXIGE ANÁLISE ---- */}
-        <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 14,
-              filter: `blur(${p4Exit * 16}px)`,
-              opacity: 1 - p4Exit,
-            }}
-          >
-            <div
-              style={{
-                transform: `translateZ(70px) translateY(${cadaCaso.y}px)`,
-                filter: `blur(${cadaCaso.blur}px) ${DROP_SHADOW}`,
-                opacity: cadaCaso.opacity,
-                fontSize: 52,
-                fontWeight: 700,
-                color: WHITE_SOFT,
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              CADA CASO
-            </div>
-            <div style={{position: 'relative'}}>
-              <div
-                style={{
-                  transform: `translateZ(90px) translateY(${exigeAnalise.y}px)`,
-                  filter: `blur(${exigeAnalise.blur}px) drop-shadow(0 30px 40px rgba(0,0,0,0.85))`,
-                  opacity: exigeAnalise.opacity,
-                  fontSize: 60,
-                  fontWeight: 900,
-                  color: WHITE_MAIN,
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                EXIGE AN&Aacute;LISE
-              </div>
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: -10,
-                  left: '50%',
-                  height: 4,
-                  width: `${underlineW * 100}%`,
-                  transform: 'translateX(-50%)',
-                  backgroundColor: ORANGE,
-                  boxShadow: '0 0 12px rgba(230,83,0,0.7)',
-                }}
-              />
-            </div>
-          </div>
-        </AbsoluteFill>
-
-        {/* ---- Phase 5: NÃO É AUTOMÁTICO. É JURÍDICO. ---- */}
-        <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
-          <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14}}>
-            <div
-              style={{
-                transform: `translateZ(60px) translateY(${naoAuto.y}px)`,
-                filter: `blur(${naoAuto.blur}px) ${DROP_SHADOW}`,
-                opacity: naoAuto.opacity,
-                fontSize: 46,
-                fontWeight: 600,
-                color: GRAY_INSTITUTIONAL,
                 fontFamily: FONT_FAMILY,
                 textAlign: 'center',
               }}
             >
-              N&Atilde;O &Eacute; AUTOM&Aacute;TICO.
-            </div>
-            <div style={{position: 'relative'}}>
-              <div
-                style={{
-                  transform: `translateZ(80px) translateY(${eJuridicoY}px)`,
-                  filter: `blur(${eJuridicoBlur}px) drop-shadow(0 40px 45px rgba(0,0,0,0.85))`,
-                  opacity: eJuridicoOpacityIn,
-                  fontSize: 68,
-                  fontWeight: 900,
-                  color: ORANGE,
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                &Eacute; JUR&Iacute;DICO.
-              </div>
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: -12,
-                  left: '50%',
-                  height: 4,
-                  width: `${stampLineW * 100}%`,
-                  transform: 'translateX(-50%)',
-                  backgroundColor: ORANGE,
-                  boxShadow: '0 0 14px rgba(230,83,0,0.8)',
-                }}
-              />
+              APLIC&Aacute;VEIS AO CASO.
             </div>
           </div>
         </AbsoluteFill>
+
       </CameraStage>
 
       <AbsoluteFill style={{backgroundColor: BG_DEEP, opacity: finalFade}} />
