@@ -32,7 +32,7 @@ export const Scene1Saude: React.FC = () => {
   const saudeSpring = spring({
     frame: frame - 10,
     fps,
-    config: {damping: 12, mass: 1.5},
+    config: {damping: 21, mass: 1.5},
   });
   const saudeY = interpolate(saudeSpring, [0, 1], [100, 0]);
   const saudeBlurIn = interpolate(frame, [10, 30], [20, 0], {

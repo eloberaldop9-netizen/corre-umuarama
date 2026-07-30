@@ -61,7 +61,7 @@ export const Scene2Seguranca: React.FC = () => {
   const shieldCoreSpring = spring({
     frame: frame - 16,
     fps,
-    config: {damping: 10, mass: 0.8, stiffness: 120},
+    config: {damping: 16, mass: 0.8, stiffness: 120},
   });
   const shieldCoreOpacity = interpolate(frame, [16, 26], [0, 1], {
     extrapolateLeft: 'clamp',

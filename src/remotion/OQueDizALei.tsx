@@ -101,7 +101,7 @@ export const OQueDizALei: React.FC = () => {
   const oQueDizSpring = spring({
     frame: frame - 9,
     fps,
-    config: {damping: 13, mass: 1.0},
+    config: {damping: 17, mass: 1.0},
   });
   const oQueDizZ = interpolate(oQueDizSpring, [0, 1], [400, 0]);
   const oQueDizBlur = interpolate(frame, [9, 28], [15, 0], {
@@ -116,7 +116,7 @@ export const OQueDizALei: React.FC = () => {
   const aLeiSpring = spring({
     frame: frame - 14,
     fps,
-    config: {damping: 13, mass: 1.0},
+    config: {damping: 17, mass: 1.0},
   });
   const aLeiZ = interpolate(aLeiSpring, [0, 1], [400, 0]);
   const aLeiBlur = interpolate(frame, [14, 33], [15, 0], {
@@ -131,7 +131,7 @@ export const OQueDizALei: React.FC = () => {
   const qMarkSpring = spring({
     frame: frame - 20,
     fps,
-    config: {damping: 10, mass: 1.2},
+    config: {damping: 19, mass: 1.2},
   });
   const qMarkScaleIn = qMarkSpring;
   const qMarkColorProgress = interpolate(frame, [20, 30], [0, 1], {

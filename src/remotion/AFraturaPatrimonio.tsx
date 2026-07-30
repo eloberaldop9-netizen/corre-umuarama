@@ -201,7 +201,7 @@ export const AFraturaPatrimonio: React.FC = () => {
   const anosSpring = spring({
     frame: frame - 28,
     fps,
-    config: {damping: 16, mass: 1.5},
+    config: {damping: 20, mass: 1.5},
   });
   const anosScale = interpolate(anosSpring, [0, 1], [0.8, 1]);
   const anosBlurIn = interpolate(frame, [28, 46], [20, 0], {
@@ -301,7 +301,7 @@ export const AFraturaPatrimonio: React.FC = () => {
               letterSpacing: -1,
               uppercase: true,
               z: 60,
-              damping: 15,
+              damping: 18,
               mass: 1.2,
               axis: 'x',
             })}
@@ -312,7 +312,7 @@ export const AFraturaPatrimonio: React.FC = () => {
               letterSpacing: -2,
               uppercase: true,
               z: 80,
-              damping: 15,
+              damping: 18,
               mass: 1.2,
               axis: 'x',
             })}
@@ -330,7 +330,7 @@ export const AFraturaPatrimonio: React.FC = () => {
               letterSpacing: -1,
               uppercase: true,
               z: 100,
-              damping: 15,
+              damping: 18,
               mass: 1.2,
               axis: 'x',
             })}

@@ -50,7 +50,7 @@ export const Scene2Instagram: React.FC = () => {
   const mockupSpring = spring({
     frame,
     fps,
-    config: {damping: 15, mass: 1.2},
+    config: {damping: 18, mass: 1.2},
   });
   const mockupY = interpolate(mockupSpring, [0, 1], [1200, 0]);
   const mockupBlurIn = interpolate(frame, [0, 25], [20, 0], {
@@ -84,7 +84,7 @@ export const Scene2Instagram: React.FC = () => {
   const releaseSpring = spring({
     frame: frame - 47,
     fps,
-    config: {damping: 10, stiffness: 200},
+    config: {damping: 18, stiffness: 200},
   });
   const buttonReleaseScale = interpolate(releaseSpring, [0, 1], [0.94, 1]);
   const buttonScale = frame < 47 ? buttonPressScale : buttonReleaseScale;
