@@ -6,6 +6,7 @@ export const CameraStage: React.FC<{
   translateY?: number;
   translateZ?: number;
   rotateX?: number;
+  rotateY?: number;
   perspective?: number;
   perspectiveOrigin?: string;
   children: React.ReactNode;
@@ -14,6 +15,7 @@ export const CameraStage: React.FC<{
   translateY = 0,
   translateZ = 0,
   rotateX = 0,
+  rotateY = 0,
   perspective = 1400,
   perspectiveOrigin = '50% 50%',
   children,
@@ -23,7 +25,7 @@ export const CameraStage: React.FC<{
       <AbsoluteFill
         style={{
           transformStyle: 'preserve-3d',
-          transform: `translate3d(${translateX}px, ${translateY}px, ${translateZ}px) rotateX(${rotateX}rad)`,
+          transform: `translate3d(${translateX}px, ${translateY}px, ${translateZ}px) rotateX(${rotateX}rad) rotateY(${rotateY}rad)`,
         }}
       >
         {children}

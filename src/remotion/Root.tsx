@@ -5,6 +5,7 @@ import {OQueDizALei} from './OQueDizALei';
 import {AConversaoFinal} from './AConversaoFinal';
 import {AConsequencia} from './AConsequencia';
 import {AFraturaPatrimonio} from './AFraturaPatrimonio';
+import {AGarantiaEstrutural} from './AGarantiaEstrutural';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -44,6 +45,14 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="AFraturaPatrimonio"
         component={AFraturaPatrimonio}
+        durationInFrames={120}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="AGarantiaEstrutural"
+        component={AGarantiaEstrutural}
         durationInFrames={120}
         fps={30}
         width={1080}
