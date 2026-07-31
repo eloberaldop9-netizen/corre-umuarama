@@ -48,12 +48,12 @@ type SliceConfig = {
 };
 
 const SLICES: SliceConfig[] = [
-  { id: 1, src: 'slice1.png', cx: 217, cy: 466, w: 362, h: 300, stagger: 0, bulgeAxis: 'x', bulge: -90, rotSeed: -22, idleFreq: 0.05, idlePhase: 0.3, idleAmpY: 5, idleAmpR: 1.8 },
-  { id: 2, src: 'slice2.png', cx: 756, cy: 427, w: 368, h: 206, stagger: 6, bulgeAxis: 'y', bulge: 70, rotSeed: 18, idleFreq: 0.043, idlePhase: 2.1, idleAmpY: 4, idleAmpR: 2.0 },
-  { id: 3, src: 'slice3.png', cx: 892, cy: 803, w: 334, h: 272, stagger: 12, bulgeAxis: 'x', bulge: 80, rotSeed: -16, idleFreq: 0.038, idlePhase: 4.0, idleAmpY: 6, idleAmpR: 1.5 },
-  { id: 4, src: 'slice4.png', cx: 128, cy: 872, w: 256, h: 346, stagger: 18, bulgeAxis: 'y', bulge: -65, rotSeed: 24, idleFreq: 0.056, idlePhase: 1.2, idleAmpY: 3, idleAmpR: 2.2 },
-  { id: 5, src: 'slice5.png', cx: 849, cy: 1397, w: 286, h: 313, stagger: 24, bulgeAxis: 'x', bulge: 75, rotSeed: -20, idleFreq: 0.047, idlePhase: 3.3, idleAmpY: 5, idleAmpR: 1.7 },
-  { id: 6, src: 'slice6.png', cx: 262, cy: 1398, w: 388, h: 286, stagger: 30, bulgeAxis: 'y', bulge: -60, rotSeed: 18, idleFreq: 0.041, idlePhase: 5.0, idleAmpY: 4, idleAmpR: 2.0 },
+  { id: 1, src: 'slice1.png', cx: 217, cy: 466, w: 362, h: 300, stagger: 0, bulgeAxis: 'x', bulge: -45, rotSeed: -22, idleFreq: 0.05, idlePhase: 0.3, idleAmpY: 5, idleAmpR: 1.8 },
+  { id: 2, src: 'slice2.png', cx: 756, cy: 427, w: 368, h: 206, stagger: 6, bulgeAxis: 'y', bulge: 45, rotSeed: 18, idleFreq: 0.043, idlePhase: 2.1, idleAmpY: 4, idleAmpR: 2.0 },
+  { id: 3, src: 'slice3.png', cx: 892, cy: 803, w: 334, h: 272, stagger: 12, bulgeAxis: 'x', bulge: 45, rotSeed: -16, idleFreq: 0.038, idlePhase: 4.0, idleAmpY: 6, idleAmpR: 1.5 },
+  { id: 4, src: 'slice4.png', cx: 128, cy: 872, w: 256, h: 346, stagger: 18, bulgeAxis: 'y', bulge: -45, rotSeed: 24, idleFreq: 0.056, idlePhase: 1.2, idleAmpY: 3, idleAmpR: 2.2 },
+  { id: 5, src: 'slice5.png', cx: 849, cy: 1397, w: 286, h: 313, stagger: 24, bulgeAxis: 'x', bulge: 45, rotSeed: -20, idleFreq: 0.047, idlePhase: 3.3, idleAmpY: 5, idleAmpR: 1.7 },
+  { id: 6, src: 'slice6.png', cx: 262, cy: 1398, w: 388, h: 286, stagger: 30, bulgeAxis: 'y', bulge: -45, rotSeed: 18, idleFreq: 0.041, idlePhase: 5.0, idleAmpY: 4, idleAmpR: 2.0 },
 ];
 
 // Raio fixo do "anel/flor" fechado — cada fatia converge para este raio,
@@ -62,6 +62,7 @@ const SLICES: SliceConfig[] = [
 const RING_RADIUS = 128;
 const RING_SCALE = 0.56;
 const EMERGE_TRAVEL = 34;
+const EDGE_MARGIN = 16;
 
 function ringTarget(cfg: SliceConfig) {
   const dx = cfg.cx - BOX.cx;
@@ -79,7 +80,7 @@ const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg
   const progress = spring({
     frame: Math.max(0, frame - emergeStart),
     fps,
-    config: { damping: 13, mass: 0.9, stiffness: 100 },
+    config: { damping: 16, mass: 0.9, stiffness: 100 },
   });
 
   const clampedLin = interpolate(frame, [emergeStart, emergeStart + EMERGE_TRAVEL], [0, 1], clampCfg);
@@ -113,10 +114,17 @@ const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg
   const idleY = idleEnv * Math.sin(frame * cfg.idleFreq + cfg.idlePhase) * cfg.idleAmpY;
   const idleRot = idleEnv * Math.sin(frame * cfg.idleFreq * 0.85 + cfg.idlePhase + 0.7) * cfg.idleAmpR;
 
-  const x = convergeX + idleX + (cfg.bulgeAxis === 'x' ? bulge : 0);
-  const y = convergeY + idleY + (cfg.bulgeAxis === 'y' ? bulge : 0);
+  const rawX = convergeX + idleX + (cfg.bulgeAxis === 'x' ? bulge : 0);
+  const rawY = convergeY + idleY + (cfg.bulgeAxis === 'y' ? bulge : 0);
   const rotation = emergeRot + idleRot;
   const scale = convergeScale;
+
+  // Trava de segurança: nunca deixa a fatia ultrapassar as bordas do canvas
+  // (o overshoot do spring + o arco de emergência podiam empurrá-la pra fora).
+  const halfW = (cfg.w * scale) / 2;
+  const halfH = (cfg.h * scale) / 2;
+  const x = Math.min(Math.max(rawX, halfW + EDGE_MARGIN), 1080 - halfW - EDGE_MARGIN);
+  const y = Math.min(Math.max(rawY, halfH + EDGE_MARGIN), 1920 - halfH - EDGE_MARGIN);
 
   return (
     <Img
@@ -163,24 +171,28 @@ const Glow: React.FC<{ frame: number }> = ({ frame }) => {
 };
 
 const Burst: React.FC<{ frame: number }> = ({ frame }) => {
-  const opacity = interpolate(frame, [S4_END, S4_END + 8, S4_END + 24], [0, 0.55, 0], clampCfg);
-  const scale = interpolate(frame, [S4_END, S4_END + 22], [0.6, 1.35], {
+  // Começa um pouco depois da logo já ter aparecido, e as linhas nascem
+  // fora do contorno da logo (não riscando por cima das letras).
+  const start = S4_END + 6;
+  const opacity = interpolate(frame, [start, start + 8, start + 22], [0, 0.4, 0], clampCfg);
+  const scale = interpolate(frame, [start, start + 20], [0.85, 1.2], {
     ...clampCfg,
     easing: Easing.out(Easing.cubic),
   });
 
   if (opacity <= 0) return null;
 
-  const lines = 14;
+  const lines = 10;
+  const size = LOGO.w * 2.2;
   return (
     <svg
-      width={LOGO.w * 2.4}
-      height={LOGO.w * 2.4}
+      width={size}
+      height={size}
       viewBox="0 0 200 200"
       style={{
         position: 'absolute',
-        left: LOGO.cx - (LOGO.w * 2.4) / 2,
-        top: LOGO.cy - (LOGO.w * 2.4) / 2,
+        left: LOGO.cx - size / 2,
+        top: LOGO.cy - size / 2,
         opacity,
         transform: `scale(${scale})`,
         transformOrigin: '50% 50%',
@@ -188,8 +200,8 @@ const Burst: React.FC<{ frame: number }> = ({ frame }) => {
     >
       {Array.from({ length: lines }).map((_, i) => {
         const angle = (i / lines) * Math.PI * 2;
-        const r0 = 34;
-        const r1 = 56 + (i % 3) * 8;
+        const r0 = 47;
+        const r1 = 62 + (i % 3) * 6;
         const x0 = 100 + Math.cos(angle) * r0;
         const y0 = 100 + Math.sin(angle) * r0;
         const x1 = 100 + Math.cos(angle) * r1;
