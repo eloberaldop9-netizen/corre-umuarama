@@ -45,38 +45,57 @@ type SliceConfig = {
   idlePhase: number;
   idleAmpY: number;
   idleAmpR: number;
+  // Ângulo do eixo principal da fatia na foto original (via PCA), usado para
+  // "endireitar" a fatia e alinhá-la tangencialmente quando forma o anel.
+  naturalAngle: number;
 };
 
 const SLICES: SliceConfig[] = [
-  { id: 1, src: 'slice1.png', cx: 217, cy: 466, w: 362, h: 300, stagger: 0, bulgeAxis: 'x', bulge: -45, rotSeed: -22, idleFreq: 0.05, idlePhase: 0.3, idleAmpY: 5, idleAmpR: 1.8 },
-  { id: 2, src: 'slice2.png', cx: 756, cy: 427, w: 368, h: 206, stagger: 6, bulgeAxis: 'y', bulge: 45, rotSeed: 18, idleFreq: 0.043, idlePhase: 2.1, idleAmpY: 4, idleAmpR: 2.0 },
-  { id: 3, src: 'slice3.png', cx: 892, cy: 803, w: 334, h: 272, stagger: 12, bulgeAxis: 'x', bulge: 45, rotSeed: -16, idleFreq: 0.038, idlePhase: 4.0, idleAmpY: 6, idleAmpR: 1.5 },
-  { id: 4, src: 'slice4.png', cx: 128, cy: 872, w: 256, h: 346, stagger: 18, bulgeAxis: 'y', bulge: -45, rotSeed: 24, idleFreq: 0.056, idlePhase: 1.2, idleAmpY: 3, idleAmpR: 2.2 },
-  { id: 5, src: 'slice5.png', cx: 849, cy: 1397, w: 286, h: 313, stagger: 24, bulgeAxis: 'x', bulge: 45, rotSeed: -20, idleFreq: 0.047, idlePhase: 3.3, idleAmpY: 5, idleAmpR: 1.7 },
-  { id: 6, src: 'slice6.png', cx: 262, cy: 1398, w: 388, h: 286, stagger: 30, bulgeAxis: 'y', bulge: -45, rotSeed: 18, idleFreq: 0.041, idlePhase: 5.0, idleAmpY: 4, idleAmpR: 2.0 },
+  { id: 1, src: 'slice1.png', cx: 217, cy: 466, w: 362, h: 300, stagger: 0, bulgeAxis: 'x', bulge: -45, rotSeed: -22, idleFreq: 0.05, idlePhase: 0.3, idleAmpY: 5, idleAmpR: 1.8, naturalAngle: -24.8 },
+  { id: 2, src: 'slice2.png', cx: 756, cy: 427, w: 368, h: 206, stagger: 6, bulgeAxis: 'y', bulge: 45, rotSeed: 18, idleFreq: 0.043, idlePhase: 2.1, idleAmpY: 4, idleAmpR: 2.0, naturalAngle: 3.1 },
+  { id: 3, src: 'slice3.png', cx: 892, cy: 803, w: 334, h: 272, stagger: 12, bulgeAxis: 'x', bulge: 45, rotSeed: -16, idleFreq: 0.038, idlePhase: 4.0, idleAmpY: 6, idleAmpR: 1.5, naturalAngle: 30.8 },
+  { id: 4, src: 'slice4.png', cx: 128, cy: 872, w: 256, h: 346, stagger: 18, bulgeAxis: 'y', bulge: -45, rotSeed: 24, idleFreq: 0.056, idlePhase: 1.2, idleAmpY: 3, idleAmpR: 2.2, naturalAngle: -64.5 },
+  { id: 5, src: 'slice5.png', cx: 849, cy: 1397, w: 286, h: 313, stagger: 24, bulgeAxis: 'x', bulge: 45, rotSeed: -20, idleFreq: 0.047, idlePhase: 3.3, idleAmpY: 5, idleAmpR: 1.7, naturalAngle: -53.4 },
+  { id: 6, src: 'slice6.png', cx: 262, cy: 1398, w: 388, h: 286, stagger: 30, bulgeAxis: 'y', bulge: -45, rotSeed: 18, idleFreq: 0.041, idlePhase: 5.0, idleAmpY: 4, idleAmpR: 2.0, naturalAngle: 20.6 },
 ];
 
-// Raio fixo do "anel/flor" fechado — cada fatia converge para este raio,
-// mantendo sua direção original a partir do centro da caixa, para que as
-// pétalas se toquem de forma consistente (como no storyboard de referência).
+// Raio fixo do "anel" fechado — cada fatia converge para este raio, girando
+// para ficar "em pé" tangente ao círculo (como moedas formando uma roda),
+// igual ao vídeo de referência.
 const RING_RADIUS = 205;
-const RING_SCALE = 0.66;
+const RING_TARGET_LONG = 232; // comprimento (eixo maior) padronizado de cada fatia no anel
 const EMERGE_TRAVEL = 34;
 const EDGE_MARGIN = 16;
 // Velocidade do giro do anel em volta da logo, em graus por frame — começa a
 // contar a partir do início da convergência (Cena 4) e continua até o fim.
 const ORBIT_DEG_PER_FRAME = 0.7;
+// A partir daqui (Cena 5) o conjunto (anel + selo) encolhe formando a
+// "moedinha" flutuante final, igual à referência.
+const SHRINK_START = S4_END;
+const SHRINK_END = S4_END + 26;
+const SHRINK_FACTOR_END = 0.6;
 
-function ringTarget(cfg: SliceConfig, frame: number) {
+function ringAngleDeg(cfg: SliceConfig, frame: number) {
   const dx = cfg.cx - BOX.cx;
   const dy = cfg.cy - BOX.cy;
-  const baseAngle = Math.atan2(dy, dx);
-  const orbit = (ORBIT_DEG_PER_FRAME * Math.max(0, frame - S3_END) * Math.PI) / 180;
-  const angle = baseAngle + orbit;
+  const baseAngle = (Math.atan2(dy, dx) * 180) / Math.PI;
+  const orbit = ORBIT_DEG_PER_FRAME * Math.max(0, frame - S3_END);
+  return baseAngle + orbit;
+}
+
+function ringTarget(cfg: SliceConfig, frame: number) {
+  const angle = (ringAngleDeg(cfg, frame) * Math.PI) / 180;
   return {
     x: BOX.cx + Math.cos(angle) * RING_RADIUS,
     y: BOX.cy + Math.sin(angle) * RING_RADIUS,
   };
+}
+
+function shrinkFactorAt(frame: number) {
+  return interpolate(frame, [SHRINK_START, SHRINK_END], [1, SHRINK_FACTOR_END], {
+    ...clampCfg,
+    easing: Easing.inOut(Easing.cubic),
+  });
 }
 
 const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg, frame, fps }) => {
@@ -98,15 +117,19 @@ const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg
 
   const bulge = cfg.bulge * Math.sin(clampedLin * Math.PI);
 
-  // Convergência (Cena 4): parte de onde a fatia já está (emergeX/Y) até o cluster fechado.
+  // Convergência (Cena 4): parte de onde a fatia já está (emergeX/Y) até o anel fechado,
+  // girando para ficar "em pé" tangente ao círculo (tamanho padronizado, como moedas).
   const closeProgress = interpolate(frame, [S3_END, S4_END], [0, 1], {
     ...clampCfg,
     easing: Easing.inOut(Easing.cubic),
   });
   const ring = ringTarget(cfg, frame);
+  const ringScaleAbs = RING_TARGET_LONG / Math.max(cfg.w, cfg.h);
+  const ringRotation = ringAngleDeg(cfg, frame) + 90 - cfg.naturalAngle;
   const convergeX = interpolate(closeProgress, [0, 1], [emergeX, ring.x] as number[]);
   const convergeY = interpolate(closeProgress, [0, 1], [emergeY, ring.y] as number[]);
-  const convergeScale = interpolate(closeProgress, [0, 1], [emergeScale, emergeScale * RING_SCALE] as number[]);
+  const convergeScale = interpolate(closeProgress, [0, 1], [emergeScale, ringScaleAbs] as number[]);
+  const convergeRot = interpolate(closeProgress, [0, 1], [emergeRot, ringRotation] as number[]);
 
   // Micro movimento vivo (Cena 3), com entrada/saída suave via envelope.
   const idleEnv = interpolate(
@@ -119,10 +142,15 @@ const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg
   const idleY = idleEnv * Math.sin(frame * cfg.idleFreq + cfg.idlePhase) * cfg.idleAmpY;
   const idleRot = idleEnv * Math.sin(frame * cfg.idleFreq * 0.85 + cfg.idlePhase + 0.7) * cfg.idleAmpR;
 
-  const rawX = convergeX + idleX + (cfg.bulgeAxis === 'x' ? bulge : 0);
-  const rawY = convergeY + idleY + (cfg.bulgeAxis === 'y' ? bulge : 0);
-  const rotation = emergeRot + idleRot;
-  const scale = convergeScale;
+  // Cena 5: o anel inteiro encolhe em volta do centro, virando a "moedinha" final.
+  const shrink = shrinkFactorAt(frame);
+
+  const preShrinkX = convergeX + idleX + (cfg.bulgeAxis === 'x' ? bulge : 0);
+  const preShrinkY = convergeY + idleY + (cfg.bulgeAxis === 'y' ? bulge : 0);
+  const rawX = BOX.cx + (preShrinkX - BOX.cx) * shrink;
+  const rawY = BOX.cy + (preShrinkY - BOX.cy) * shrink;
+  const rotation = convergeRot + idleRot;
+  const scale = convergeScale * shrink;
 
   // Trava de segurança: nunca deixa a fatia ultrapassar as bordas do canvas
   // (o overshoot do spring + o arco de emergência podiam empurrá-la pra fora).
@@ -161,6 +189,67 @@ const BoxShadow: React.FC<{ opacity: number }> = ({ opacity }) => (
     }}
   />
 );
+
+const BADGE_DIAMETER = 300;
+
+// O selo branco com a logo real no centro do anel — igual à referência (disco
+// branco atrás da marca), mas usando a nossa logo de verdade, sem inventar
+// nada. Encolhe junto com o anel na Cena 5, formando a "moedinha" final.
+const Badge: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
+  const badgeSpring = spring({
+    frame: Math.max(0, frame - S4_END),
+    fps,
+    config: { damping: 14, mass: 0.7, stiffness: 130 },
+  });
+  const popScale = interpolate(badgeSpring, [0, 1], [0.9, 1]);
+  const opacity = interpolate(frame, [S4_END, S4_END + 12], [0, 1], clampCfg);
+  const shrink = shrinkFactorAt(frame);
+  const scale = popScale * shrink;
+  const d = BADGE_DIAMETER * scale;
+
+  const coinShadowOpacity = interpolate(frame, [SHRINK_START + 6, SHRINK_END + 6], [0, 0.2], clampCfg);
+
+  return (
+    <>
+      <div
+        style={{
+          position: 'absolute',
+          left: BOX.cx - (BADGE_DIAMETER * 0.62 * scale) / 2,
+          top: BOX.cy + d / 2 - 6,
+          width: BADGE_DIAMETER * 0.62 * scale,
+          height: BADGE_DIAMETER * 0.16 * scale,
+          opacity: coinShadowOpacity,
+          background: 'radial-gradient(ellipse at center, rgba(60,35,10,0.6) 0%, rgba(60,35,10,0) 72%)',
+          filter: 'blur(10px)',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: BOX.cx - d / 2,
+          top: BOX.cy - d / 2,
+          width: d,
+          height: d,
+          borderRadius: '50%',
+          background: '#fffdf6',
+          opacity,
+          boxShadow: '0 12px 28px rgba(70,40,10,0.22)',
+        }}
+      />
+      <Img
+        src={staticFile(`uai-tofu/${LOGO.src}`)}
+        style={{
+          position: 'absolute',
+          left: BOX.cx - (LOGO.w * scale) / 2,
+          top: BOX.cy - (LOGO.h * scale) / 2,
+          width: LOGO.w * scale,
+          height: LOGO.h * scale,
+          opacity,
+        }}
+      />
+    </>
+  );
+};
 
 const Glow: React.FC<{ frame: number }> = ({ frame }) => {
   const opacity = interpolate(frame, [S4_END, S4_END + 8, DURATION], [0, 0.35, 0.16], clampCfg);
@@ -368,15 +457,6 @@ export const UaiTofuReveal: React.FC = () => {
   });
   const boxOpacity = boxRevealOpacity * boxFade;
 
-  // Cena 5 — reveal da logo
-  const logoSpring = spring({
-    frame: Math.max(0, frame - S4_END),
-    fps,
-    config: { damping: 14, mass: 0.7, stiffness: 130 },
-  });
-  const logoScale = interpolate(logoSpring, [0, 1], [0.9, 1]);
-  const logoOpacity = interpolate(frame, [S4_END, S4_END + 12], [0, 1], clampCfg);
-
   return (
     <AbsoluteFill style={{ backgroundColor: BG }}>
       <BoxShadow opacity={shadowOpacity * boxFade} />
@@ -399,20 +479,8 @@ export const UaiTofuReveal: React.FC = () => {
         }}
       />
 
-      <Img
-        src={staticFile(`uai-tofu/${LOGO.src}`)}
-        style={{
-          position: 'absolute',
-          left: LOGO.cx - LOGO.w / 2,
-          top: LOGO.cy - LOGO.h / 2,
-          width: LOGO.w,
-          height: LOGO.h,
-          opacity: logoOpacity,
-          transform: `scale(${logoScale})`,
-        }}
-      />
-
       <Glow frame={frame} />
+      <Badge frame={frame} fps={fps} />
       <Burst frame={frame} />
       <Sparkles frame={frame} />
     </AbsoluteFill>
