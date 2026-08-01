@@ -48,22 +48,39 @@ type SliceConfig = {
   // Ângulo do eixo principal da fatia na foto original (via PCA), usado para
   // "endireitar" a fatia e alinhá-la tangencialmente quando forma o anel.
   naturalAngle: number;
+  // Posição fixa (em graus) desta fatia no anel final — evenly-spaced, não a
+  // direção "natural" da posição espalhada (para o anel ficar redondo e uniforme).
+  ringSlotDeg: number;
+  // Clones reaproveitam a mesma foto real para preencher o anel de 12 posições
+  // (igual à referência), aparecendo só na hora de fechar o círculo.
+  isClone?: boolean;
 };
 
 const SLICES: SliceConfig[] = [
-  { id: 1, src: 'slice1.png', cx: 217, cy: 466, w: 362, h: 300, stagger: 0, bulgeAxis: 'x', bulge: -45, rotSeed: -22, idleFreq: 0.05, idlePhase: 0.3, idleAmpY: 5, idleAmpR: 1.8, naturalAngle: -24.8 },
-  { id: 2, src: 'slice2.png', cx: 756, cy: 427, w: 368, h: 206, stagger: 6, bulgeAxis: 'y', bulge: 45, rotSeed: 18, idleFreq: 0.043, idlePhase: 2.1, idleAmpY: 4, idleAmpR: 2.0, naturalAngle: 3.1 },
-  { id: 3, src: 'slice3.png', cx: 892, cy: 803, w: 334, h: 272, stagger: 12, bulgeAxis: 'x', bulge: 45, rotSeed: -16, idleFreq: 0.038, idlePhase: 4.0, idleAmpY: 6, idleAmpR: 1.5, naturalAngle: 30.8 },
-  { id: 4, src: 'slice4.png', cx: 128, cy: 872, w: 256, h: 346, stagger: 18, bulgeAxis: 'y', bulge: -45, rotSeed: 24, idleFreq: 0.056, idlePhase: 1.2, idleAmpY: 3, idleAmpR: 2.2, naturalAngle: -64.5 },
-  { id: 5, src: 'slice5.png', cx: 849, cy: 1397, w: 286, h: 313, stagger: 24, bulgeAxis: 'x', bulge: 45, rotSeed: -20, idleFreq: 0.047, idlePhase: 3.3, idleAmpY: 5, idleAmpR: 1.7, naturalAngle: -53.4 },
-  { id: 6, src: 'slice6.png', cx: 262, cy: 1398, w: 388, h: 286, stagger: 30, bulgeAxis: 'y', bulge: -45, rotSeed: 18, idleFreq: 0.041, idlePhase: 5.0, idleAmpY: 4, idleAmpR: 2.0, naturalAngle: 20.6 },
+  { id: 1, src: 'slice1.png', cx: 217, cy: 466, w: 362, h: 300, stagger: 0, bulgeAxis: 'x', bulge: -45, rotSeed: -22, idleFreq: 0.05, idlePhase: 0.3, idleAmpY: 5, idleAmpR: 1.8, naturalAngle: -24.8, ringSlotDeg: 240 },
+  { id: 2, src: 'slice2.png', cx: 756, cy: 427, w: 368, h: 206, stagger: 6, bulgeAxis: 'y', bulge: 45, rotSeed: 18, idleFreq: 0.043, idlePhase: 2.1, idleAmpY: 4, idleAmpR: 2.0, naturalAngle: 3.1, ringSlotDeg: 300 },
+  { id: 3, src: 'slice3.png', cx: 892, cy: 803, w: 334, h: 272, stagger: 12, bulgeAxis: 'x', bulge: 45, rotSeed: -16, idleFreq: 0.038, idlePhase: 4.0, idleAmpY: 6, idleAmpR: 1.5, naturalAngle: 30.8, ringSlotDeg: 0 },
+  { id: 4, src: 'slice4.png', cx: 128, cy: 872, w: 256, h: 346, stagger: 18, bulgeAxis: 'y', bulge: -45, rotSeed: 24, idleFreq: 0.056, idlePhase: 1.2, idleAmpY: 3, idleAmpR: 2.2, naturalAngle: -64.5, ringSlotDeg: 180 },
+  { id: 5, src: 'slice5.png', cx: 849, cy: 1397, w: 286, h: 313, stagger: 24, bulgeAxis: 'x', bulge: 45, rotSeed: -20, idleFreq: 0.047, idlePhase: 3.3, idleAmpY: 5, idleAmpR: 1.7, naturalAngle: -53.4, ringSlotDeg: 60 },
+  { id: 6, src: 'slice6.png', cx: 262, cy: 1398, w: 388, h: 286, stagger: 30, bulgeAxis: 'y', bulge: -45, rotSeed: 18, idleFreq: 0.041, idlePhase: 5.0, idleAmpY: 4, idleAmpR: 2.0, naturalAngle: 20.6, ringSlotDeg: 120 },
 ];
+
+// Clones das mesmas 6 fotos reais, preenchendo os 6 espaços intermediários do
+// anel (offset de 30°) — só entram na Cena 4, nascendo do centro da caixa,
+// para deixar o anel denso e redondo como na referência (12 posições).
+const CLONES: SliceConfig[] = SLICES.map((s) => ({
+  ...s,
+  id: s.id + 100,
+  ringSlotDeg: s.ringSlotDeg + 30,
+  isClone: true,
+  stagger: s.id * 4,
+}));
 
 // Raio fixo do "anel" fechado — cada fatia converge para este raio, girando
 // para ficar "em pé" tangente ao círculo (como moedas formando uma roda),
 // igual ao vídeo de referência.
-const RING_RADIUS = 205;
-const RING_TARGET_LONG = 232; // comprimento (eixo maior) padronizado de cada fatia no anel
+const RING_RADIUS = 225;
+const RING_TARGET_LONG = 150; // comprimento (eixo maior) padronizado de cada fatia no anel
 const EMERGE_TRAVEL = 34;
 const EDGE_MARGIN = 16;
 // Velocidade do giro do anel em volta da logo, em graus por frame — começa a
@@ -76,11 +93,8 @@ const SHRINK_END = S4_END + 26;
 const SHRINK_FACTOR_END = 0.6;
 
 function ringAngleDeg(cfg: SliceConfig, frame: number) {
-  const dx = cfg.cx - BOX.cx;
-  const dy = cfg.cy - BOX.cy;
-  const baseAngle = (Math.atan2(dy, dx) * 180) / Math.PI;
   const orbit = ORBIT_DEG_PER_FRAME * Math.max(0, frame - S3_END);
-  return baseAngle + orbit;
+  return cfg.ringSlotDeg + orbit;
 }
 
 function ringTarget(cfg: SliceConfig, frame: number) {
@@ -99,7 +113,7 @@ function shrinkFactorAt(frame: number) {
 }
 
 const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg, frame, fps }) => {
-  const emergeStart = S1_END + cfg.stagger;
+  const emergeStart = cfg.isClone ? S3_END + cfg.stagger : S1_END + cfg.stagger;
 
   const progress = spring({
     frame: Math.max(0, frame - emergeStart),
@@ -109,13 +123,17 @@ const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg
 
   const clampedLin = interpolate(frame, [emergeStart, emergeStart + EMERGE_TRAVEL], [0, 1], clampCfg);
 
-  const emergeX = interpolate(progress, [0, 1], [BOX.cx, cfg.cx] as number[]);
-  const emergeY = interpolate(progress, [0, 1], [BOX.cy, cfg.cy] as number[]);
-  const emergeScale = interpolate(progress, [0, 1], [0.2, 1]);
-  const emergeRot = interpolate(progress, [0, 1], [cfg.rotSeed, 0] as number[]);
-  const emergeOpacity = interpolate(frame, [emergeStart, emergeStart + 10], [0, 1], clampCfg);
+  // Clones nascem parados no centro da caixa e só existem a partir da Cena 4
+  // (não têm fase de espalhamento nem micro movimento próprio).
+  const emergeX = cfg.isClone ? BOX.cx : interpolate(progress, [0, 1], [BOX.cx, cfg.cx] as number[]);
+  const emergeY = cfg.isClone ? BOX.cy : interpolate(progress, [0, 1], [BOX.cy, cfg.cy] as number[]);
+  const emergeScale = cfg.isClone ? 0.2 : interpolate(progress, [0, 1], [0.2, 1]);
+  const emergeRot = cfg.isClone ? 0 : interpolate(progress, [0, 1], [cfg.rotSeed, 0] as number[]);
+  const emergeOpacity = cfg.isClone
+    ? interpolate(frame, [emergeStart, emergeStart + 14], [0, 1], clampCfg)
+    : interpolate(frame, [emergeStart, emergeStart + 10], [0, 1], clampCfg);
 
-  const bulge = cfg.bulge * Math.sin(clampedLin * Math.PI);
+  const bulge = cfg.isClone ? 0 : cfg.bulge * Math.sin(clampedLin * Math.PI);
 
   // Convergência (Cena 4): parte de onde a fatia já está (emergeX/Y) até o anel fechado,
   // girando para ficar "em pé" tangente ao círculo (tamanho padronizado, como moedas).
@@ -131,13 +149,10 @@ const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg
   const convergeScale = interpolate(closeProgress, [0, 1], [emergeScale, ringScaleAbs] as number[]);
   const convergeRot = interpolate(closeProgress, [0, 1], [emergeRot, ringRotation] as number[]);
 
-  // Micro movimento vivo (Cena 3), com entrada/saída suave via envelope.
-  const idleEnv = interpolate(
-    frame,
-    [110, 130, S3_END, S3_END + 16],
-    [0, 1, 1, 0],
-    clampCfg
-  );
+  // Micro movimento vivo (Cena 3), com entrada/saída suave via envelope (clones não têm).
+  const idleEnv = cfg.isClone
+    ? 0
+    : interpolate(frame, [110, 130, S3_END, S3_END + 16], [0, 1, 1, 0], clampCfg);
   const idleX = idleEnv * Math.sin(frame * cfg.idleFreq * 1.1 + cfg.idlePhase + 1.5) * 3;
   const idleY = idleEnv * Math.sin(frame * cfg.idleFreq + cfg.idlePhase) * cfg.idleAmpY;
   const idleRot = idleEnv * Math.sin(frame * cfg.idleFreq * 0.85 + cfg.idlePhase + 0.7) * cfg.idleAmpR;
@@ -463,6 +478,9 @@ export const UaiTofuReveal: React.FC = () => {
       <OrbitArcs frame={frame} />
 
       {SLICES.map((cfg) => (
+        <Slice key={cfg.id} cfg={cfg} frame={frame} fps={fps} />
+      ))}
+      {CLONES.map((cfg) => (
         <Slice key={cfg.id} cfg={cfg} frame={frame} fps={fps} />
       ))}
 
