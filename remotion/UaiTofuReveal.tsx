@@ -28,7 +28,7 @@ const clampCfg = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as cons
 // Posições e tamanhos exatos extraídos da imagem de referência (composição final),
 // já na escala do canvas 1080x1920.
 const BOX = { src: 'box.png', cx: 554, cy: 942, w: 585, h: 733 };
-const LOGO = { src: 'logo.png', cx: 554, cy: 942, w: 300, h: 245 };
+const LOGO = { src: 'logo.png', cx: 554, cy: 942, w: 190, h: 155 };
 
 type SliceConfig = {
   id: number;
@@ -59,8 +59,8 @@ const SLICES: SliceConfig[] = [
 // Raio fixo do "anel/flor" fechado — cada fatia converge para este raio,
 // mantendo sua direção original a partir do centro da caixa, para que as
 // pétalas se toquem de forma consistente (como no storyboard de referência).
-const RING_RADIUS = 128;
-const RING_SCALE = 0.56;
+const RING_RADIUS = 205;
+const RING_SCALE = 0.66;
 const EMERGE_TRAVEL = 34;
 const EDGE_MARGIN = 16;
 
