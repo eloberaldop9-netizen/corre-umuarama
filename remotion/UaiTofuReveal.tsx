@@ -228,6 +228,129 @@ const Burst: React.FC<{ frame: number }> = ({ frame }) => {
   );
 };
 
+// Arcos brancos girando em volta do espalhamento das fatias (Cenas 2-3),
+// estilo "trilha de movimento" — somem antes da convergência começar.
+const OrbitArcs: React.FC<{ frame: number }> = ({ frame }) => {
+  const opacity = interpolate(frame, [76, 96, 196, 224], [0, 1, 1, 0], clampCfg);
+  if (opacity <= 0) return null;
+
+  const spin = frame * 0.35;
+  const radius = 440;
+  const size = radius * 2 + 40;
+  const c = size / 2;
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      style={{
+        position: 'absolute',
+        left: BOX.cx - c,
+        top: BOX.cy - c,
+        opacity,
+        transform: `rotate(${spin}deg)`,
+        transformOrigin: '50% 50%',
+      }}
+    >
+      <circle
+        cx={c}
+        cy={c}
+        r={radius}
+        fill="none"
+        stroke="#fffdf6"
+        strokeWidth={16}
+        strokeLinecap="round"
+        strokeDasharray="180 210"
+      />
+      <circle
+        cx={c}
+        cy={c}
+        r={radius - 46}
+        fill="none"
+        stroke="#fffdf6"
+        strokeWidth={10}
+        strokeLinecap="round"
+        strokeDasharray="120 340"
+        transform={`rotate(140 ${c} ${c})`}
+      />
+    </svg>
+  );
+};
+
+type SparkleDot = { x: number; y: number; size: number; freq: number; phase: number };
+
+const SPARKLE_DOTS: SparkleDot[] = [
+  { x: 130, y: 640, size: 7, freq: 0.07, phase: 0.4 },
+  { x: 960, y: 600, size: 6, freq: 0.06, phase: 2.1 },
+  { x: 90, y: 1120, size: 5, freq: 0.08, phase: 4.0 },
+  { x: 990, y: 1180, size: 7, freq: 0.065, phase: 1.2 },
+  { x: 220, y: 1620, size: 5, freq: 0.075, phase: 3.1 },
+  { x: 880, y: 1650, size: 6, freq: 0.055, phase: 5.2 },
+  { x: 540, y: 500, size: 5, freq: 0.07, phase: 2.6 },
+];
+
+// Partículas de brilho: nascem no começo da Cena 2 e ficam piscando até o fim
+// (inclusive durante o hold final da logo), igual à referência.
+const Sparkles: React.FC<{ frame: number }> = ({ frame }) => {
+  const envelope = interpolate(frame, [70, 92], [0, 1], clampCfg);
+  if (envelope <= 0) return null;
+
+  return (
+    <>
+      {SPARKLE_DOTS.map((d, i) => {
+        const twinkle = 0.35 + 0.65 * Math.max(0, Math.sin(frame * d.freq + d.phase));
+        return (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              left: d.x - d.size / 2,
+              top: d.y - d.size / 2,
+              width: d.size,
+              height: d.size,
+              borderRadius: '50%',
+              background: '#fffdf6',
+              opacity: envelope * twinkle,
+              boxShadow: '0 0 6px 1px rgba(255,253,246,0.8)',
+            }}
+          />
+        );
+      })}
+      <SparkleStar frame={frame} x={954} y={1780} size={40} envelope={envelope} />
+    </>
+  );
+};
+
+const SparkleStar: React.FC<{ frame: number; x: number; y: number; size: number; envelope: number }> = ({
+  frame,
+  x,
+  y,
+  size,
+  envelope,
+}) => {
+  const pulse = 0.82 + 0.18 * Math.sin(frame * 0.09);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      style={{
+        position: 'absolute',
+        left: x - size / 2,
+        top: y - size / 2,
+        opacity: envelope * 0.9,
+        transform: `scale(${pulse})`,
+        transformOrigin: '50% 50%',
+      }}
+    >
+      <path
+        d="M12 0 C12.8 6.5 13.5 9.4 16.2 10.8 C19 12.2 21.6 12 24 12 C21.6 12 19 11.8 16.2 13.2 C13.5 14.6 12.8 17.5 12 24 C11.2 17.5 10.5 14.6 7.8 13.2 C5 11.8 2.4 12 0 12 C2.4 12 5 12.2 7.8 10.8 C10.5 9.4 11.2 6.5 12 0 Z"
+        fill="#fffdf6"
+      />
+    </svg>
+  );
+};
+
 export const UaiTofuReveal: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -257,6 +380,7 @@ export const UaiTofuReveal: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: BG }}>
       <BoxShadow opacity={shadowOpacity * boxFade} />
+      <OrbitArcs frame={frame} />
 
       {SLICES.map((cfg) => (
         <Slice key={cfg.id} cfg={cfg} frame={frame} fps={fps} />
@@ -290,6 +414,7 @@ export const UaiTofuReveal: React.FC = () => {
 
       <Glow frame={frame} />
       <Burst frame={frame} />
+      <Sparkles frame={frame} />
     </AbsoluteFill>
   );
 };
