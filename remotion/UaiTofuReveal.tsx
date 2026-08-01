@@ -63,14 +63,19 @@ const RING_RADIUS = 205;
 const RING_SCALE = 0.66;
 const EMERGE_TRAVEL = 34;
 const EDGE_MARGIN = 16;
+// Velocidade do giro do anel em volta da logo, em graus por frame — começa a
+// contar a partir do início da convergência (Cena 4) e continua até o fim.
+const ORBIT_DEG_PER_FRAME = 0.7;
 
-function ringTarget(cfg: SliceConfig) {
+function ringTarget(cfg: SliceConfig, frame: number) {
   const dx = cfg.cx - BOX.cx;
   const dy = cfg.cy - BOX.cy;
-  const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+  const baseAngle = Math.atan2(dy, dx);
+  const orbit = (ORBIT_DEG_PER_FRAME * Math.max(0, frame - S3_END) * Math.PI) / 180;
+  const angle = baseAngle + orbit;
   return {
-    x: BOX.cx + (dx / dist) * RING_RADIUS,
-    y: BOX.cy + (dy / dist) * RING_RADIUS,
+    x: BOX.cx + Math.cos(angle) * RING_RADIUS,
+    y: BOX.cy + Math.sin(angle) * RING_RADIUS,
   };
 }
 
@@ -98,7 +103,7 @@ const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg
     ...clampCfg,
     easing: Easing.inOut(Easing.cubic),
   });
-  const ring = ringTarget(cfg);
+  const ring = ringTarget(cfg, frame);
   const convergeX = interpolate(closeProgress, [0, 1], [emergeX, ring.x] as number[]);
   const convergeY = interpolate(closeProgress, [0, 1], [emergeY, ring.y] as number[]);
   const convergeScale = interpolate(closeProgress, [0, 1], [emergeScale, emergeScale * RING_SCALE] as number[]);
