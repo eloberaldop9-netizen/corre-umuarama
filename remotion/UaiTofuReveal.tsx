@@ -27,8 +27,8 @@ const clampCfg = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as cons
 
 // Posições e tamanhos exatos extraídos da imagem de referência (composição final),
 // já na escala do canvas 1080x1920.
-const BOX = { src: 'box.png', cx: 554, cy: 942, w: 585, h: 733 };
-const LOGO = { src: 'logo.png', cx: 554, cy: 942, w: 190, h: 155 };
+const BOX = { src: 'box.png', cx: 554, cy: 942, w: 557, h: 705 };
+const LOGO = { src: 'logo.png', cx: 554, cy: 942, w: 235, h: 192 };
 
 type SliceConfig = {
   id: number;
@@ -205,7 +205,7 @@ const BoxShadow: React.FC<{ opacity: number }> = ({ opacity }) => (
   />
 );
 
-const BADGE_DIAMETER = 300;
+const BADGE_DIAMETER = 305;
 
 // O selo branco com a logo real no centro do anel — igual à referência (disco
 // branco atrás da marca), mas usando a nossa logo de verdade, sem inventar
