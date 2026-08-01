@@ -21,7 +21,13 @@ const S1_END = 60;
 const S2_END = 120;
 const S3_END = 216;
 const S4_END = 264;
-export const DURATION = 300;
+// Cena 6: o anel dá 2 giros rápidos (284-338) e então a logo cresce e
+// se destaca sobre a imagem inteira, enquanto o anel desaparece (338-372).
+const SPIN_START = 284;
+const SPIN_END = 338;
+const ZOOM_START = 338;
+const ZOOM_END = 372;
+export const DURATION = 390;
 
 const clampCfg = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 
@@ -86,15 +92,16 @@ const EDGE_MARGIN = 16;
 // Velocidade do giro do anel em volta da logo, em graus por frame — começa a
 // contar a partir do início da convergência (Cena 4) e continua até o fim.
 const ORBIT_DEG_PER_FRAME = 0.7;
-// A partir daqui (Cena 5) o conjunto (anel + selo) encolhe formando a
-// "moedinha" flutuante final, igual à referência.
-const SHRINK_START = S4_END;
-const SHRINK_END = S4_END + 26;
-const SHRINK_FACTOR_END = 0.6;
+// Giro final: 2 voltas completas (720°), rápido e com ease-in-out.
+const SPIN_TURNS = 2;
 
 function ringAngleDeg(cfg: SliceConfig, frame: number) {
   const orbit = ORBIT_DEG_PER_FRAME * Math.max(0, frame - S3_END);
-  return cfg.ringSlotDeg + orbit;
+  const spinBonus = interpolate(frame, [SPIN_START, SPIN_END], [0, SPIN_TURNS * 360], {
+    ...clampCfg,
+    easing: Easing.inOut(Easing.cubic),
+  });
+  return cfg.ringSlotDeg + orbit + spinBonus;
 }
 
 function ringTarget(cfg: SliceConfig, frame: number) {
@@ -105,8 +112,10 @@ function ringTarget(cfg: SliceConfig, frame: number) {
   };
 }
 
-function shrinkFactorAt(frame: number) {
-  return interpolate(frame, [SHRINK_START, SHRINK_END], [1, SHRINK_FACTOR_END], {
+// O anel dá os giros finais e depois desaparece enquanto a logo cresce
+// (Cena 6), em vez de encolher numa moedinha.
+function ringFadeAt(frame: number) {
+  return interpolate(frame, [ZOOM_START, ZOOM_START + 20], [1, 0], {
     ...clampCfg,
     easing: Easing.inOut(Easing.cubic),
   });
@@ -157,15 +166,10 @@ const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg
   const idleY = idleEnv * Math.sin(frame * cfg.idleFreq + cfg.idlePhase) * cfg.idleAmpY;
   const idleRot = idleEnv * Math.sin(frame * cfg.idleFreq * 0.85 + cfg.idlePhase + 0.7) * cfg.idleAmpR;
 
-  // Cena 5: o anel inteiro encolhe em volta do centro, virando a "moedinha" final.
-  const shrink = shrinkFactorAt(frame);
-
-  const preShrinkX = convergeX + idleX + (cfg.bulgeAxis === 'x' ? bulge : 0);
-  const preShrinkY = convergeY + idleY + (cfg.bulgeAxis === 'y' ? bulge : 0);
-  const rawX = BOX.cx + (preShrinkX - BOX.cx) * shrink;
-  const rawY = BOX.cy + (preShrinkY - BOX.cy) * shrink;
+  const rawX = convergeX + idleX + (cfg.bulgeAxis === 'x' ? bulge : 0);
+  const rawY = convergeY + idleY + (cfg.bulgeAxis === 'y' ? bulge : 0);
   const rotation = convergeRot + idleRot;
-  const scale = convergeScale * shrink;
+  const scale = convergeScale;
 
   // Trava de segurança: nunca deixa a fatia ultrapassar as bordas do canvas
   // (o overshoot do spring + o arco de emergência podiam empurrá-la pra fora).
@@ -173,6 +177,9 @@ const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg
   const halfH = (cfg.h * scale) / 2;
   const x = Math.min(Math.max(rawX, halfW + EDGE_MARGIN), 1080 - halfW - EDGE_MARGIN);
   const y = Math.min(Math.max(rawY, halfH + EDGE_MARGIN), 1920 - halfH - EDGE_MARGIN);
+
+  // Cena 6: depois dos 2 giros finais, o anel desaparece para dar lugar à logo grande.
+  const ringFade = ringFadeAt(frame);
 
   return (
     <Img
@@ -183,7 +190,7 @@ const Slice: React.FC<{ cfg: SliceConfig; frame: number; fps: number }> = ({ cfg
         top: y - cfg.h / 2,
         width: cfg.w,
         height: cfg.h,
-        opacity: emergeOpacity,
+        opacity: emergeOpacity * ringFade,
         transform: `rotate(${rotation}deg) scale(${scale})`,
       }}
     />
@@ -206,10 +213,13 @@ const BoxShadow: React.FC<{ opacity: number }> = ({ opacity }) => (
 );
 
 const BADGE_DIAMETER = 305;
+// Quanto a logo cresce na Cena 6, até se destacar sobre a imagem inteira.
+const LOGO_ZOOM_END = 3.4;
 
 // O selo branco com a logo real no centro do anel — igual à referência (disco
 // branco atrás da marca), mas usando a nossa logo de verdade, sem inventar
-// nada. Encolhe junto com o anel na Cena 5, formando a "moedinha" final.
+// nada. Depois dos giros finais (Cena 6), o disco desaparece e a logo cresce
+// grande, se destacando sobre a imagem inteira.
 const Badge: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const badgeSpring = spring({
     frame: Math.max(0, frame - S4_END),
@@ -218,22 +228,26 @@ const Badge: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   });
   const popScale = interpolate(badgeSpring, [0, 1], [0.9, 1]);
   const opacity = interpolate(frame, [S4_END, S4_END + 12], [0, 1], clampCfg);
-  const shrink = shrinkFactorAt(frame);
-  const scale = popScale * shrink;
-  const d = BADGE_DIAMETER * scale;
+  const d = BADGE_DIAMETER * popScale;
 
-  const coinShadowOpacity = interpolate(frame, [SHRINK_START + 6, SHRINK_END + 6], [0, 0.2], clampCfg);
+  // Cena 6 — disco branco e sua sombra somem enquanto a logo cresce.
+  const discFade = interpolate(frame, [ZOOM_START, ZOOM_START + 16], [1, 0], clampCfg);
+  const logoZoom = interpolate(frame, [ZOOM_START, ZOOM_END], [1, LOGO_ZOOM_END], {
+    ...clampCfg,
+    easing: Easing.out(Easing.cubic),
+  });
+  const logoScale = popScale * logoZoom;
 
   return (
     <>
       <div
         style={{
           position: 'absolute',
-          left: BOX.cx - (BADGE_DIAMETER * 0.62 * scale) / 2,
+          left: BOX.cx - (BADGE_DIAMETER * 0.62 * popScale) / 2,
           top: BOX.cy + d / 2 - 6,
-          width: BADGE_DIAMETER * 0.62 * scale,
-          height: BADGE_DIAMETER * 0.16 * scale,
-          opacity: coinShadowOpacity,
+          width: BADGE_DIAMETER * 0.62 * popScale,
+          height: BADGE_DIAMETER * 0.16 * popScale,
+          opacity: opacity * discFade * 0.2,
           background: 'radial-gradient(ellipse at center, rgba(60,35,10,0.6) 0%, rgba(60,35,10,0) 72%)',
           filter: 'blur(10px)',
         }}
@@ -247,7 +261,7 @@ const Badge: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
           height: d,
           borderRadius: '50%',
           background: '#fffdf6',
-          opacity,
+          opacity: opacity * discFade,
           boxShadow: '0 12px 28px rgba(70,40,10,0.22)',
         }}
       />
@@ -255,10 +269,10 @@ const Badge: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
         src={staticFile(`uai-tofu/${LOGO.src}`)}
         style={{
           position: 'absolute',
-          left: BOX.cx - (LOGO.w * scale) / 2,
-          top: BOX.cy - (LOGO.h * scale) / 2,
-          width: LOGO.w * scale,
-          height: LOGO.h * scale,
+          left: BOX.cx - (LOGO.w * logoScale) / 2,
+          top: BOX.cy - (LOGO.h * logoScale) / 2,
+          width: LOGO.w * logoScale,
+          height: LOGO.h * logoScale,
           opacity,
         }}
       />
@@ -267,7 +281,12 @@ const Badge: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
 };
 
 const Glow: React.FC<{ frame: number }> = ({ frame }) => {
-  const opacity = interpolate(frame, [S4_END, S4_END + 8, DURATION], [0, 0.35, 0.16], clampCfg);
+  const opacity = interpolate(
+    frame,
+    [S4_END, S4_END + 8, ZOOM_START, ZOOM_START + 14, ZOOM_END, DURATION],
+    [0, 0.35, 0.16, 0.4, 0.22, 0.22],
+    clampCfg
+  );
   return (
     <AbsoluteFill
       style={{
@@ -279,10 +298,7 @@ const Glow: React.FC<{ frame: number }> = ({ frame }) => {
   );
 };
 
-const Burst: React.FC<{ frame: number }> = ({ frame }) => {
-  // Começa um pouco depois da logo já ter aparecido, e as linhas nascem
-  // fora do contorno da logo (não riscando por cima das letras).
-  const start = S4_END + 6;
+const Burst: React.FC<{ frame: number; start: number; size: number }> = ({ frame, start, size }) => {
   const opacity = interpolate(frame, [start, start + 8, start + 22], [0, 0.4, 0], clampCfg);
   const scale = interpolate(frame, [start, start + 20], [0.85, 1.2], {
     ...clampCfg,
@@ -292,7 +308,6 @@ const Burst: React.FC<{ frame: number }> = ({ frame }) => {
   if (opacity <= 0) return null;
 
   const lines = 10;
-  const size = LOGO.w * 2.2;
   return (
     <svg
       width={size}
@@ -499,7 +514,8 @@ export const UaiTofuReveal: React.FC = () => {
 
       <Glow frame={frame} />
       <Badge frame={frame} fps={fps} />
-      <Burst frame={frame} />
+      <Burst frame={frame} start={S4_END + 6} size={LOGO.w * 2.2} />
+      <Burst frame={frame} start={ZOOM_START + 2} size={LOGO.w * 4.5} />
       <Sparkles frame={frame} />
     </AbsoluteFill>
   );
