@@ -47,6 +47,41 @@ function tf(y, s) {
   return `translate(-50%,-50%) translateY(${y}px) scale(${s})`;
 }
 
+// Splits an element's text into one <span> per character (spaces become
+// NBSP so they keep their width) so each letter can be animated on its own.
+function splitChars(el) {
+  const text = el.textContent;
+  el.textContent = '';
+  const spans = [];
+  for (const ch of text) {
+    const span = document.createElement('span');
+    span.textContent = ch === ' ' ? ' ' : ch;
+    span.style.display = 'inline-block';
+    spans.push(span);
+    el.appendChild(span);
+  }
+  return spans;
+}
+
+// Fast letter-by-letter cascade: each character pops in with a short
+// stagger — the signature "kinetic typography" reveal, punchier and more
+// alive than fading the whole word in as one block.
+function letterCascade(spans, startT, opts) {
+  const stagger = (opts && opts.stagger) || 30;
+  const dur = (opts && opts.duration) || 260;
+  const easing = (opts && opts.easing) || EASE_OUT;
+  const y = (opts && opts.y) || 20;
+  const scale = (opts && opts.scale) || .82;
+  spans.forEach((span, i) => {
+    const t0 = startT + i * stagger;
+    T(span, [
+      { t: t0,         opacity: 0, transform: `translateY(${y}px) scale(${scale})` },
+      { t: t0 + dur,   opacity: 1, transform: 'translateY(0px) scale(1)' },
+    ], easing);
+  });
+  return startT + (spans.length - 1) * stagger + dur;
+}
+
 function build() {
   const stage = $('stage');
 
@@ -63,9 +98,9 @@ function build() {
     { t: 720, opacity: 0, transform: 'translate(-50%,-50%) scaleX(1)' },
   ]);
 
+  letterCascade(splitChars($('t-mas')), 150, { stagger: 40, duration: 220, y: 22, scale: .8 });
   T($('t-mas'), [
-    { t: 150, opacity: 0, transform: tf(0, .94) },
-    { t: 400, opacity: 1, transform: tf(0, 1) },
+    { t: 150, opacity: 1, transform: tf(0, 1) },
     { t: 560, opacity: 1, transform: tf(0, 1) },
     { t: 720, opacity: 0, transform: tf(-14, 1.06) },
   ]);
@@ -88,10 +123,11 @@ function build() {
     { t: 1710, opacity: 0, transform: tf(-8, .96) },
   ]);
 
+  letterCascade(splitChars($('t-autoestima')), 900, { stagger: 34, duration: 300, y: 24, scale: .8 });
   T($('t-autoestima'), [
-    { t: 900,  opacity: 0, transform: tf(26, 1), letterSpacing: '2px' },
-    { t: 1250, opacity: 1, transform: tf(0, 1),  letterSpacing: '6px' },
-    { t: 1580, opacity: 1, transform: tf(0, 1),  letterSpacing: '6px' },
+    { t: 900,  opacity: 1, transform: tf(0, 1), letterSpacing: '2px' },
+    { t: 1300, opacity: 1, transform: tf(0, 1), letterSpacing: '6px' },
+    { t: 1580, opacity: 1, transform: tf(0, 1), letterSpacing: '6px' },
     { t: 1730, opacity: 0, transform: tf(-8, .96), letterSpacing: '6px' },
   ]);
 
@@ -112,9 +148,9 @@ function build() {
     { t: 2630, opacity: 0 },
   ]);
 
+  letterCascade(splitChars($('t-tambem')), 1720, { stagger: 32, duration: 240, y: 18, scale: .82 });
   T($('t-tambem'), [
-    { t: 1720, opacity: 0, transform: tf(16, 1) },
-    { t: 1980, opacity: 1, transform: tf(0, 1) },
+    { t: 1720, opacity: 1, transform: tf(0, 1) },
     { t: 2410, opacity: 1, transform: tf(0, 1) },
     { t: 2560, opacity: 0, transform: tf(-8, .96) },
   ]);
@@ -130,9 +166,9 @@ function build() {
     { t: 4440, opacity: 0, transform: tf(-8, .96) },
   ]);
 
+  letterCascade(splitChars($('t-saude')), 2780, { stagger: 42, duration: 320, y: 30, scale: .78 });
   T($('t-saude'), [
-    { t: 2780, opacity: 0, transform: tf(34, 1) },
-    { t: 3160, opacity: 1, transform: tf(0, 1) },
+    { t: 2780, opacity: 1, transform: tf(0, 1) },
     { t: 4260, opacity: 1, transform: tf(0, 1) },
     { t: 4440, opacity: 0, transform: tf(-8, .96) },
   ]);
