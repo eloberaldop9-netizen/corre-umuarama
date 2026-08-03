@@ -71,15 +71,14 @@ function build() {
   ]);
 
   // ---- Scene B: "CUIDAR DA / AUTOESTIMA" (700 - 1710ms) ----
-  // brand icon reveals like a left-to-right stroke draw (clip-path wipe),
-  // then settles as a faint persistent watermark behind the rest of the scene.
+  // brand icon settles in with a soft fade + gentle scale, then dims to a
+  // faint persistent watermark behind the rest of the scene.
   T($('face-contour'), [
-    { t: 700,  opacity: 0, clipPath: 'inset(0 100% 0 0)' },
-    { t: 950,  opacity: 1, clipPath: 'inset(0 55% 0 0)' },
-    { t: 1350, opacity: 1, clipPath: 'inset(0 0% 0 0)' },
-    { t: 1750, opacity: .16, clipPath: 'inset(0 0% 0 0)' },
-    { t: 4250, opacity: .16, clipPath: 'inset(0 0% 0 0)' },
-    { t: 4600, opacity: 0, clipPath: 'inset(0 0% 0 0)' },
+    { t: 700,  opacity: 0,   transform: 'translate(-50%,-50%) scale(.94)' },
+    { t: 1250, opacity: 1,   transform: 'translate(-50%,-50%) scale(.96)' },
+    { t: 1750, opacity: .14, transform: 'translate(-50%,-50%) scale(.96)' },
+    { t: 4250, opacity: .14, transform: 'translate(-50%,-50%) scale(.96)' },
+    { t: 4600, opacity: 0,   transform: 'translate(-50%,-50%) scale(.97)' },
   ], EASE_OUT_SOFT);
 
   T($('t-cuidar1'), [
