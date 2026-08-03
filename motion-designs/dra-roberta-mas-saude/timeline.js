@@ -71,27 +71,16 @@ function build() {
   ]);
 
   // ---- Scene B: "CUIDAR DA / AUTOESTIMA" (700 - 1710ms) ----
+  // brand icon reveals like a left-to-right stroke draw (clip-path wipe),
+  // then settles as a faint persistent watermark behind the rest of the scene.
   T($('face-contour'), [
-    { t: 700,  opacity: 0 },
-    { t: 950,  opacity: 1 },
-    { t: 1400, opacity: 1 },
-    { t: 1750, opacity: .16 },
-    { t: 4250, opacity: .16 },
-    { t: 4600, opacity: 0 },
-  ]);
-  A($('face-path'), [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { delay: 700, duration: 650, easing: EASE_OUT_SOFT });
-
-  A($('circuit-a'), [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { delay: 900, duration: 380, easing: EASE_OUT });
-  A($('dot-a'), [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1.25)' }, { opacity: 1, transform: 'scale(1)' }],
-    { delay: 1280, duration: 220, easing: EASE_OUT });
-
-  A($('circuit-b'), [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { delay: 980, duration: 380, easing: EASE_OUT });
-  A($('dot-b'), [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1.25)' }, { opacity: 1, transform: 'scale(1)' }],
-    { delay: 1360, duration: 220, easing: EASE_OUT });
-
-  A($('circuit-c'), [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { delay: 1060, duration: 380, easing: EASE_OUT });
-  A($('dot-c'), [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1.25)' }, { opacity: 1, transform: 'scale(1)' }],
-    { delay: 1440, duration: 220, easing: EASE_OUT });
+    { t: 700,  opacity: 0, clipPath: 'inset(0 100% 0 0)' },
+    { t: 950,  opacity: 1, clipPath: 'inset(0 55% 0 0)' },
+    { t: 1350, opacity: 1, clipPath: 'inset(0 0% 0 0)' },
+    { t: 1750, opacity: .16, clipPath: 'inset(0 0% 0 0)' },
+    { t: 4250, opacity: .16, clipPath: 'inset(0 0% 0 0)' },
+    { t: 4600, opacity: 0, clipPath: 'inset(0 0% 0 0)' },
+  ], EASE_OUT_SOFT);
 
   T($('t-cuidar1'), [
     { t: 730,  opacity: 0, transform: tf(20, 1) },
