@@ -194,26 +194,33 @@ function build() {
     { t: 3790, opacity: 0, transform: 'translate(-50%,-50%) scaleX(1) translateY(-8px)' },
   ]);
 
-  A($('seg-a'), [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { delay: 2700, duration: 950, easing: EASE_OUT_SOFT });
+  // a single simple line draws left-to-right above the text, then retracts
+  // (erases from its tip, the same motion in reverse) right as "totalmente"
+  // ends — a plain, legible cue that something is about to change course,
+  // deliberately kept small and clear of the brand-icon watermark below.
+  T($('seg-a'), [
+    { t: 2700, strokeDashoffset: 1 },
+    { t: 3650, strokeDashoffset: 0 },
+    { t: 3720, strokeDashoffset: 0 },
+    { t: 3920, strokeDashoffset: -1 },
+  ], EASE_OUT_SOFT);
   T($('rdot1'), [
     { t: 2900, opacity: 0 },
     { t: 3080, opacity: 1 },
-    { t: 3700, opacity: 1 },
-    { t: 3830, opacity: 0 },
+    { t: 3650, opacity: 1 },
+    { t: 3850, opacity: 0 },
   ]);
 
   // ---- Scene D: "AO CONTRÁRIO" (3800 - 5400ms) ----
-  // the champagne line reverses direction — segment B curves back the
-  // opposite way exactly as "CONTRÁRIO" locks into place.
-  A($('seg-b'), [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { delay: 3850, duration: 500, easing: EASE_OUT_SOFT });
+  // the reversal pays off as the champagne underline beneath "CONTRÁRIO"
+  // (drawn further below) — a small dot marks where the "new direction"
+  // settles, echoing the connector dots on the brand icon.
   T($('rdot2'), [
-    { t: 4080, opacity: 0 },
-    { t: 4260, opacity: 1 },
+    { t: 4500, opacity: 0 },
+    { t: 4680, opacity: 1 },
     { t: 5250, opacity: 1 },
     { t: 5390, opacity: 0 },
   ]);
-  T($('seg-a'), [{ t: 5250, opacity: 1 }, { t: 5390, opacity: 0 }]);
-  T($('seg-b'), [{ t: 5250, opacity: 1 }, { t: 5390, opacity: 0 }]);
 
   T($('t-ao'), [
     { t: 3820, opacity: 0, transform: tf(0, 1) },
