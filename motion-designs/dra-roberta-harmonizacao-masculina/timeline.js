@@ -152,12 +152,13 @@ function build() {
   ]);
 
   // ---- Scene B: "A HARMONIZAÇÃO MASCULINA" (800 - 2600ms) ----
-  // brand icon settles in with a soft fade + gentle scale (same treatment
-  // as scene 01), then dims to a faint persistent watermark.
+  // brand icon settles in as a faint background layer — kept subtle the
+  // whole time (never full black) so it never fights the bold "MASCULINA"
+  // letters it sits behind.
   T($('face'), [
     { t: 850,  opacity: 0,   transform: 'translate(-50%,-50%) scale(.90)' },
-    { t: 1300, opacity: 1,   transform: 'translate(-50%,-50%) scale(.96)' },
-    { t: 2550, opacity: 1,   transform: 'translate(-50%,-50%) scale(.96)' },
+    { t: 1300, opacity: .22, transform: 'translate(-50%,-50%) scale(.96)' },
+    { t: 2550, opacity: .22, transform: 'translate(-50%,-50%) scale(.96)' },
     { t: 2900, opacity: .14, transform: 'translate(-50%,-50%) scale(.97)' },
     { t: 5450, opacity: .14, transform: 'translate(-50%,-50%) scale(.97)' },
     { t: 5750, opacity: 0,   transform: 'translate(-50%,-50%) scale(.98)' },
