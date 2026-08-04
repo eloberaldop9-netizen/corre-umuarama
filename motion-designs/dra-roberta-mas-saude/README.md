@@ -27,3 +27,13 @@ rm -rf frames
 
 `render.py` aponta para o Chromium instalado em `/opt/pw-browsers/chromium-*/chrome-linux/chrome`;
 ajuste o `executable_path` se rodar em outra máquina.
+
+## Nota sobre o motor de animação (`timeline.js`)
+
+O helper `T()` aplica o easing **por keyframe**, nunca no nível do efeito. Um easing
+"ease-out" no nível do efeito é resolvido *uma vez* sobre a linha do tempo 0→1 inteira antes
+de localizar os keyframes — como a curva usada aqui atinge ~1.0 em ~35% da duração, qualquer
+keyframe de "hold" (segurar o valor) posicionado depois disso era silenciosamente ignorado e o
+elemento começava a sumir quase imediatamente após aparecer. Manter o easing por keyframe é o
+que faz um trecho de "hold" (mesmo valor de entrada e saída) realmente segurar. Ao adicionar
+novas animações multi-fase, use sempre `T()` (nunca `A()` com mais de 2 keyframes) por esse motivo.

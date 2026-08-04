@@ -32,15 +32,28 @@ function A(el, keyframes, opts) {
 // converts to a single animate() call with proper offsets — this is the
 // only safe way to give one element/property multiple phases (in, hold,
 // out) without later calls silently overriding earlier ones.
+//
+// IMPORTANT: easing is set PER KEYFRAME (paces that keyframe's segment to
+// the next one), never at the effect/options level. An effect-level easing
+// is resolved ONCE across the whole 0→1 timeline before keyframes are
+// located — with an ease-out curve like ours that reaches ~1.0 by 35% of
+// the duration, everything after that samples as "progress ≈ 1", which
+// silently swallows hold segments (a word set to hold, then fade, instead
+// starts fading almost immediately). Per-keyframe easing paces each
+// segment independently, so a hold segment (same value in and out)
+// actually holds.
 function T(el, keys, easing) {
   const start = keys[0].t;
   const end = keys[keys.length - 1].t;
   const duration = Math.max(end - start, 1);
-  const frames = keys.map(k => {
+  const ease = easing || EASE_OUT;
+  const frames = keys.map((k, i) => {
     const { t, ...props } = k;
-    return Object.assign({ offset: (t - start) / duration }, props);
+    const frame = Object.assign({ offset: (t - start) / duration }, props);
+    if (i < keys.length - 1) frame.easing = ease;
+    return frame;
   });
-  return A(el, frames, { delay: start, duration, easing: easing || EASE_OUT });
+  return A(el, frames, { delay: start, duration, easing: 'linear' });
 }
 
 function tf(y, s) {

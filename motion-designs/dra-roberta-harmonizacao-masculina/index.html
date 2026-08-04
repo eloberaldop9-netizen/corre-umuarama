@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Dra. Roberta Rodrigues — Cena 02 · "na verdade, a harmonização masculina é totalmente ao contrário"</title>
+<style>
+  @font-face{
+    font-family:'Montserrat';
+    src:url('assets/fonts/Montserrat-Variable.woff2') format('woff2-variations'), url('assets/fonts/Montserrat-Variable.woff2') format('woff2');
+    font-weight:100 900;
+    font-style:normal;
+    font-display:block;
+  }
+  :root{
+    --white:#FFFFFF;
+    --gelo:#F7F7F5;
+    --gray-light:#E8E8E8;
+    --gray-mid:#A8A8A8;
+    --graphite:#2A2A2A;
+    --black:#111111;
+    --champagne:#D8C8B6;
+    --silver:#CFCFCF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:#F7F7F5;}
+  #stage{
+    position:relative;
+    width:1080px;height:1920px;
+    background:var(--gelo);
+    font-family:'Montserrat',sans-serif;
+    overflow:hidden;
+    transform-origin:50% 50%;
+  }
+
+  #grain{
+    position:absolute;inset:0;
+    opacity:.05;
+    mix-blend-mode:multiply;
+    pointer-events:none;
+  }
+
+  #sidelight{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse 900px 1400px at -10% 30%, rgba(216,200,182,.32), transparent 60%),
+      radial-gradient(ellipse 900px 1400px at 110% 75%, rgba(216,200,182,.22), transparent 60%);
+    opacity:0;
+    pointer-events:none;
+  }
+
+  #vignette{
+    position:absolute;inset:0;
+    background: radial-gradient(ellipse 1200px 1900px at 50% 50%, transparent 55%, rgba(17,17,17,.05) 100%);
+    pointer-events:none;
+  }
+
+  /* background motif: the brand icon, same treatment as scene 01 */
+  #motif{ position:absolute;inset:0; pointer-events:none; }
+  #face{
+    position:absolute;
+    left:50%; top:1040px;
+    width:520px;
+    transform:translate(-50%,-50%) scale(.96);
+    opacity:0;
+  }
+  #face img{ width:100%; display:block; }
+
+  /* the champagne "reversal" line: segment A goes one way, segment B curves back */
+  #reverse-line{
+    position:absolute; left:0; top:0; width:1080px; height:1920px;
+    pointer-events:none;
+  }
+  #reverse-line path{
+    fill:none; stroke:var(--champagne); stroke-width:4;
+    stroke-linecap:round;
+    pathLength:1; stroke-dasharray:1; stroke-dashoffset:1;
+  }
+  #reverse-line circle{ fill:var(--champagne); opacity:0; }
+
+  #sweep-line{
+    position:absolute;
+    left:50%; top:900px;
+    width:520px; height:2px;
+    background:var(--graphite);
+    transform:translate(-50%,-50%) scaleX(0);
+    transform-origin:0% 50%;
+    opacity:0;
+  }
+
+  /* text layer */
+  .txt{
+    position:absolute;
+    left:50%; top:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    white-space:nowrap;
+    opacity:0;
+  }
+  .cap{ text-transform:uppercase; }
+
+  #t-na{
+    top:770px;
+    font-weight:500;
+    font-size:52px;
+    letter-spacing:10px;
+    color:var(--gray-mid);
+  }
+  #t-verdade{
+    top:900px;
+    font-weight:900;
+    font-size:150px;
+    letter-spacing:4px;
+    color:var(--black);
+    text-shadow:0 8px 30px rgba(17,17,17,.11);
+  }
+
+  #t-a-harm{
+    top:790px;
+    font-weight:700;
+    font-size:64px;
+    letter-spacing:3px;
+    color:var(--graphite);
+    text-shadow:0 4px 16px rgba(17,17,17,.06);
+  }
+  #t-masculina{
+    top:940px;
+    font-weight:900;
+    font-size:118px;
+    letter-spacing:6px;
+    color:var(--black);
+    text-shadow:0 8px 30px rgba(17,17,17,.12);
+  }
+
+  #t-e{
+    top:800px;
+    font-weight:500;
+    font-size:60px;
+    letter-spacing:6px;
+    color:var(--gray-mid);
+  }
+  #t-totalmente{
+    top:940px;
+    font-weight:900;
+    font-size:124px;
+    letter-spacing:6px;
+    color:var(--graphite);
+    text-shadow:0 8px 28px rgba(17,17,17,.10);
+  }
+
+  #t-ao{
+    top:770px;
+    font-weight:600;
+    font-size:58px;
+    letter-spacing:8px;
+    color:var(--gray-mid);
+  }
+  #t-contrario{
+    top:940px;
+    font-weight:900;
+    font-size:132px;
+    letter-spacing:4px;
+    color:var(--black);
+    text-shadow:0 10px 34px rgba(17,17,17,.13);
+  }
+
+  #underline{
+    position:absolute;
+    left:50%; top:1030px;
+    width:560px; height:7px;
+    background:linear-gradient(90deg, transparent, var(--champagne) 18%, var(--champagne) 82%, transparent);
+    transform:translate(-50%,-50%) scaleX(0);
+    transform-origin:50% 50%;
+    opacity:0;
+    box-shadow:0 3px 16px rgba(42,42,42,.14), 0 0 22px rgba(216,200,182,.7);
+  }
+
+  /* recap block */
+  #recap{
+    position:absolute;
+    left:50%; top:860px;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    opacity:0;
+    width:980px;
+  }
+  #recap .line{
+    white-space:nowrap;
+    font-size:42px;
+    font-weight:900;
+    letter-spacing:.5px;
+    color:var(--black);
+    line-height:1.5;
+  }
+  #recap .line .soft{
+    font-weight:500;
+    letter-spacing:5px;
+    color:var(--gray-mid);
+  }
+  #recap .line .mid{
+    font-weight:700;
+    color:var(--graphite);
+  }
+  #recap .line .heavy{
+    font-weight:900;
+    color:var(--graphite);
+  }
+
+  #recap-rule{
+    position:absolute;
+    left:50%; top:990px;
+    width:420px; height:6px;
+    background:linear-gradient(90deg, transparent, var(--champagne) 18%, var(--champagne) 82%, transparent);
+    transform:translate(-50%,-50%) scaleX(0);
+    transform-origin:50% 50%;
+    opacity:0;
+    box-shadow:0 2px 12px rgba(42,42,42,.12), 0 0 18px rgba(216,200,182,.6);
+  }
+
+  #logo{
+    position:absolute;
+    left:50%; top:1300px;
+    transform:translate(-50%,-50%);
+    width:250px;
+    opacity:0;
+  }
+  #logo img{ width:100%; display:block; }
+
+</style>
+</head>
+<body>
+<div id="stage">
+  <img id="grain" src="assets/grain.png" alt="" />
+  <div id="sidelight"></div>
+
+  <div id="motif">
+    <div id="face"><img src="assets/icon.svg" alt="" /></div>
+  </div>
+
+  <div id="sweep-line"></div>
+
+  <svg id="reverse-line" viewBox="0 0 1080 1920">
+    <path id="seg-a" pathLength="1" d="M 300 810 C 420 800 560 795 660 800" />
+    <path id="seg-b" pathLength="1" d="M 660 800 C 760 806 820 860 760 940 C 700 1010 560 1035 420 1030" />
+    <circle id="rdot1" cx="480" cy="801" r="5.5"/>
+    <circle id="rdot2" cx="600" cy="960" r="5.5"/>
+  </svg>
+
+  <div id="t-na" class="txt cap">NA</div>
+  <div id="t-verdade" class="txt cap">VERDADE</div>
+
+  <div id="t-a-harm" class="txt cap">A HARMONIZAÇÃO</div>
+  <div id="t-masculina" class="txt cap">MASCULINA</div>
+
+  <div id="t-e" class="txt cap">É</div>
+  <div id="t-totalmente" class="txt cap">TOTALMENTE</div>
+
+  <div id="t-ao" class="txt cap">AO</div>
+  <div id="t-contrario" class="txt cap">CONTRÁRIO</div>
+  <div id="underline"></div>
+
+  <div id="recap">
+    <div class="line"><span class="soft">NA</span> VERDADE,</div>
+    <div class="line"><span class="mid">A HARMONIZAÇÃO</span> MASCULINA</div>
+    <div class="line"><span class="soft">É</span> <span class="heavy">TOTALMENTE</span> <span class="soft">AO</span> CONTRÁRIO</div>
+  </div>
+  <div id="recap-rule"></div>
+
+  <div id="logo"><img src="assets/logo.png" alt="Dra. Roberta Rodrigues" /></div>
+
+  <div id="vignette"></div>
+</div>
+
+<script src="timeline.js"></script>
+</body>
+</html>
