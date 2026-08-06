@@ -3,6 +3,7 @@ import { Composition } from 'remotion';
 import { UaiCienciaIntro } from './UaiCienciaIntro';
 import { UaiTofuReveal, DURATION as UAI_TOFU_DURATION } from './UaiTofuReveal';
 import { UaiSoyToProduct, DURATION as UAI_SOY_DURATION } from './UaiSoyToProduct';
+import { UaiTofuMantra, DURATION as UAI_MANTRA_DURATION, FPS as UAI_MANTRA_FPS } from './UaiTofuMantra';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -20,6 +21,14 @@ export const RemotionRoot: React.FC = () => {
         component={UaiSoyToProduct}
         durationInFrames={UAI_SOY_DURATION}
         fps={60}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="UaiTofuMantra"
+        component={UaiTofuMantra}
+        durationInFrames={UAI_MANTRA_DURATION}
+        fps={UAI_MANTRA_FPS}
         width={1080}
         height={1920}
       />
