@@ -12,15 +12,15 @@ import {
 
 // =============================================================================
 // UAI TOFU — "Da soja ao produto"
-// Vertical 9:16 narrative: soybean grains -> creamy mass -> tofu block -> sliced
-// -> real package -> finished dish -> logo close.
+// Vertical 9:16 narrative: grãos de soja -> bloco de tofu -> corte em fatias
+// -> embalagem real -> prato pronto -> logo close.
 //
-// Scenes 1-3 and 6 have no real product photography available yet (grains,
-// creamy texture, whole block, finished plate), so per client direction they
-// are STYLIZED motion graphics (shape/color/light in the brand palette) —
-// never faux-photorealistic. Scenes 4, 5 and 7 use the real, already
-// chroma-keyed brand assets (slice1-6.png, box.png, logo.png) completely
-// unaltered: only uniform position/scale/rotation, never distorted/redrawn.
+// Todas as cenas usam fotografia REAL do produto (recortes com alpha real ou
+// "photo cards" retangulares) — nada de formas 3D/CGI inventadas. A cena
+// intermediária de "textura cremosa" foi removida por decisão do cliente
+// (não existia foto real para ela e a versão em motion graphics lia como
+// falsa); a transição grão -> bloco agora é um crossfade com um pulso de
+// blur bem curto, só para vender a "transformação" sem fabricar conteúdo.
 // =============================================================================
 
 const FPS = 60;
@@ -28,26 +28,25 @@ export const WIDTH = 1080;
 export const HEIGHT = 1920;
 
 // ---- Timeline (frames @ 60fps) -------------------------------------------
-// Cena 1  0.0-1.5s  grãos de soja
-// Cena 2  1.5-3.0s  textura cremosa
-// Cena 3  3.0-4.5s  bloco de tofu
-// Cena 4  4.5-6.0s  corte em fatias
-// Cena 5  6.0-7.5s  embalagem real
-// Cena 6  7.5-9.0s  prato pronto
-// Cena 7  9.0-10s   fechamento com a marca (0.5s hold no final)
+// Cena 1  0.00-1.83s  grãos de soja (foto real)
+// Cena 3  1.83-3.67s  bloco de tofu inteiro, sem embalagem (foto real)
+// Cena 4  3.67-5.42s  corte (foto real) -> fatias reais se espalhando
+// Cena 5  5.42-7.00s  embalagem real + fatias ao redor
+// Cena 6  7.00-8.75s  prato pronto (foto real)
+// Cena 7  8.75-10.0s  fechamento com a marca (0.5s hold no final)
+// (Numeração das cenas preservada do briefing original — a Cena 2, de
+// textura cremosa, foi removida a pedido do cliente.)
 const S1_START = 0;
-const S1_END = 90;
-const S2_START = 90;
-const S2_END = 180;
-const S3_START = 180;
-const S3_END = 270;
-const S4_START = 270;
-const S4_END = 360;
-const S5_START = 360;
-const S5_END = 450;
-const S6_START = 450;
-const S6_END = 540;
-const S7_START = 540;
+const S1_END = 110;
+const S3_START = 110;
+const S3_END = 220;
+const S4_START = 220;
+const S4_END = 325;
+const S5_START = 325;
+const S5_END = 420;
+const S6_START = 420;
+const S6_END = 525;
+const S7_START = 525;
 export const DURATION = 600;
 
 const clampCfg = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
@@ -78,19 +77,22 @@ function crossfade(frame: number, start: number, end: number, isFirst: boolean, 
   );
 }
 
+// Pulso de blur curto centrado num frame — usado só na transição grão->bloco
+// para sugerir "transformação" sem precisar de uma forma inventada no meio.
+function transitionBlur(frame: number, center: number, halfWindow: number, peakPx: number) {
+  return interpolate(
+    frame,
+    [center - halfWindow, center, center + halfWindow],
+    [0, peakPx, 0],
+    clampCfg
+  );
+}
+
 // ---- Paleta (quente, artesanal/mineiro, premium) --------------------------
 const BG_CREAM = '#F3E2C0';
 const BG_CREAM_DEEP = '#E7CE9C';
-const YELLOW = '#FBBD3C';
-const BEIGE = '#EAD6AC';
-const BEIGE_DEEP = '#D6BA80';
 const TERRACOTTA = '#C1602F';
-const DARK_GREEN = '#33513A';
 const BRAND_RED = '#962D15';
-const SOY = '#C7B25A';
-const SOY_DEEP = '#A38A3C';
-const SMOKED = '#7A5230';
-const TOFU_CREAM = '#F5EAD3';
 
 const fontFamily = 'Lato';
 
@@ -137,128 +139,56 @@ const Background: React.FC<{ frame: number }> = ({ frame }) => {
   );
 };
 
-// =============================================================================
-// CENA 1 — SoybeanParticles (0-1.5s)
-// Grãos surgindo em disposição phyllotaxis (ângulo dourado) — orgânico e
-// determinístico, sem depender de Math.random no render.
-// =============================================================================
-const GOLDEN_ANGLE = 137.50776;
-const GRAIN_COUNT = 24;
-
-type Grain = { i: number; cx: number; cy: number; size: number; rot: number; stagger: number };
-
-const GRAINS: Grain[] = Array.from({ length: GRAIN_COUNT }).map((_, i) => {
-  const angle = (i * GOLDEN_ANGLE * Math.PI) / 180;
-  const radius = 46 * Math.sqrt(i);
-  return {
-    i,
-    cx: STAGE_CX + Math.cos(angle) * radius,
-    cy: STAGE_CY + Math.sin(angle) * radius * 0.92,
-    size: 80 + (i % 5) * 11,
-    rot: ((i * 53) % 360) - 180,
-    stagger: i * 1.6,
-  };
-});
-
-const SoybeanGrain: React.FC<{ g: Grain; frame: number }> = ({ g, frame }) => {
-  const local = frame - S1_START - g.stagger;
-  const enter = interpolate(local, [0, 20], [0, 1], { ...clampCfg, easing: Easing.out(Easing.cubic) });
-  const scale = interpolate(enter, [0, 1], [0.8, 1]);
-  const rot = interpolate(enter, [0, 1], [g.rot * 0.4, 0]);
-  // Leve deriva orgânica contínua, como grãos assentando.
-  const drift = Math.sin((frame + g.i * 9) * 0.05) * 3;
-  // No fim da cena os grãos são puxados sutilmente para dentro, antecipando a fusão.
-  const pull = interpolate(frame, [S1_END - 22, S1_END], [0, 1], clampCfg);
-  const x = g.cx + (STAGE_CX - g.cx) * pull * 0.35;
-  const y = g.cy + (STAGE_CY - g.cy) * pull * 0.35 + drift * (1 - pull);
-
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: x - g.size / 2,
-        top: y - g.size / 2,
-        width: g.size,
-        height: g.size * 0.86,
-        opacity: enter,
-        borderRadius: '52% 48% 55% 45% / 58% 52% 48% 42%',
-        transform: `rotate(${rot}deg) scale(${scale})`,
-        background: `radial-gradient(circle at 34% 30%, #E9D98A 0%, ${SOY} 45%, ${SOY_DEEP} 100%)`,
-        boxShadow: '0 4px 8px rgba(90,70,20,0.18)',
-      }}
-    />
-  );
-};
-
-const SoybeanParticles: React.FC<{ frame: number }> = ({ frame }) => (
-  <>
-    {GRAINS.map((g) => (
-      <SoybeanGrain key={g.i} g={g} frame={frame} />
-    ))}
-  </>
+// Sombra de contato genérica — mesmo tratamento usado sob todo elemento
+// "hero" (grão, bloco, cards de foto, embalagem), para todas as cenas
+// pousarem no mesmo chão visual.
+const ContactShadow: React.FC<{ cx: number; cy: number; w: number; opacity: number }> = ({ cx, cy, w, opacity }) => (
+  <div
+    style={{
+      position: 'absolute',
+      left: cx - w / 2,
+      top: cy,
+      width: w,
+      height: w * 0.16,
+      opacity,
+      background: 'radial-gradient(ellipse at center, rgba(60,35,10,0.5) 0%, rgba(60,35,10,0) 72%)',
+      filter: 'blur(16px)',
+    }}
+  />
 );
 
 // =============================================================================
-// CENA 2 — CreamMorph (1.5-3s)
-// Mancha orgânica (turbulência + displacement em CSS filter) que cresce a
-// partir do agrupamento de grãos e amolece em massa cremosa. Nada de "leite
-// industrial": tom bege elegante, bordas macias, sem brilho plástico.
+// CENA 1 — SoybeanGrains (0-1.83s)
+// Foto real (potinho de grãos de soja + grãos soltos + folhas de soja).
+// Recorte com alpha real (chroma-key sobre fundo branco), sem forma inventada.
 // =============================================================================
-const CreamFilterDefs: React.FC<{ displacement: number }> = ({ displacement }) => (
-  <svg width={0} height={0} style={{ position: 'absolute' }}>
-    <defs>
-      <filter id="cream-morph-filter" x="-40%" y="-40%" width="180%" height="180%">
-        <feTurbulence type="fractalNoise" baseFrequency={0.012} numOctaves={2} seed={7} result="noise" />
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale={displacement} xChannelSelector="R" yChannelSelector="G" />
-      </filter>
-    </defs>
-  </svg>
-);
+const BEANS = { src: 'soy-beans.png', w: 887, h: 899 };
+const BEANS_DISPLAY_W = 660;
 
-const CreamMorph: React.FC<{ frame: number }> = ({ frame }) => {
-  const local = frame - S2_START;
-  const grow = interpolate(local, [0, 55], [0, 1], { ...clampCfg, easing: Easing.inOut(Easing.sin) });
-  const diameter = interpolate(grow, [0, 1], [340, 620]);
+const SoybeanGrains: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
+  const local = frame - S1_START;
+  const s = spring({ frame: local, fps, config: { damping: 12, mass: 0.8, stiffness: 120 } });
+  const scale = interpolate(s, [0, 1], [0.84, 1]);
+  const opacity = interpolate(local, [0, 16], [0, 1], clampCfg);
+  const shadowOpacity = interpolate(local, [0, 18], [0, 0.28], clampCfg);
+  // respiração bem sutil, contínua, para a foto não ficar "morta" em tela.
+  const breathe = 1 + Math.sin(frame * 0.025) * 0.012;
 
-  // Cresce orgânico e depois começa a se "aprumar" para o formato de bloco.
-  const settle = interpolate(local, [55, 90], [0, 1], { ...clampCfg, easing: Easing.inOut(Easing.cubic) });
-  const borderRadius = interpolate(settle, [0, 1], [50, 30]); // % -> vira retangular arredondado
-  const width = interpolate(settle, [0, 1], [diameter, 620]);
-  const height = interpolate(settle, [0, 1], [diameter, 440]);
-  const displacement = interpolate(local, [0, 30, 60, 90], [0, 34, 30, 6], clampCfg);
-  const blurAmt = interpolate(local, [0, 30, 90], [16, 9, 3], clampCfg);
-  const opacity = interpolate(local, [0, 14], [0, 1], clampCfg);
+  const w = BEANS_DISPLAY_W * scale * breathe;
+  const h = w * (BEANS.h / BEANS.w);
 
   return (
     <>
-      <CreamFilterDefs displacement={displacement} />
-      <div
+      <ContactShadow cx={STAGE_CX} cy={STAGE_CY + h * 0.42} w={w * 0.7} opacity={shadowOpacity} />
+      <Img
+        src={staticFile(`uai-tofu/${BEANS.src}`)}
         style={{
           position: 'absolute',
-          left: STAGE_CX - width / 2,
-          top: STAGE_CY - height / 2,
-          width,
-          height,
+          left: STAGE_CX - w / 2,
+          top: STAGE_CY - h / 2,
+          width: w,
+          height: h,
           opacity,
-          borderRadius: `${borderRadius}%`,
-          background: `radial-gradient(ellipse at 38% 32%, #FBF3DE 0%, ${BEIGE} 55%, ${BEIGE_DEEP} 100%)`,
-          filter: `url(#cream-morph-filter) blur(${blurAmt}px)`,
-          boxShadow: `0 20px 40px -12px rgba(90,60,20,0.28)`,
-        }}
-      />
-      {/* Reflexo suave sugerindo movimento de mistura, sem parecer líquido industrial. */}
-      <div
-        style={{
-          position: 'absolute',
-          left: STAGE_CX - width * 0.28,
-          top: STAGE_CY - height * 0.3,
-          width: width * 0.56,
-          height: height * 0.22,
-          opacity: opacity * 0.5 * (1 - settle * 0.6),
-          borderRadius: '50%',
-          background: 'linear-gradient(90deg, rgba(255,250,235,0.65), rgba(255,250,235,0))',
-          filter: 'blur(6px)',
-          transform: `rotate(${-8 + settle * 4}deg)`,
         }}
       />
     </>
@@ -266,64 +196,38 @@ const CreamMorph: React.FC<{ frame: number }> = ({ frame }) => {
 };
 
 // =============================================================================
-// CENA 3 — TofuBlock (3-4.5s)
-// Bloco com volume, squash-and-stretch de chegada, sombra de contato e
-// bordas levemente irregulares (artesanal, não um retângulo perfeito de CSS).
+// CENA 3 — TofuBlock (1.83-3.67s)
+// Bloco inteiro real (foto, sem embalagem), recorte com alpha real (chroma-key
+// sobre fundo verde). Chegada com leve squash-and-stretch, sombra de contato.
 // =============================================================================
+const BLOCK = { src: 'tofu-block.png', w: 773, h: 619 };
+const BLOCK_DISPLAY_W = 700;
+
 const TofuBlock: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const local = frame - S3_START;
   const s = spring({ frame: local, fps, config: { damping: 9, mass: 0.9, stiffness: 130 } });
   // Squash-and-stretch sutil: chega "achatado" e assenta na proporção final.
-  const stretchY = interpolate(s, [0, 1], [0.72, 1]);
-  const stretchX = interpolate(s, [0, 1], [1.14, 1]);
+  const stretchY = interpolate(s, [0, 1], [0.8, 1]);
+  const stretchX = interpolate(s, [0, 1], [1.1, 1]);
   const opacity = interpolate(local, [0, 10], [0, 1], clampCfg);
+  const shadowOpacity = interpolate(local, [0, 16], [0, 0.32], clampCfg);
+  const breathe = 1 + Math.sin(frame * 0.025) * 0.01;
 
-  const W = 620;
-  const H = 440;
-  const shadowOpacity = interpolate(local, [0, 16], [0, 0.3], clampCfg);
+  const w = BLOCK_DISPLAY_W * stretchX * breathe;
+  const h = w * (BLOCK.h / BLOCK.w) * (stretchY / stretchX);
 
   return (
     <>
-      {/* sombra de contato */}
-      <div
+      <ContactShadow cx={STAGE_CX} cy={STAGE_CY + h * 0.4} w={w * 0.8} opacity={shadowOpacity} />
+      <Img
+        src={staticFile(`uai-tofu/${BLOCK.src}`)}
         style={{
           position: 'absolute',
-          left: STAGE_CX - (W * stretchX) * 0.46,
-          top: STAGE_CY + (H * stretchY) * 0.42,
-          width: W * stretchX * 0.92,
-          height: 60,
-          opacity: shadowOpacity,
-          background: 'radial-gradient(ellipse at center, rgba(70,45,15,0.55) 0%, rgba(70,45,15,0) 72%)',
-          filter: 'blur(18px)',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: STAGE_CX - (W * stretchX) / 2,
-          top: STAGE_CY - (H * stretchY) / 2,
-          width: W * stretchX,
-          height: H * stretchY,
+          left: STAGE_CX - w / 2,
+          top: STAGE_CY - h / 2,
+          width: w,
+          height: h,
           opacity,
-          // cantos levemente irregulares, para não ler como "retângulo de vetor".
-          borderRadius: '42px 50px 38px 46px',
-          background: `linear-gradient(165deg, #FBF3DE 0%, ${TOFU_CREAM} 45%, ${BEIGE_DEEP} 100%)`,
-          border: `2px solid rgba(122,82,48,0.22)`,
-          boxShadow: '0 26px 46px -18px rgba(90,60,20,0.35), inset 0 2px 0 rgba(255,255,255,0.5)',
-        }}
-      />
-      {/* realce suave no topo, sugerindo volume sem look 3D artificial */}
-      <div
-        style={{
-          position: 'absolute',
-          left: STAGE_CX - (W * stretchX) * 0.36,
-          top: STAGE_CY - (H * stretchY) * 0.42,
-          width: W * stretchX * 0.5,
-          height: H * stretchY * 0.28,
-          opacity: opacity * 0.55,
-          borderRadius: '50%',
-          background: 'radial-gradient(ellipse at center, rgba(255,252,240,0.75), rgba(255,252,240,0))',
-          filter: 'blur(4px)',
         }}
       />
     </>
@@ -331,11 +235,53 @@ const TofuBlock: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => 
 };
 
 // =============================================================================
-// CENA 4 — TofuSlices (4.5-6s)
-// Uma linha de corte varre o bloco estilizado; ele dá lugar às fatias REAIS
-// (fotos já extraídas), que deslizam para os lados com rotação e espaçamento
-// naturais. Poeira sutil e opcional no instante do corte.
+// CENA 4 — TofuSlices (3.67-5.42s)
+// Um "photo card" real (bloco sendo cortado com faca, tábua de madeira) abre
+// a cena; em seguida cede lugar às fatias REAIS (já extraídas) que se
+// espalham com rotação e espaçamento naturais.
 // =============================================================================
+const CUTTING_PHOTO = { src: 'tofu-cutting.jpg', w: 1080, h: 718 };
+const CUTTING_DISPLAY_W = 760;
+const CARD_FADE_OUT_START = S4_START + 34;
+const CARD_FADE_OUT_END = S4_START + 50;
+
+const CuttingPhotoCard: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
+  const local = frame - S4_START;
+  const s = spring({ frame: local, fps, config: { damping: 13, mass: 0.8, stiffness: 130 } });
+  const scale = interpolate(s, [0, 1], [0.9, 1]);
+  const fadeIn = interpolate(local, [0, 14], [0, 1], clampCfg);
+  const fadeOut = interpolate(frame, [CARD_FADE_OUT_START, CARD_FADE_OUT_END], [1, 0], clampCfg);
+  const opacity = fadeIn * fadeOut;
+  if (opacity <= 0) return null;
+
+  const w = CUTTING_DISPLAY_W * scale;
+  const h = w * (CUTTING_PHOTO.h / CUTTING_PHOTO.w);
+
+  return (
+    <>
+      <ContactShadow cx={STAGE_CX} cy={STAGE_CY + h / 2 - 10} w={w * 0.85} opacity={opacity * 0.3} />
+      <div
+        style={{
+          position: 'absolute',
+          left: STAGE_CX - w / 2,
+          top: STAGE_CY - h / 2,
+          width: w,
+          height: h,
+          opacity,
+          borderRadius: 22,
+          overflow: 'hidden',
+          boxShadow: '0 30px 50px -20px rgba(60,35,10,0.4)',
+        }}
+      >
+        <Img
+          src={staticFile(`uai-tofu/${CUTTING_PHOTO.src}`)}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      </div>
+    </>
+  );
+};
+
 type SliceCfg = { src: string; w: number; h: number; targetX: number; targetY: number; targetRot: number };
 
 const SLICE_TARGET_LONG = 380;
@@ -346,64 +292,8 @@ const SLICE_SET: SliceCfg[] = [
   { src: 'slice6.png', w: 388, h: 286, targetX: STAGE_CX + 300, targetY: STAGE_CY + 12, targetRot: 14 },
 ];
 
-const CutLine: React.FC<{ frame: number }> = ({ frame }) => {
-  const local = frame - S4_START;
-  const progress = interpolate(local, [0, 24], [0, 1], { ...clampCfg, easing: Easing.inOut(Easing.cubic) });
-  const opacity = interpolate(local, [0, 6, 22, 28], [0, 1, 1, 0], clampCfg);
-  if (opacity <= 0) return null;
-  const x = STAGE_CX - 320 + progress * 640;
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: x - 2,
-        top: STAGE_CY - 240,
-        width: 4,
-        height: 480,
-        opacity,
-        background: 'linear-gradient(180deg, rgba(255,253,246,0) 0%, #FFFDF6 45%, #FFFDF6 55%, rgba(255,253,246,0) 100%)',
-        boxShadow: '0 0 18px 4px rgba(255,253,246,0.7)',
-      }}
-    />
-  );
-};
-
-const CRUMB_DOTS = [
-  { dx: -14, dy: 30, size: 4 },
-  { dx: 10, dy: 42, size: 3 },
-  { dx: -30, dy: 20, size: 3 },
-  { dx: 24, dy: 26, size: 4 },
-  { dx: 2, dy: 50, size: 3 },
-];
-
-const CrumbDust: React.FC<{ frame: number }> = ({ frame }) => {
-  const local = frame - S4_START;
-  const opacity = interpolate(local, [16, 22, 40], [0, 0.4, 0], clampCfg);
-  if (opacity <= 0) return null;
-  return (
-    <>
-      {CRUMB_DOTS.map((d, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute',
-            left: STAGE_CX + d.dx - d.size / 2,
-            top: STAGE_CY + d.dy - d.size / 2 + (local - 16) * 0.6,
-            width: d.size,
-            height: d.size,
-            opacity,
-            borderRadius: '50%',
-            background: TOFU_CREAM,
-            filter: 'blur(0.5px)',
-          }}
-        />
-      ))}
-    </>
-  );
-};
-
 const RealSlice: React.FC<{ cfg: SliceCfg; frame: number; fps: number }> = ({ cfg, frame, fps }) => {
-  const emergeStart = S4_START + 26;
+  const emergeStart = S4_START + 30;
   const s = spring({ frame: Math.max(0, frame - emergeStart), fps, config: { damping: 15, mass: 0.85, stiffness: 105 } });
   const opacity = interpolate(frame, [emergeStart, emergeStart + 12], [0, 1], clampCfg);
   const scaleBase = SLICE_TARGET_LONG / Math.max(cfg.w, cfg.h);
@@ -435,28 +325,17 @@ const RealSlice: React.FC<{ cfg: SliceCfg; frame: number; fps: number }> = ({ cf
   );
 };
 
-const TofuSlices: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
-  // O bloco estilizado permanece visível até a linha de corte terminar de
-  // passar, depois cede lugar às fatias reais (crossfade curto e local).
-  const blockFade = interpolate(frame, [S4_START + 22, S4_START + 34], [1, 0], clampCfg);
-  return (
-    <>
-      {blockFade > 0 && (
-        <div style={{ position: 'absolute', inset: 0, opacity: blockFade }}>
-          <TofuBlock frame={S3_END - 1} fps={fps} />
-        </div>
-      )}
-      <CutLine frame={frame} />
-      <CrumbDust frame={frame} />
-      {SLICE_SET.map((cfg) => (
-        <RealSlice key={cfg.src} cfg={cfg} frame={frame} fps={fps} />
-      ))}
-    </>
-  );
-};
+const TofuSlices: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => (
+  <>
+    <CuttingPhotoCard frame={frame} fps={fps} />
+    {SLICE_SET.map((cfg) => (
+      <RealSlice key={cfg.src} cfg={cfg} frame={frame} fps={fps} />
+    ))}
+  </>
+);
 
 // =============================================================================
-// CENA 5 — ProductPackage (6-7.5s)
+// CENA 5 — ProductPackage (5.42-7s)
 // Embalagem real (box.png) — asset travado: nunca distorcer, redesenhar ou
 // recolorir. Apenas fade + escala uniforme + sombra realista. As fatias reais
 // da cena anterior se reposicionam ao redor da caixa.
@@ -529,7 +408,6 @@ const ProductPackage: React.FC<{ frame: number; fps: number }> = ({ frame, fps }
           width: w,
           height: h,
           opacity,
-          transform: `scale(1)`,
         }}
       />
     </>
@@ -537,139 +415,64 @@ const ProductPackage: React.FC<{ frame: number; fps: number }> = ({ frame, fps }
 };
 
 // =============================================================================
-// CENA 6 — FinalDish (7.5-9s)
-// Prato estilizado (sem foto real disponível) com cubos de tofu, guarnição e
-// vapor sutil. Push-in elegante. Embalagem some desfocada ao fundo.
+// CENA 6 — FinalDish (7-8.75s)
+// Foto real (fatias no prato amarelo, pano xadrez, folhas de louro) como
+// "photo card" — push-in elegante. Embalagem some desfocada ao fundo, como
+// contexto de marca.
 // =============================================================================
-const SteamWisp: React.FC<{ frame: number; x: number; y: number; delay: number }> = ({ frame, x, y, delay }) => {
-  const local = frame - S6_START - delay;
-  const rise = interpolate(local, [0, 70], [0, -150], clampCfg);
-  const opacity = interpolate(local, [0, 20, 55, 70], [0, 0.28, 0.16, 0], clampCfg);
-  const sway = Math.sin(local * 0.06) * 16;
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: x + sway,
-        top: y - 250 + rise,
-        width: 5,
-        height: 120,
-        opacity,
-        borderRadius: 6,
-        background: 'linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.9), rgba(255,255,255,0))',
-        filter: 'blur(5px)',
-      }}
-    />
-  );
-};
+const PLATE_PHOTO = { src: 'tofu-plate.jpg', w: 1080, h: 1200 };
+const PLATE_DISPLAY_W = 760;
 
-const TofuCube: React.FC<{ x: number; y: number; size: number; rot: number }> = ({ x, y, size, rot }) => (
-  <div
-    style={{
-      position: 'absolute',
-      left: x - size / 2,
-      top: y - size / 2,
-      width: size,
-      height: size,
-      borderRadius: 8,
-      transform: `rotate(${rot}deg)`,
-      background: `linear-gradient(165deg, ${TOFU_CREAM} 0%, ${BEIGE} 70%, ${SMOKED} 100%)`,
-      border: '1.5px solid rgba(122,82,48,0.3)',
-      boxShadow: '0 8px 14px -6px rgba(90,60,20,0.4)',
-    }}
-  />
-);
-
-const FinalDish: React.FC<{ frame: number }> = ({ frame }) => {
+const FinalDish: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const local = frame - S6_START;
-  const enter = interpolate(local, [0, 22], [0, 1], { ...clampCfg, easing: Easing.out(Easing.cubic) });
-  const pushIn = interpolate(local, [0, 90], [1, 1.08], { ...clampCfg, easing: Easing.inOut(Easing.sin) });
+  const s = spring({ frame: local, fps, config: { damping: 13, mass: 0.8, stiffness: 130 } });
+  const scale = interpolate(s, [0, 1], [0.92, 1]);
+  const opacity = interpolate(local, [0, 18], [0, 1], clampCfg);
+  const pushIn = interpolate(local, [0, 105], [1, 1.05], { ...clampCfg, easing: Easing.inOut(Easing.sin) });
 
-  // Centro do prato — um pouco abaixo do ponto focal padrão, para a
-  // composição respirar (guarnição e vapor sobem acima dele).
-  const plateCx = STAGE_CX;
-  const plateCy = STAGE_CY + 90;
+  const w = PLATE_DISPLAY_W * scale * pushIn;
+  const h = w * (PLATE_PHOTO.h / PLATE_PHOTO.w);
 
   return (
-    <AbsoluteFill style={{ transform: `scale(${pushIn})`, transformOrigin: '50% 50%' }}>
+    <>
       {/* Embalagem desfocada ao fundo, apenas como contexto de marca. */}
       <Img
         src={staticFile(`uai-tofu/${BOX.src}`)}
         style={{
           position: 'absolute',
           left: 70,
-          top: plateCy + 420,
-          width: 190,
-          height: 190 * (BOX.h / BOX.w),
-          opacity: enter * 0.32,
+          top: STAGE_CY + 470,
+          width: 170,
+          height: 170 * (BOX.h / BOX.w),
+          opacity: opacity * 0.3,
           filter: 'blur(8px)',
         }}
       />
-
-      {/* sombra do prato */}
+      <ContactShadow cx={STAGE_CX} cy={STAGE_CY + h / 2 - 14} w={w * 0.85} opacity={opacity * 0.32} />
       <div
         style={{
           position: 'absolute',
-          left: plateCx - 400,
-          top: plateCy + 220,
-          width: 800,
-          height: 100,
-          opacity: enter * 0.3,
-          background: 'radial-gradient(ellipse at center, rgba(50,30,10,0.55) 0%, rgba(50,30,10,0) 72%)',
-          filter: 'blur(20px)',
+          left: STAGE_CX - w / 2,
+          top: STAGE_CY - h / 2,
+          width: w,
+          height: h,
+          opacity,
+          borderRadius: 26,
+          overflow: 'hidden',
+          boxShadow: '0 34px 60px -20px rgba(60,35,10,0.42)',
         }}
-      />
-      {/* prato */}
-      <div
-        style={{
-          position: 'absolute',
-          left: plateCx - 450,
-          top: plateCy - 190,
-          width: 900,
-          height: 380,
-          opacity: enter,
-          borderRadius: '50%',
-          background: `linear-gradient(180deg, #FBF3DE 0%, ${BEIGE} 60%, ${TERRACOTTA} 100%)`,
-          boxShadow: '0 34px 60px -20px rgba(70,40,10,0.4)',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: plateCx - 392,
-          top: plateCy - 158,
-          width: 784,
-          height: 296,
-          opacity: enter,
-          borderRadius: '50%',
-          background: '#FBF6E8',
-        }}
-      />
-
-      <TofuCube x={plateCx - 104} y={plateCy + 60} size={162} rot={-6} />
-      <TofuCube x={plateCx + 76} y={plateCy + 44} size={150} rot={9} />
-      <TofuCube x={plateCx - 14} y={plateCy - 56} size={134} rot={2} />
-
-      {/* guarnição — folha estilizada */}
-      <svg
-        width={120}
-        height={120}
-        viewBox="0 0 70 70"
-        style={{ position: 'absolute', left: plateCx + 206, top: plateCy - 40, opacity: enter }}
       >
-        <path d="M35 5 C55 15 60 45 35 65 C10 45 15 15 35 5 Z" fill={DARK_GREEN} />
-        <path d="M35 12 L35 58" stroke="#4E7457" strokeWidth={2} strokeLinecap="round" />
-      </svg>
-
-      <SteamWisp frame={frame} x={plateCx - 50} y={plateCy} delay={4} />
-      <SteamWisp frame={frame} x={plateCx + 35} y={plateCy} delay={18} />
-      <SteamWisp frame={frame} x={plateCx - 120} y={plateCy} delay={30} />
-    </AbsoluteFill>
+        <Img
+          src={staticFile(`uai-tofu/${PLATE_PHOTO.src}`)}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      </div>
+    </>
   );
 };
 
 // =============================================================================
-// CENA 7 — LogoReveal (9-10s)
+// CENA 7 — LogoReveal (8.75-10s)
 // Logo real (logo.png) — asset travado, apenas fade + escala uniforme + brilho.
 // Linhas orgânicas mínimas e texto opcional. 0.5s de hold no final.
 // =============================================================================
@@ -764,26 +567,31 @@ const LogoReveal: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =>
 };
 
 // =============================================================================
-// Composição principal — orquestra o crossfade entre as 7 cenas.
+// Composição principal — orquestra o crossfade entre as 6 cenas.
 // =============================================================================
 export const UaiSoyToProduct: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+
+  // Pulso de blur na transição grão -> bloco (substitui a antiga cena de
+  // "textura cremosa"): as duas fotos reais se cruzam com um leve desfoque
+  // no meio do dissolve, sugerindo transformação sem inventar conteúdo.
+  const blend13 = transitionBlur(frame, S3_START, XFADE, 7);
 
   return (
     <AbsoluteFill style={{ fontFamily }}>
       <FontFace />
       <Background frame={frame} />
 
-      <AbsoluteFill style={{ opacity: crossfade(frame, S1_START, S1_END, true, false) }}>
-        <SoybeanParticles frame={frame} />
+      <AbsoluteFill
+        style={{ opacity: crossfade(frame, S1_START, S1_END, true, false), filter: `blur(${blend13}px)` }}
+      >
+        <SoybeanGrains frame={frame} fps={fps} />
       </AbsoluteFill>
 
-      <AbsoluteFill style={{ opacity: crossfade(frame, S2_START, S2_END, false, false) }}>
-        <CreamMorph frame={frame} />
-      </AbsoluteFill>
-
-      <AbsoluteFill style={{ opacity: crossfade(frame, S3_START, S3_END, false, false) }}>
+      <AbsoluteFill
+        style={{ opacity: crossfade(frame, S3_START, S3_END, false, false), filter: `blur(${blend13}px)` }}
+      >
         <TofuBlock frame={frame} fps={fps} />
       </AbsoluteFill>
 
@@ -796,7 +604,7 @@ export const UaiSoyToProduct: React.FC = () => {
       </AbsoluteFill>
 
       <AbsoluteFill style={{ opacity: crossfade(frame, S6_START, S6_END, false, false) }}>
-        <FinalDish frame={frame} />
+        <FinalDish frame={frame} fps={fps} />
       </AbsoluteFill>
 
       <AbsoluteFill style={{ opacity: crossfade(frame, S7_START, DURATION, false, true) }}>
