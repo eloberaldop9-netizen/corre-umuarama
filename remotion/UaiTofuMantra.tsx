@@ -49,14 +49,21 @@ const YELLOW = '#FFD23F';
 const CREAM = '#FDFBF7';
 const SHADOW = '#0B1F11';
 
-const fontFamily = 'Anton';
+const fontFamily = 'Lato';
 
 const FontFace: React.FC = () => (
   <style>{`
     @font-face {
-      font-family: 'Anton';
-      src: url('${staticFile('fonts/Anton-Regular-latin.woff2')}') format('woff2');
+      font-family: 'Lato';
+      src: url('${staticFile('fonts/Lato-Regular-latin.woff2')}') format('woff2');
       font-weight: 400;
+      font-style: normal;
+      font-display: block;
+    }
+    @font-face {
+      font-family: 'Lato';
+      src: url('${staticFile('fonts/Lato-Black-latin.woff2')}') format('woff2');
+      font-weight: 900;
       font-style: normal;
       font-display: block;
     }
@@ -77,130 +84,91 @@ function crossfade(frame: number, start: number, end: number, overlap: number, i
 
 // =============================================================================
 // CENA 1 — O Mantra do Tofu (0-90)
-// Kinetic typography: 3 blocos de texto empilhados; a câmera (o container)
-// dá "trancos" verticais pra revelar cada bloco, e no fim mergulha (Z-DIVE)
-// pelo "O" de TOFU.
+// Tipografia de impacto na fonte da marca (Lato Black), com espaçamento
+// generoso entre letras e linhas. As 3 frases entram em sequência, cada uma
+// pousando abaixo da anterior — nada desaparece, a frase final é a soma das
+// três ("EU COMO TOFU" / "EU AMO TOFU" / "EU VIVO TOFU").
 // =============================================================================
-const BLOCK_Y = [0, 800, 1600];
-const WORD_SIZE = 138;
+const LINE_SIZE = 92;
+const LINE_GAP = 44;
 
 type WordSpec = { text: string; color: string };
-const BLOCKS: WordSpec[][] = [
-  [{ text: 'EU', color: CREAM }, { text: 'AMO', color: YELLOW }, { text: 'TOFU', color: CREAM }],
-  [{ text: 'EU', color: CREAM }, { text: 'COMO', color: YELLOW }, { text: 'TOFU', color: CREAM }],
-  [{ text: 'EU', color: CREAM }, { text: 'VIVO', color: YELLOW }, { text: 'TOFU', color: CREAM }],
+type LineSpec = { words: WordSpec[]; delay: number };
+
+const LINES: LineSpec[] = [
+  { words: [{ text: 'EU', color: CREAM }, { text: 'COMO', color: YELLOW }, { text: 'TOFU', color: CREAM }], delay: 0 },
+  { words: [{ text: 'EU', color: CREAM }, { text: 'AMO', color: YELLOW }, { text: 'TOFU', color: CREAM }], delay: 20 },
+  { words: [{ text: 'EU', color: CREAM }, { text: 'VIVO', color: YELLOW }, { text: 'TOFU', color: CREAM }], delay: 40 },
 ];
 
-// Grid cinético amarelo muito sutil, sobe junto com a câmera.
-const KineticGrid: React.FC<{ cameraY: number }> = ({ cameraY }) => (
-  <svg
-    style={{
-      position: 'absolute',
-      left: 0,
-      top: -cameraY,
-      width: '100%',
-      height: BLOCK_Y[2] + HEIGHT,
-      opacity: 0.05,
-    }}
-  >
-    {Array.from({ length: Math.ceil((BLOCK_Y[2] + HEIGHT) / 90) }).map((_, i) => (
-      <line key={i} x1={0} y1={i * 90} x2={WIDTH} y2={i * 90} stroke={YELLOW} strokeWidth={1} />
-    ))}
-  </svg>
-);
-
-const MantraWord: React.FC<{ w: WordSpec; frame: number; delay: number; fps: number }> = ({ w, frame, delay, fps }) => {
-  const s = spring({ frame: frame - delay, fps, config: { damping: 10, mass: 1 } });
-  const scale = interpolate(s, [0, 1], [3, 1]);
-  const blur = interpolate(s, [0, 1], [20, 0]);
-  const opacity = interpolate(s, [0, 1], [0, 1], clampCfg);
+// Grade cinética amarela bem sutil, com uma deriva contínua e lenta — só
+// pra a cena nunca ficar estática, sem depender de movimento de câmera.
+const KineticGrid: React.FC<{ frame: number }> = ({ frame }) => {
+  const drift = (frame * 0.25) % 96;
   return (
-    <div
-      style={{
-        fontFamily,
-        fontSize: WORD_SIZE,
-        lineHeight: 0.86,
-        letterSpacing: -5,
-        color: w.color,
-        opacity,
-        transform: `scale(${scale})`,
-        filter: `blur(${blur}px)`,
-      }}
-    >
-      {w.text}
-    </div>
+    <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.05 }}>
+      {Array.from({ length: Math.ceil(HEIGHT / 96) + 1 }).map((_, i) => (
+        <line key={i} x1={0} y1={i * 96 - drift} x2={WIDTH} y2={i * 96 - drift} stroke={YELLOW} strokeWidth={1} />
+      ))}
+    </svg>
   );
 };
 
-// Bloco estático (2 e 3) — já montado, só é revelado pela câmera.
-const MantraBlockStatic: React.FC<{ words: WordSpec[] }> = ({ words }) => (
-  <div style={{ fontFamily, fontSize: WORD_SIZE, lineHeight: 0.86, letterSpacing: -5, textAlign: 'center' }}>
-    {words.map((w, i) => (
-      <div key={i} style={{ color: w.color }}>
-        {w.text}
-      </div>
+// Entrada polida — o mesmo princípio de movimento já aprovado pela marca em
+// "UAI, é ciência!": leve translateY + skew + scale, com spring suave. Nada
+// de blur/scale agressivo — o impacto vem do peso da fonte, não do efeito.
+const MantraWord: React.FC<{ w: WordSpec; frame: number; delay: number; fps: number }> = ({ w, frame, delay, fps }) => {
+  const s = spring({ frame: frame - delay, fps, config: { damping: 15, mass: 1, stiffness: 110 } });
+  const translateY = interpolate(s, [0, 1], [46, 0]);
+  const skewY = interpolate(s, [0, 1], [2.5, 0]);
+  const scale = interpolate(s, [0, 1], [0.92, 1]);
+  const opacity = interpolate(s, [0, 1], [0, 1], clampCfg);
+  return (
+    <span
+      style={{
+        display: 'inline-block',
+        marginRight: '0.32em',
+        color: w.color,
+        transform: `translateY(${translateY}px) skewY(${skewY}deg) scale(${scale})`,
+        opacity,
+      }}
+    >
+      {w.text}
+    </span>
+  );
+};
+
+const MantraLine: React.FC<{ line: LineSpec; frame: number; fps: number; top: number }> = ({ line, frame, fps, top }) => (
+  <div
+    style={{
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top,
+      textAlign: 'center',
+      fontFamily,
+      fontWeight: 900,
+      fontSize: LINE_SIZE,
+      lineHeight: 1.05,
+      letterSpacing: -0.5,
+    }}
+  >
+    {line.words.map((w, i) => (
+      <MantraWord key={i} w={w} frame={frame} delay={line.delay + i * 3} fps={fps} />
     ))}
   </div>
 );
 
-// Centro real do "O" de TOFU no bloco 3, medido pixel a pixel num still
-// renderizado do frame 73 (bloco já assentado, câmera parada, sem escala de
-// mergulho ainda) — coordenada relativa ao topo do próprio container do
-// bloco 3. Preferimos essa medição fixa a getBoundingClientRect em tempo de
-// render: cada frame do Remotion pode ser processado por um worker que monta
-// o componente direto naquele frame, então um useLayoutEffect não tem
-// garantia de rodar antes da captura consistentemente.
-const DIVE_ORIGIN = { x: 530, y: 296 };
-
 const MantraScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
-  // Câmera: dois "trancos" verticais (Easing.inOut(Easing.exp)) que revelam
-  // os blocos 2 e 3.
-  const camTo800 = interpolate(frame, [30, 40], [0, 800], { ...clampCfg, easing: Easing.inOut(Easing.exp) });
-  const camTo1600 = interpolate(frame, [60, 70], [0, 800], { ...clampCfg, easing: Easing.inOut(Easing.exp) });
-  const cameraY = camTo800 + camTo1600;
-
-  // Z-DIVE final: mergulha pelo "O" do bloco 3.
-  const diveT = interpolate(frame, [75, 90], [0, 1], { ...clampCfg, easing: Easing.in(Easing.exp) });
-  const diveScale = interpolate(diveT, [0, 1], [1, 50]);
-  const diveBlur = interpolate(diveT, [0, 1], [0, 26]);
-  const blackout = interpolate(frame, [82, 90], [0, 1], clampCfg);
-
-  const blockCenterTop = CENTER_Y - WORD_SIZE * 0.86 * 1.5;
+  const blockHeight = LINES.length * LINE_SIZE * 1.05 + (LINES.length - 1) * LINE_GAP;
+  const firstTop = CENTER_Y - blockHeight / 2;
 
   return (
-    <AbsoluteFill style={{ overflow: 'hidden' }}>
-      <KineticGrid cameraY={cameraY} />
-
-      <div style={{ position: 'absolute', inset: 0, transform: `translateY(${-cameraY}px)` }}>
-        {/* Bloco 1 — palavras entram com spring individual (soco na tela). */}
-        <div style={{ position: 'absolute', left: 0, right: 0, top: blockCenterTop + BLOCK_Y[0], textAlign: 'center' }}>
-          {BLOCKS[0].map((w, i) => (
-            <MantraWord key={i} w={w} frame={frame} delay={i * 3} fps={fps} />
-          ))}
-        </div>
-
-        {/* Bloco 2 — já montado, revelado pela câmera. */}
-        <div style={{ position: 'absolute', left: 0, right: 0, top: blockCenterTop + BLOCK_Y[1] }}>
-          <MantraBlockStatic words={BLOCKS[1]} />
-        </div>
-
-        {/* Bloco 3 — já montado; no fim, mergulha (scale) a partir do "O" medido. */}
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: blockCenterTop + BLOCK_Y[2],
-            transform: `scale(${diveScale})`,
-            transformOrigin: `${DIVE_ORIGIN.x}px ${DIVE_ORIGIN.y}px`,
-            filter: `blur(${diveBlur}px)`,
-          }}
-        >
-          <MantraBlockStatic words={BLOCKS[2]} />
-        </div>
-      </div>
-
-      <AbsoluteFill style={{ backgroundColor: '#000', opacity: blackout }} />
+    <AbsoluteFill>
+      <KineticGrid frame={frame} />
+      {LINES.map((line, i) => (
+        <MantraLine key={i} line={line} frame={frame} fps={fps} top={firstTop + i * (LINE_SIZE * 1.05 + LINE_GAP)} />
+      ))}
     </AbsoluteFill>
   );
 };
