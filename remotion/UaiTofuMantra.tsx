@@ -219,7 +219,7 @@ const FLANK: FlankCfg[] = [
   { src: 'slice5.png', w: 286, h: 313, angleDeg: 98, radiusMul: 1.0, rot: -10 },
   { src: 'slice6.png', w: 388, h: 286, angleDeg: 155, radiusMul: 1.05, rot: 14 },
 ];
-const FLANK_DISPLAY_LONG = 200;
+const FLANK_DISPLAY_LONG = 260;
 const FLANK_BASE_RADIUS = 400;
 
 // Grupo único (embalagem + fatias): entra assentando com peso (spring mais
@@ -264,8 +264,23 @@ const RevealScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =
         const dh = f.h * (FLANK_DISPLAY_LONG / Math.max(f.w, f.h)) * fScale;
         const angleRad = (f.angleDeg * Math.PI) / 180;
         const radius = FLANK_BASE_RADIUS * f.radiusMul * fScale;
-        const fx = CENTER_X + Math.cos(angleRad) * radius;
-        const fy = CENTER_Y + Math.sin(angleRad) * radius * 0.86;
+
+        // Micro-movimento vivo durante o respiro — cada fatia com fase e
+        // frequência próprias, envelope suave na entrada/saída pra não dar
+        // um "salto" quando o balanço liga/desliga.
+        const idlePhase = i * 1.35 + 0.6;
+        const idleEnv = interpolate(
+          frame,
+          [MERGE_END + 26, MERGE_END + 40, EXIT_START - 10, EXIT_START],
+          [0, 1, 1, 0],
+          clampCfg
+        );
+        const idleX = idleEnv * Math.sin(frame * 0.045 + idlePhase) * 7;
+        const idleY = idleEnv * Math.sin(frame * 0.037 + idlePhase + 1.4) * 9;
+        const idleRot = idleEnv * Math.sin(frame * 0.03 + idlePhase + 0.7) * 3;
+
+        const fx = CENTER_X + Math.cos(angleRad) * radius + idleX;
+        const fy = CENTER_Y + Math.sin(angleRad) * radius * 0.86 + idleY;
         const fOpacity = interpolate(fs, [0, 1], [0, 1]);
         return (
           <Img
@@ -278,7 +293,7 @@ const RevealScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =
               width: dw,
               height: dh,
               opacity: fOpacity * 0.96,
-              transform: `rotate(${f.rot}deg)`,
+              transform: `rotate(${f.rot + idleRot}deg)`,
             }}
           />
         );
