@@ -211,16 +211,20 @@ type FlankCfg = { src: string; w: number; h: number; angleDeg: number; radiusMul
 // 6 fatias reais (todas as que temos) espalhadas ao redor da embalagem em
 // ângulos e raios levemente irregulares — orgânico, como na referência, não
 // um anel perfeitamente simétrico.
+// radiusMul calibrado por ângulo pra sempre limpar o retângulo da embalagem
+// (halfW≈270, halfH≈341) com uma margem de respiro — os ângulos quase
+// verticais (-95°, 98°) precisam de MAIS raio que os diagonais, já que a
+// caixa é mais alta que larga.
 const FLANK: FlankCfg[] = [
-  { src: 'slice1.png', w: 362, h: 300, angleDeg: -152, radiusMul: 1.0, rot: -16 },
-  { src: 'slice2.png', w: 368, h: 206, angleDeg: -95, radiusMul: 0.82, rot: 6 },
-  { src: 'slice3.png', w: 334, h: 272, angleDeg: -32, radiusMul: 1.05, rot: 12 },
-  { src: 'slice4.png', w: 256, h: 346, angleDeg: 30, radiusMul: 0.95, rot: -8 },
-  { src: 'slice5.png', w: 286, h: 313, angleDeg: 98, radiusMul: 1.0, rot: -10 },
-  { src: 'slice6.png', w: 388, h: 286, angleDeg: 155, radiusMul: 1.05, rot: 14 },
+  { src: 'slice1.png', w: 362, h: 300, angleDeg: -152, radiusMul: 0.97, rot: -16 },
+  { src: 'slice2.png', w: 368, h: 206, angleDeg: -95, radiusMul: 1.04, rot: 6 },
+  { src: 'slice3.png', w: 334, h: 272, angleDeg: -32, radiusMul: 1.0, rot: 12 },
+  { src: 'slice4.png', w: 256, h: 346, angleDeg: 30, radiusMul: 0.98, rot: -8 },
+  { src: 'slice5.png', w: 286, h: 313, angleDeg: 98, radiusMul: 1.05, rot: -10 },
+  { src: 'slice6.png', w: 388, h: 286, angleDeg: 155, radiusMul: 0.96, rot: 14 },
 ];
-const FLANK_DISPLAY_LONG = 260;
-const FLANK_BASE_RADIUS = 400;
+const FLANK_DISPLAY_LONG = 240;
+const FLANK_BASE_RADIUS = 470;
 
 // Grupo único (embalagem + fatias): entra assentando com peso (spring mais
 // amortecida, sem "pop") e sai encolhendo de volta pro centro, suave —
@@ -275,12 +279,12 @@ const RevealScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =
           [0, 1, 1, 0],
           clampCfg
         );
-        const idleX = idleEnv * Math.sin(frame * 0.045 + idlePhase) * 7;
-        const idleY = idleEnv * Math.sin(frame * 0.037 + idlePhase + 1.4) * 9;
+        const idleX = idleEnv * Math.sin(frame * 0.045 + idlePhase) * 6;
+        const idleY = idleEnv * Math.sin(frame * 0.037 + idlePhase + 1.4) * 7;
         const idleRot = idleEnv * Math.sin(frame * 0.03 + idlePhase + 0.7) * 3;
 
         const fx = CENTER_X + Math.cos(angleRad) * radius + idleX;
-        const fy = CENTER_Y + Math.sin(angleRad) * radius * 0.86 + idleY;
+        const fy = CENTER_Y + Math.sin(angleRad) * radius * 0.96 + idleY;
         const fOpacity = interpolate(fs, [0, 1], [0, 1]);
         return (
           <Img
