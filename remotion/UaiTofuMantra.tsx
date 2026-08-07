@@ -16,21 +16,26 @@ import {
 //
 // Estrutura (seguindo a referência "Royal Tempeh" enviada pelo cliente):
 //   Cena 1 — Manifesto tipográfico (Lato Black, 3 frases empilhadas)
-//   Cena 2 — As palavras se fundem num ponto central; dessa fusão nascem a
-//            embalagem real + 6 fatias reais ao redor, juntas (sem uma fase
-//            separada de fatias "flutuando sozinhas")
-//   Cena 3 — Embalagem + fatias diminuem de tamanho juntas (saída suave,
-//            sem giro) e a logo real surge desse mesmo encolhimento
-//   Cena 4 — Hold da logo, dissolve pra preto
+//   Cena 2 — As palavras se fundem num ponto central; a embalagem nasce no
+//            centro e 12 fatias reais se espalham preenchendo a tela toda,
+//            balançando levemente
+//   Cena 3 — As fatias convergem (sucção magnética) de volta pra dentro da
+//            embalagem, uma a uma; a embalagem então diminui e some
+//   Cena 4 — A logo real surge desse encolhimento, hold, dissolve pra preto
 //
 // O fundo troca de verde profundo (texto) para o amarelo da marca (produto e
 // logo) numa única transição de cor compartilhada, na mesma janela da fusão.
+//
+// Duração estendida de 225 -> 300 frames (7.5s -> 10s): preencher a tela
+// inteira de fatias e depois convergi-las pra dentro da caixa é um beat bem
+// mais rico que precisa de espaço pra respirar — não cabia no tempo antigo
+// sem parecer apressado.
 // =============================================================================
 
 export const FPS = 30;
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
-export const DURATION = 225;
+export const DURATION = 300;
 
 const CENTER_X = 540;
 const CENTER_Y = 960;
@@ -39,11 +44,14 @@ const CENTER_Y = 960;
 const S1_START = 0;
 const MERGE_START = 83; // palavras começam a colapsar pro centro
 const MERGE_END = 100; // ponto de "fusão" — flash, embalagem+fatias nascem daqui
-const REVEAL_HOLD_END = 158; // fim do respiro com embalagem+fatias paradas (mais fatias, mais tempo de leitura)
-const EXIT_START = 158; // embalagem+fatias começam a diminuir juntas
-const EXIT_END = 182; // encolhimento completo
-const LOGO_START = 172; // a logo já começa a crescer antes do encolhimento terminar — crossfade suave, sem frame vazio
-const DISSOLVE_START = 210;
+const HOLD_END = 195; // fim do respiro com a tela cheia de fatias balançando
+const CONVERGE_START = 195; // fatias começam a voar de volta pra dentro da embalagem
+const CONVERGE_STAGGER = 2.2;
+const CONVERGE_TRAVEL = 26;
+const BOX_EXIT_START = 236; // embalagem começa a diminuir, já com as fatias absorvidas
+const BOX_EXIT_END = 258;
+const LOGO_START = 250; // a logo já começa a crescer antes do encolhimento terminar — crossfade suave
+const DISSOLVE_START = 285;
 
 const clampCfg = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 
@@ -196,56 +204,37 @@ const MantraScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =
 };
 
 // =============================================================================
-// CENA 2 — Fusão -> Embalagem + Fatias (83-158)
-// No instante da fusão (MERGE_END), um flash rápido marca a transformação: a
-// embalagem real e 6 fatias reais nascem juntas do mesmo ponto central,
-// crescendo e assentando com uma entrada mais pesada/suave (menos "pop",
-// mais assentamento) — igual à referência (produto + peças aparecem de uma
-// vez, não em duas fases separadas).
+// CENA 2 — Fusão -> Embalagem no centro + 12 fatias preenchendo a tela
+// (83-195)
+// No instante da fusão (MERGE_END), um flash marca a transformação: a
+// embalagem nasce no centro e 12 fatias reais (as 6 fotos reais, reaproveitadas
+// em ângulos/posições diferentes — nunca fabricamos foto nova) se espalham
+// preenchendo a tela inteira, cada uma com seu próprio balanço.
+//
+// CENA 3 — Sucção magnética (195-258)
+// As fatias voam de volta, uma a uma, pra dentro da embalagem — e só depois
+// a embalagem encolhe e some.
 // =============================================================================
 const BOX = { src: 'box.png', w: 557, h: 705 };
 const BOX_DISPLAY_W = 540;
 
-type FlankCfg = { src: string; w: number; h: number; angleDeg: number; radiusMul: number; rot: number };
-
-// 6 fatias reais (todas as que temos) espalhadas ao redor da embalagem em
-// ângulos e raios levemente irregulares — orgânico, como na referência, não
-// um anel perfeitamente simétrico.
-// radiusMul calibrado por ângulo pra sempre limpar o retângulo da embalagem
-// (halfW≈270, halfH≈341) com uma margem de respiro — os ângulos quase
-// verticais (-95°, 98°) precisam de MAIS raio que os diagonais, já que a
-// caixa é mais alta que larga.
-const FLANK: FlankCfg[] = [
-  { src: 'slice1.png', w: 362, h: 300, angleDeg: -152, radiusMul: 0.97, rot: -16 },
-  { src: 'slice2.png', w: 368, h: 206, angleDeg: -95, radiusMul: 1.04, rot: 6 },
-  { src: 'slice3.png', w: 334, h: 272, angleDeg: -32, radiusMul: 1.0, rot: 12 },
-  { src: 'slice4.png', w: 256, h: 346, angleDeg: 30, radiusMul: 0.98, rot: -8 },
-  { src: 'slice5.png', w: 286, h: 313, angleDeg: 98, radiusMul: 1.05, rot: -10 },
-  { src: 'slice6.png', w: 388, h: 286, angleDeg: 155, radiusMul: 0.96, rot: 14 },
-];
-const FLANK_DISPLAY_LONG = 240;
-const FLANK_BASE_RADIUS = 470;
-
-// Grupo único (embalagem + fatias): entra assentando com peso (spring mais
-// amortecida, sem "pop") e sai encolhendo de volta pro centro, suave —
-// "saída quádrupla" simplificada pra um encolhimento simétrico: escala +
-// blur + opacity, sem necessidade de posição (o próprio encolhimento pro
-// centro já é a direção do movimento).
-const RevealScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
+// Embalagem: entra assentando com peso (spring amortecida, sem "pop") no
+// centro, fica parada durante toda a Cena 2, e só encolhe depois que as 12
+// fatias já convergiram de volta pra dentro dela (BOX_EXIT_START).
+const BoxScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const s = spring({ frame: Math.max(0, frame - MERGE_END), fps, config: { damping: 16, mass: 1.15, stiffness: 95 } });
   const entranceScale = interpolate(s, [0, 1], [0.08, 1]);
   const entranceOpacity = interpolate(frame, [MERGE_END - 2, MERGE_END + 10], [0, 1], clampCfg);
   const entranceBlur = interpolate(s, [0, 1], [9, 0]);
 
-  // Encolhimento suave de saída — grupo inteiro (embalagem + fatias) junto.
-  const exitT = interpolate(frame, [EXIT_START, EXIT_END], [0, 1], { ...clampCfg, easing: Easing.inOut(Easing.cubic) });
+  const exitT = interpolate(frame, [BOX_EXIT_START, BOX_EXIT_END], [0, 1], { ...clampCfg, easing: Easing.inOut(Easing.cubic) });
   const exitScale = interpolate(exitT, [0, 1], [1, 0.18]);
   const exitOpacity = interpolate(exitT, [0.35, 1], [1, 0]);
   const exitBlur = interpolate(exitT, [0, 1], [0, 10]);
 
-  const groupScale = entranceScale * exitScale;
-  const groupOpacity = entranceOpacity * exitOpacity;
-  const groupBlur = entranceBlur + exitBlur;
+  const scale = entranceScale * exitScale;
+  const opacity = entranceOpacity * exitOpacity;
+  const blur = entranceBlur + exitBlur;
 
   const shadowOpacity = interpolate(frame, [MERGE_END, MERGE_END + 16], [0, 0.28], clampCfg) * interpolate(exitT, [0, 1], [1, 0]);
 
@@ -255,54 +244,12 @@ const RevealScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =
   return (
     <AbsoluteFill
       style={{
-        transform: `scale(${groupScale})`,
+        transform: `scale(${scale})`,
         transformOrigin: `${CENTER_X}px ${CENTER_Y}px`,
-        opacity: groupOpacity,
-        filter: `blur(${groupBlur}px)`,
+        opacity,
+        filter: `blur(${blur}px)`,
       }}
     >
-      {FLANK.map((f, i) => {
-        const fs = spring({ frame: Math.max(0, frame - MERGE_END - 4 - i * 3), fps, config: { damping: 16, mass: 0.9, stiffness: 95 } });
-        const fScale = interpolate(fs, [0, 1], [0.18, 1]);
-        const dw = f.w * (FLANK_DISPLAY_LONG / Math.max(f.w, f.h)) * fScale;
-        const dh = f.h * (FLANK_DISPLAY_LONG / Math.max(f.w, f.h)) * fScale;
-        const angleRad = (f.angleDeg * Math.PI) / 180;
-        const radius = FLANK_BASE_RADIUS * f.radiusMul * fScale;
-
-        // Micro-movimento vivo durante o respiro — cada fatia com fase e
-        // frequência próprias, envelope suave na entrada/saída pra não dar
-        // um "salto" quando o balanço liga/desliga.
-        const idlePhase = i * 1.35 + 0.6;
-        const idleEnv = interpolate(
-          frame,
-          [MERGE_END + 26, MERGE_END + 40, EXIT_START - 10, EXIT_START],
-          [0, 1, 1, 0],
-          clampCfg
-        );
-        const idleX = idleEnv * Math.sin(frame * 0.045 + idlePhase) * 6;
-        const idleY = idleEnv * Math.sin(frame * 0.037 + idlePhase + 1.4) * 7;
-        const idleRot = idleEnv * Math.sin(frame * 0.03 + idlePhase + 0.7) * 3;
-
-        const fx = CENTER_X + Math.cos(angleRad) * radius + idleX;
-        const fy = CENTER_Y + Math.sin(angleRad) * radius * 0.96 + idleY;
-        const fOpacity = interpolate(fs, [0, 1], [0, 1]);
-        return (
-          <Img
-            key={f.src}
-            src={staticFile(`uai-tofu/${f.src}`)}
-            style={{
-              position: 'absolute',
-              left: fx - dw / 2,
-              top: fy - dh / 2,
-              width: dw,
-              height: dh,
-              opacity: fOpacity * 0.96,
-              transform: `rotate(${f.rot + idleRot}deg)`,
-            }}
-          />
-        );
-      })}
-
       <div
         style={{
           position: 'absolute',
@@ -329,10 +276,104 @@ const RevealScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =
   );
 };
 
+type SliceSrc = { src: string; w: number; h: number };
+const SLICE_SRCS: SliceSrc[] = [
+  { src: 'slice1.png', w: 362, h: 300 },
+  { src: 'slice2.png', w: 368, h: 206 },
+  { src: 'slice3.png', w: 334, h: 272 },
+  { src: 'slice4.png', w: 256, h: 346 },
+  { src: 'slice5.png', w: 286, h: 313 },
+  { src: 'slice6.png', w: 388, h: 286 },
+];
+
+type FieldCfg = { srcIndex: number; x: number; y: number; rot: number; long: number };
+
+// 12 posições espalhadas pela tela INTEIRA (não só ao redor da caixa) — um
+// grid solto de 3 colunas x 5 linhas com o miolo (onde a embalagem fica)
+// vazado, mantendo espaçamento regular entre elas. As 6 fotos reais se
+// repetem 2x cada, em ângulos/tamanhos diferentes — nunca inventamos uma
+// fatia nova.
+const FIELD: FieldCfg[] = [
+  { srcIndex: 0, x: 175, y: 175, rot: -18, long: 208 },
+  { srcIndex: 1, x: 540, y: 145, rot: 8, long: 220 },
+  { srcIndex: 2, x: 905, y: 175, rot: 14, long: 210 },
+  { srcIndex: 3, x: 135, y: 480, rot: -10, long: 226 },
+  { srcIndex: 4, x: 945, y: 480, rot: 16, long: 198 },
+  { srcIndex: 5, x: 120, y: 965, rot: -14, long: 232 },
+  { srcIndex: 0, x: 960, y: 965, rot: 10, long: 210 },
+  { srcIndex: 1, x: 170, y: 1460, rot: -8, long: 214 },
+  { srcIndex: 2, x: 540, y: 1485, rot: 18, long: 206 },
+  { srcIndex: 3, x: 910, y: 1460, rot: -16, long: 228 },
+  { srcIndex: 4, x: 170, y: 1785, rot: 12, long: 200 },
+  { srcIndex: 5, x: 910, y: 1785, rot: -10, long: 216 },
+];
+
+const SliceField: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => (
+  <>
+    {FIELD.map((f, i) => {
+      const cfg = SLICE_SRCS[f.srcIndex];
+
+      // Entrada: nasce no centro (ponto da fusão) e voa até a posição final,
+      // com stagger — igual ao "soco na tela" da tipografia, só que espacial.
+      const es = spring({ frame: Math.max(0, frame - MERGE_END - 3 - i * 2.4), fps, config: { damping: 16, mass: 0.9, stiffness: 90 } });
+      const entranceScale = interpolate(es, [0, 1], [0.12, 1]);
+      const ex = interpolate(es, [0, 1], [CENTER_X, f.x] as number[]);
+      const ey = interpolate(es, [0, 1], [CENTER_Y, f.y] as number[]);
+      const entranceOpacity = interpolate(es, [0, 1], [0, 1]);
+
+      // Balanço vivo durante o respiro — fase e frequência próprias por
+      // fatia, envelope suave nas duas pontas.
+      const idlePhase = i * 1.24 + 0.5;
+      const idleEnv = interpolate(frame, [MERGE_END + 30, MERGE_END + 44, HOLD_END - 12, HOLD_END], [0, 1, 1, 0], clampCfg);
+      const idleX = idleEnv * Math.sin(frame * 0.032 + idlePhase) * 7;
+      const idleY = idleEnv * Math.sin(frame * 0.026 + idlePhase + 1.4) * 11;
+      const idleRot = idleEnv * Math.sin(frame * 0.022 + idlePhase + 0.7) * 3.5;
+
+      // Sucção magnética: cada fatia é puxada de volta pro centro (dentro da
+      // embalagem), acelerando (Easing.in.exp) e encolhendo/sumindo ao
+      // "entrar" nela — a mesma ordem da entrada, criando uma escadinha.
+      const convergeDelay = CONVERGE_START + i * CONVERGE_STAGGER;
+      const ct = interpolate(frame, [convergeDelay, convergeDelay + CONVERGE_TRAVEL], [0, 1], {
+        ...clampCfg,
+        easing: Easing.in(Easing.exp),
+      });
+
+      const baseX = ex + idleX;
+      const baseY = ey + idleY;
+      const x = interpolate(ct, [0, 1], [baseX, CENTER_X] as number[]);
+      const y = interpolate(ct, [0, 1], [baseY, CENTER_Y] as number[]);
+      const convergeScale = interpolate(ct, [0, 1], [1, 0.1]);
+      const convergeOpacity = interpolate(ct, [0.55, 1], [1, 0]);
+
+      const scale = entranceScale * convergeScale;
+      const w = cfg.w * (f.long / Math.max(cfg.w, cfg.h)) * scale;
+      const h = cfg.h * (f.long / Math.max(cfg.w, cfg.h)) * scale;
+      const rot = f.rot + idleRot;
+      const opacity = entranceOpacity * convergeOpacity;
+
+      return (
+        <Img
+          key={i}
+          src={staticFile(`uai-tofu/${cfg.src}`)}
+          style={{
+            position: 'absolute',
+            left: x - w / 2,
+            top: y - h / 2,
+            width: w,
+            height: h,
+            opacity: opacity * 0.96,
+            transform: `rotate(${rot}deg)`,
+          }}
+        />
+      );
+    })}
+  </>
+);
+
 // =============================================================================
-// CENA 4 — Logo (176-225)
-// A embalagem morfa na logo real (fade + escala, flash na virada), fica em
-// hold, e dissolve pra preto no final.
+// CENA 4 — Logo (250-300)
+// A logo real cresce a partir do mesmo ponto onde a embalagem encolheu, fica
+// em hold, e dissolve pra preto no final.
 // =============================================================================
 const LOGO = { src: 'logo.png', w: 460, h: 376 };
 const LOGO_DISPLAY_W = 420;
@@ -396,10 +437,11 @@ export const UaiTofuMantra: React.FC = () => {
       <MantraScene frame={frame} fps={fps} />
 
       <AbsoluteFill style={{ opacity: interpolate(frame, [MERGE_END - 4, MERGE_END + 4], [0, 1], clampCfg) }}>
-        <RevealScene frame={frame} fps={fps} />
+        <BoxScene frame={frame} fps={fps} />
+        <SliceField frame={frame} fps={fps} />
       </AbsoluteFill>
 
-      {/* A logo cresce a partir do mesmo encolhimento da embalagem+fatias —
+      {/* A logo cresce a partir do mesmo encolhimento da embalagem —
           crossfade suave, sem flash, sem giro. */}
       <AbsoluteFill style={{ opacity: interpolate(frame, [LOGO_START - 2, LOGO_START + 8], [0, 1], clampCfg) }}>
         <LogoScene frame={frame} fps={fps} />
