@@ -19,8 +19,8 @@ import {
 //   Cena 2 — As palavras se fundem num ponto central; a embalagem nasce no
 //            centro e 12 fatias reais se espalham preenchendo a tela toda,
 //            balançando levemente
-//   Cena 3 — As fatias convergem (sucção magnética) de volta pra dentro da
-//            embalagem, uma a uma; a embalagem então diminui e some
+//   Cena 3 — As fatias e a embalagem somem JUNTAS (encolhendo/desfocando no
+//            próprio lugar, com um stagger mínimo entre as fatias)
 //   Cena 4 — A logo real surge desse encolhimento, hold, dissolve pra preto
 //
 // O fundo troca de verde profundo (texto) para o amarelo da marca (produto e
@@ -44,12 +44,9 @@ const CENTER_Y = 960;
 const S1_START = 0;
 const MERGE_START = 83; // palavras começam a colapsar pro centro
 const MERGE_END = 100; // ponto de "fusão" — flash, embalagem+fatias nascem daqui
-const HOLD_END = 195; // fim do respiro com a tela cheia de fatias balançando
-const CONVERGE_START = 195; // fatias começam a voar de volta pra dentro da embalagem
-const CONVERGE_STAGGER = 2.2;
-const CONVERGE_TRAVEL = 26;
-const BOX_EXIT_START = 236; // embalagem começa a diminuir, já com as fatias absorvidas
+const BOX_EXIT_START = 236; // embalagem e fatias começam a sumir JUNTAS
 const BOX_EXIT_END = 258;
+const EXIT_STAGGER = 0.6; // stagger mínimo entre fatias na saída — ainda lê como "junto", não em fila
 const LOGO_START = 250; // a logo já começa a crescer antes do encolhimento terminar — crossfade suave
 const DISSOLVE_START = 285;
 
@@ -205,22 +202,24 @@ const MantraScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =
 
 // =============================================================================
 // CENA 2 — Fusão -> Embalagem no centro + 12 fatias preenchendo a tela
-// (83-195)
+// (83-236)
 // No instante da fusão (MERGE_END), um flash marca a transformação: a
 // embalagem nasce no centro e 12 fatias reais (as 6 fotos reais, reaproveitadas
 // em ângulos/posições diferentes — nunca fabricamos foto nova) se espalham
-// preenchendo a tela inteira, cada uma com seu próprio balanço.
+// preenchendo a tela inteira, cada uma com seu próprio balanço, até o
+// instante em que tudo começa a sumir.
 //
-// CENA 3 — Sucção magnética (195-258)
-// As fatias voam de volta, uma a uma, pra dentro da embalagem — e só depois
-// a embalagem encolhe e some.
+// CENA 3 — Saída em conjunto (236-258)
+// A embalagem e as 12 fatias somem JUNTAS — cada uma encolhe/desfoca no seu
+// próprio lugar (nada voa pro centro), com um stagger de poucos frames entre
+// elas pra não parecer um corte seco em bloco único.
 // =============================================================================
 const BOX = { src: 'box.png', w: 557, h: 705 };
 const BOX_DISPLAY_W = 540;
 
 // Embalagem: entra assentando com peso (spring amortecida, sem "pop") no
-// centro, fica parada durante toda a Cena 2, e só encolhe depois que as 12
-// fatias já convergiram de volta pra dentro dela (BOX_EXIT_START).
+// centro, fica parada durante toda a Cena 2, e encolhe/some junto com as
+// fatias a partir de BOX_EXIT_START.
 const BoxScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const s = spring({ frame: Math.max(0, frame - MERGE_END), fps, config: { damping: 16, mass: 1.15, stiffness: 95 } });
   const entranceScale = interpolate(s, [0, 1], [0.08, 1]);
@@ -292,20 +291,21 @@ type FieldCfg = { srcIndex: number; x: number; y: number; rot: number; long: num
 // grid solto de 3 colunas x 5 linhas com o miolo (onde a embalagem fica)
 // vazado, mantendo espaçamento regular entre elas. As 6 fotos reais se
 // repetem 2x cada, em ângulos/tamanhos diferentes — nunca inventamos uma
-// fatia nova.
+// fatia nova. Tamanhos (long) verificados numericamente contra a borda do
+// canvas considerando rotação + balanço de idle antes de subir aqui.
 const FIELD: FieldCfg[] = [
-  { srcIndex: 0, x: 175, y: 175, rot: -18, long: 208 },
-  { srcIndex: 1, x: 540, y: 145, rot: 8, long: 220 },
-  { srcIndex: 2, x: 905, y: 175, rot: 14, long: 210 },
-  { srcIndex: 3, x: 135, y: 480, rot: -10, long: 226 },
-  { srcIndex: 4, x: 945, y: 480, rot: 16, long: 198 },
-  { srcIndex: 5, x: 120, y: 965, rot: -14, long: 232 },
-  { srcIndex: 0, x: 960, y: 965, rot: 10, long: 210 },
-  { srcIndex: 1, x: 170, y: 1460, rot: -8, long: 214 },
-  { srcIndex: 2, x: 540, y: 1485, rot: 18, long: 206 },
-  { srcIndex: 3, x: 910, y: 1460, rot: -16, long: 228 },
-  { srcIndex: 4, x: 170, y: 1785, rot: 12, long: 200 },
-  { srcIndex: 5, x: 910, y: 1785, rot: -10, long: 216 },
+  { srcIndex: 0, x: 208, y: 215, rot: -18, long: 236 },
+  { srcIndex: 1, x: 540, y: 195, rot: 8, long: 244 },
+  { srcIndex: 2, x: 872, y: 215, rot: 14, long: 238 },
+  { srcIndex: 3, x: 173, y: 560, rot: -10, long: 248 },
+  { srcIndex: 4, x: 907, y: 560, rot: 16, long: 232 },
+  { srcIndex: 5, x: 158, y: 965, rot: -14, long: 250 },
+  { srcIndex: 0, x: 922, y: 965, rot: 10, long: 236 },
+  { srcIndex: 1, x: 173, y: 1370, rot: -8, long: 240 },
+  { srcIndex: 2, x: 540, y: 1390, rot: 18, long: 234 },
+  { srcIndex: 3, x: 907, y: 1370, rot: -16, long: 246 },
+  { srcIndex: 4, x: 208, y: 1710, rot: 12, long: 230 },
+  { srcIndex: 5, x: 872, y: 1710, rot: -10, long: 240 },
 ];
 
 const SliceField: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => (
@@ -321,35 +321,40 @@ const SliceField: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =>
       const ey = interpolate(es, [0, 1], [CENTER_Y, f.y] as number[]);
       const entranceOpacity = interpolate(es, [0, 1], [0, 1]);
 
-      // Balanço vivo durante o respiro — fase e frequência próprias por
-      // fatia, envelope suave nas duas pontas.
+      // Balanço vivo durante todo o respiro — fase e frequência próprias por
+      // fatia, envelope suave na entrada e desligando pouco antes da saída
+      // começar (pra não brigar com o encolhimento da saída).
       const idlePhase = i * 1.24 + 0.5;
-      const idleEnv = interpolate(frame, [MERGE_END + 30, MERGE_END + 44, HOLD_END - 12, HOLD_END], [0, 1, 1, 0], clampCfg);
+      const idleEnv = interpolate(
+        frame,
+        [MERGE_END + 30, MERGE_END + 44, BOX_EXIT_START - 14, BOX_EXIT_START],
+        [0, 1, 1, 0],
+        clampCfg,
+      );
       const idleX = idleEnv * Math.sin(frame * 0.032 + idlePhase) * 7;
       const idleY = idleEnv * Math.sin(frame * 0.026 + idlePhase + 1.4) * 11;
       const idleRot = idleEnv * Math.sin(frame * 0.022 + idlePhase + 0.7) * 3.5;
 
-      // Sucção magnética: cada fatia é puxada de volta pro centro (dentro da
-      // embalagem), acelerando (Easing.in.exp) e encolhendo/sumindo ao
-      // "entrar" nela — a mesma ordem da entrada, criando uma escadinha.
-      const convergeDelay = CONVERGE_START + i * CONVERGE_STAGGER;
-      const ct = interpolate(frame, [convergeDelay, convergeDelay + CONVERGE_TRAVEL], [0, 1], {
+      // Saída em conjunto: a fatia encolhe e desfoca NO PRÓPRIO LUGAR, na
+      // mesma janela (BOX_EXIT_START -> BOX_EXIT_END) que a embalagem usa
+      // pra sumir — nada voa pro centro. Um stagger de frações de segundo
+      // entre fatias evita o corte seco de "tudo em bloco único".
+      const exitDelay = i * EXIT_STAGGER;
+      const exitT = interpolate(frame, [BOX_EXIT_START + exitDelay, BOX_EXIT_END + exitDelay], [0, 1], {
         ...clampCfg,
-        easing: Easing.in(Easing.exp),
+        easing: Easing.inOut(Easing.cubic),
       });
+      const exitScale = interpolate(exitT, [0, 1], [1, 0.15]);
+      const exitOpacity = interpolate(exitT, [0.35, 1], [1, 0]);
+      const exitBlur = interpolate(exitT, [0, 1], [0, 8]);
 
-      const baseX = ex + idleX;
-      const baseY = ey + idleY;
-      const x = interpolate(ct, [0, 1], [baseX, CENTER_X] as number[]);
-      const y = interpolate(ct, [0, 1], [baseY, CENTER_Y] as number[]);
-      const convergeScale = interpolate(ct, [0, 1], [1, 0.1]);
-      const convergeOpacity = interpolate(ct, [0.55, 1], [1, 0]);
-
-      const scale = entranceScale * convergeScale;
+      const x = ex + idleX;
+      const y = ey + idleY;
+      const scale = entranceScale * exitScale;
       const w = cfg.w * (f.long / Math.max(cfg.w, cfg.h)) * scale;
       const h = cfg.h * (f.long / Math.max(cfg.w, cfg.h)) * scale;
       const rot = f.rot + idleRot;
-      const opacity = entranceOpacity * convergeOpacity;
+      const opacity = entranceOpacity * exitOpacity;
 
       return (
         <Img
@@ -363,6 +368,7 @@ const SliceField: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =>
             height: h,
             opacity: opacity * 0.96,
             transform: `rotate(${rot}deg)`,
+            filter: exitBlur > 0.1 ? `blur(${exitBlur}px)` : undefined,
           }}
         />
       );
