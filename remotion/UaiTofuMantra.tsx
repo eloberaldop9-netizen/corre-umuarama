@@ -17,11 +17,11 @@ import {
 // Estrutura (seguindo a referência "Royal Tempeh" enviada pelo cliente):
 //   Cena 1 — Manifesto tipográfico (Lato Black, 3 frases empilhadas)
 //   Cena 2 — As palavras se fundem num ponto central; dessa fusão nascem a
-//            embalagem real + as fatias reais ao redor, juntas (sem uma fase
+//            embalagem real + 6 fatias reais ao redor, juntas (sem uma fase
 //            separada de fatias "flutuando sozinhas")
-//   Cena 3 — Fatias somem, a embalagem dá um giro rápido no eixo Y com
-//            motion blur (peso físico)
-//   Cena 4 — A embalagem morfa na logo, hold final, dissolve pra preto
+//   Cena 3 — Embalagem + fatias diminuem de tamanho juntas (saída suave,
+//            sem giro) e a logo real surge desse mesmo encolhimento
+//   Cena 4 — Hold da logo, dissolve pra preto
 //
 // O fundo troca de verde profundo (texto) para o amarelo da marca (produto e
 // logo) numa única transição de cor compartilhada, na mesma janela da fusão.
@@ -39,11 +39,10 @@ const CENTER_Y = 960;
 const S1_START = 0;
 const MERGE_START = 83; // palavras começam a colapsar pro centro
 const MERGE_END = 100; // ponto de "fusão" — flash, embalagem+fatias nascem daqui
-const REVEAL_HOLD_END = 148; // fim do respiro com embalagem+fatias paradas
-const SLICES_EXIT_END = 158; // fatias já sumiram
-const SPIN_START = 152;
-const SPIN_END = 183; // giro no eixo Y completo — termina numa volta inteira (aterrissa de frente, não de perfil)
-const LOGO_START = SPIN_END; // embalagem só começa a morfar na logo depois que o giro termina
+const REVEAL_HOLD_END = 158; // fim do respiro com embalagem+fatias paradas (mais fatias, mais tempo de leitura)
+const EXIT_START = 158; // embalagem+fatias começam a diminuir juntas
+const EXIT_END = 182; // encolhimento completo
+const LOGO_START = 172; // a logo já começa a crescer antes do encolhimento terminar — crossfade suave, sem frame vazio
 const DISSOLVE_START = 210;
 
 const clampCfg = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
@@ -199,57 +198,75 @@ const MantraScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =
 // =============================================================================
 // CENA 2 — Fusão -> Embalagem + Fatias (83-158)
 // No instante da fusão (MERGE_END), um flash rápido marca a transformação: a
-// embalagem real e as 4 fatias reais nascem juntas do mesmo ponto central,
-// crescendo e assentando — igual à referência (produto + peças aparecem de
-// uma vez, não em duas fases separadas).
+// embalagem real e 6 fatias reais nascem juntas do mesmo ponto central,
+// crescendo e assentando com uma entrada mais pesada/suave (menos "pop",
+// mais assentamento) — igual à referência (produto + peças aparecem de uma
+// vez, não em duas fases separadas).
 // =============================================================================
 const BOX = { src: 'box.png', w: 557, h: 705 };
-const BOX_DISPLAY_W = 560;
+const BOX_DISPLAY_W = 540;
 
-type FlankCfg = { src: string; w: number; h: number; ox: number; oy: number; rot: number };
+type FlankCfg = { src: string; w: number; h: number; angleDeg: number; radiusMul: number; rot: number };
 
-// Mesmas 4 fatias reais e mesmo espírito de posicionamento (flanqueando a
-// embalagem) já aprovados em "Da soja ao produto" — só reaproveitados aqui,
-// escalados pro tamanho de caixa deste vídeo.
+// 6 fatias reais (todas as que temos) espalhadas ao redor da embalagem em
+// ângulos e raios levemente irregulares — orgânico, como na referência, não
+// um anel perfeitamente simétrico.
 const FLANK: FlankCfg[] = [
-  { src: 'slice1.png', w: 362, h: 300, ox: -1, oy: -0.72, rot: -16 },
-  { src: 'slice6.png', w: 388, h: 286, ox: -0.92, oy: 0.78, rot: 10 },
-  { src: 'slice3.png', w: 334, h: 272, ox: 1, oy: -0.76, rot: 12 },
-  { src: 'slice5.png', w: 286, h: 313, ox: 1.05, oy: 0.74, rot: -10 },
+  { src: 'slice1.png', w: 362, h: 300, angleDeg: -152, radiusMul: 1.0, rot: -16 },
+  { src: 'slice2.png', w: 368, h: 206, angleDeg: -95, radiusMul: 0.82, rot: 6 },
+  { src: 'slice3.png', w: 334, h: 272, angleDeg: -32, radiusMul: 1.05, rot: 12 },
+  { src: 'slice4.png', w: 256, h: 346, angleDeg: 30, radiusMul: 0.95, rot: -8 },
+  { src: 'slice5.png', w: 286, h: 313, angleDeg: 98, radiusMul: 1.0, rot: -10 },
+  { src: 'slice6.png', w: 388, h: 286, angleDeg: 155, radiusMul: 1.05, rot: 14 },
 ];
-const FLANK_DISPLAY_LONG = 220;
+const FLANK_DISPLAY_LONG = 200;
+const FLANK_BASE_RADIUS = 400;
 
+// Grupo único (embalagem + fatias): entra assentando com peso (spring mais
+// amortecida, sem "pop") e sai encolhendo de volta pro centro, suave —
+// "saída quádrupla" simplificada pra um encolhimento simétrico: escala +
+// blur + opacity, sem necessidade de posição (o próprio encolhimento pro
+// centro já é a direção do movimento).
 const RevealScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
-  const s = spring({ frame: Math.max(0, frame - MERGE_END), fps, config: { damping: 12, mass: 1, stiffness: 130 } });
-  const scale = interpolate(s, [0, 1], [0.08, 1]);
-  // A embalagem some bem no início do giro (Cena 3) — SpinBox assume dali em
-  // diante, pra nunca haver duas caixas desenhadas ao mesmo tempo.
-  const boxExit = interpolate(frame, [SPIN_START - 3, SPIN_START + 1], [1, 0], clampCfg);
-  const opacity = interpolate(frame, [MERGE_END - 2, MERGE_END + 8], [0, 1], clampCfg) * boxExit;
-  const blur = interpolate(s, [0, 1], [10, 0]);
+  const s = spring({ frame: Math.max(0, frame - MERGE_END), fps, config: { damping: 16, mass: 1.15, stiffness: 95 } });
+  const entranceScale = interpolate(s, [0, 1], [0.08, 1]);
+  const entranceOpacity = interpolate(frame, [MERGE_END - 2, MERGE_END + 10], [0, 1], clampCfg);
+  const entranceBlur = interpolate(s, [0, 1], [9, 0]);
 
-  const shadowOpacity = interpolate(frame, [MERGE_END, MERGE_END + 16], [0, 0.28], clampCfg) * boxExit;
+  // Encolhimento suave de saída — grupo inteiro (embalagem + fatias) junto.
+  const exitT = interpolate(frame, [EXIT_START, EXIT_END], [0, 1], { ...clampCfg, easing: Easing.inOut(Easing.cubic) });
+  const exitScale = interpolate(exitT, [0, 1], [1, 0.18]);
+  const exitOpacity = interpolate(exitT, [0.35, 1], [1, 0]);
+  const exitBlur = interpolate(exitT, [0, 1], [0, 10]);
 
-  // Fatias somem um pouco antes do giro começar — a composição afunila de
-  // volta pra só a embalagem, preparando a Cena 3.
-  const slicesExit = interpolate(frame, [REVEAL_HOLD_END, SLICES_EXIT_END], [1, 0], {
-    ...clampCfg,
-    easing: Easing.in(Easing.cubic),
-  });
+  const groupScale = entranceScale * exitScale;
+  const groupOpacity = entranceOpacity * exitOpacity;
+  const groupBlur = entranceBlur + exitBlur;
 
-  const w = BOX_DISPLAY_W * scale;
+  const shadowOpacity = interpolate(frame, [MERGE_END, MERGE_END + 16], [0, 0.28], clampCfg) * interpolate(exitT, [0, 1], [1, 0]);
+
+  const w = BOX_DISPLAY_W;
   const h = w * (BOX.h / BOX.w);
 
   return (
-    <>
+    <AbsoluteFill
+      style={{
+        transform: `scale(${groupScale})`,
+        transformOrigin: `${CENTER_X}px ${CENTER_Y}px`,
+        opacity: groupOpacity,
+        filter: `blur(${groupBlur}px)`,
+      }}
+    >
       {FLANK.map((f, i) => {
-        const fs = spring({ frame: Math.max(0, frame - MERGE_END - 4 - i * 3), fps, config: { damping: 15, mass: 0.85, stiffness: 100 } });
-        const fScale = interpolate(fs, [0, 1], [0.15, 1]);
+        const fs = spring({ frame: Math.max(0, frame - MERGE_END - 4 - i * 3), fps, config: { damping: 16, mass: 0.9, stiffness: 95 } });
+        const fScale = interpolate(fs, [0, 1], [0.18, 1]);
         const dw = f.w * (FLANK_DISPLAY_LONG / Math.max(f.w, f.h)) * fScale;
         const dh = f.h * (FLANK_DISPLAY_LONG / Math.max(f.w, f.h)) * fScale;
-        const fx = CENTER_X + f.ox * (BOX_DISPLAY_W / 2 + 90) * fScale;
-        const fy = CENTER_Y + f.oy * (BOX_DISPLAY_W * (BOX.h / BOX.w) / 2 + 70) * fScale;
-        const fOpacity = interpolate(fs, [0, 1], [0, 1]) * slicesExit;
+        const angleRad = (f.angleDeg * Math.PI) / 180;
+        const radius = FLANK_BASE_RADIUS * f.radiusMul * fScale;
+        const fx = CENTER_X + Math.cos(angleRad) * radius;
+        const fy = CENTER_Y + Math.sin(angleRad) * radius * 0.86;
+        const fOpacity = interpolate(fs, [0, 1], [0, 1]);
         return (
           <Img
             key={f.src}
@@ -287,53 +304,6 @@ const RevealScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =
           top: CENTER_Y - h / 2,
           width: w,
           height: h,
-          opacity,
-          filter: `blur(${blur}px)`,
-        }}
-      />
-    </>
-  );
-};
-
-// =============================================================================
-// CENA 3 — Giro (150-183)
-// A embalagem dá um giro rápido e completo no eixo Y, com motion blur
-// proporcional à velocidade angular (pico no meio do giro, zero nas pontas)
-// e uma leve contração de peso — física real, não um "spin" de vetor.
-// =============================================================================
-const SpinBox: React.FC<{ frame: number }> = ({ frame }) => {
-  const spinT = interpolate(frame, [SPIN_START, SPIN_END], [0, 1], { ...clampCfg, easing: Easing.inOut(Easing.cubic) });
-  const spinDeg = spinT * 360 * 3; // 3 voltas inteiras — termina de frente (0°), pronta pro handoff com a logo
-  const motionBlur = Math.sin(spinT * Math.PI) * 7;
-  const squash = 1 - Math.sin(spinT * Math.PI) * 0.06;
-
-  const w = BOX_DISPLAY_W * squash;
-  const h = w * (BOX.h / BOX.w);
-
-  return (
-    <AbsoluteFill style={{ perspective: 1600 }}>
-      <div
-        style={{
-          position: 'absolute',
-          left: CENTER_X - w * 0.4,
-          top: CENTER_Y + h * 0.44,
-          width: w * 0.8,
-          height: 36,
-          opacity: 0.26,
-          background: `radial-gradient(ellipse at center, ${SHADOW} 0%, transparent 72%)`,
-          filter: 'blur(14px)',
-        }}
-      />
-      <Img
-        src={staticFile(`uai-tofu/${BOX.src}`)}
-        style={{
-          position: 'absolute',
-          left: CENTER_X - w / 2,
-          top: CENTER_Y - h / 2,
-          width: w,
-          height: h,
-          transform: `rotateY(${spinDeg}deg)`,
-          filter: `blur(${motionBlur}px)`,
         }}
       />
     </AbsoluteFill>
@@ -350,9 +320,9 @@ const LOGO_DISPLAY_W = 420;
 
 const LogoScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const local = frame - LOGO_START;
-  const s = spring({ frame: Math.max(0, local - 4), fps, config: { damping: 13, mass: 0.9, stiffness: 120 } });
-  const scale = interpolate(s, [0, 1], [0.82, 1]);
-  const opacity = interpolate(frame, [LOGO_START + 2, LOGO_START + 16], [0, 1], clampCfg);
+  const s = spring({ frame: Math.max(0, local), fps, config: { damping: 16, mass: 1, stiffness: 95 } });
+  const scale = interpolate(s, [0, 1], [0.55, 1]);
+  const opacity = interpolate(frame, [LOGO_START, LOGO_START + 18], [0, 1], clampCfg);
 
   const glow = interpolate(local, [0, 18, 60], [0, 0.4, 0.24], clampCfg);
 
@@ -383,35 +353,6 @@ const LogoScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => 
   );
 };
 
-// Box -> Logo: fade cruzado dos dois com um flash branco rápido no meio,
-// selando a "virada" — mesmo princípio do flash Cena1->Cena2.
-const BoxToLogo: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
-  const boxOpacity = interpolate(frame, [LOGO_START, LOGO_START + 9], [1, 0], clampCfg);
-  const boxScale = interpolate(frame, [LOGO_START, LOGO_START + 9], [1, 1.08], clampCfg);
-  const w = BOX_DISPLAY_W * boxScale;
-  const h = w * (BOX.h / BOX.w);
-
-  return (
-    <>
-      {boxOpacity > 0 && (
-        <Img
-          src={staticFile(`uai-tofu/${BOX.src}`)}
-          style={{
-            position: 'absolute',
-            left: CENTER_X - w / 2,
-            top: CENTER_Y - h / 2,
-            width: w,
-            height: h,
-            opacity: boxOpacity,
-            filter: `blur(${(1 - boxOpacity) * 6}px)`,
-          }}
-        />
-      )}
-      <LogoScene frame={frame} fps={fps} />
-    </>
-  );
-};
-
 // =============================================================================
 // Composição principal
 // =============================================================================
@@ -426,8 +367,6 @@ export const UaiTofuMantra: React.FC = () => {
 
   // Flash da fusão texto -> produto.
   const mergeFlash = interpolate(frame, [MERGE_END - 3, MERGE_END + 2, MERGE_END + 12], [0, 0.8, 0], clampCfg);
-  // Flash da virada embalagem -> logo.
-  const logoFlash = interpolate(frame, [LOGO_START - 2, LOGO_START + 2, LOGO_START + 10], [0, 0.6, 0], clampCfg);
 
   const dissolve = interpolate(frame, [DISSOLVE_START, DURATION], [0, 1], clampCfg);
 
@@ -441,27 +380,13 @@ export const UaiTofuMantra: React.FC = () => {
         <RevealScene frame={frame} fps={fps} />
       </AbsoluteFill>
 
-      {/* Fade-in ao entrar no giro, fade-out logo depois que ele termina —
-          entrega a caixa pra BoxToLogo sem nenhum frame com as duas juntas. */}
-      <AbsoluteFill
-        style={{
-          opacity: interpolate(
-            frame,
-            [SPIN_START - 2, SPIN_START + 4, SPIN_END, SPIN_END + 6],
-            [0, 1, 1, 0],
-            clampCfg
-          ),
-        }}
-      >
-        <SpinBox frame={frame} />
-      </AbsoluteFill>
-
-      <AbsoluteFill style={{ opacity: interpolate(frame, [SPIN_END - 1, SPIN_END + 2], [0, 1], clampCfg) }}>
-        <BoxToLogo frame={frame} fps={fps} />
+      {/* A logo cresce a partir do mesmo encolhimento da embalagem+fatias —
+          crossfade suave, sem flash, sem giro. */}
+      <AbsoluteFill style={{ opacity: interpolate(frame, [LOGO_START - 2, LOGO_START + 8], [0, 1], clampCfg) }}>
+        <LogoScene frame={frame} fps={fps} />
       </AbsoluteFill>
 
       <AbsoluteFill style={{ backgroundColor: CREAM, opacity: mergeFlash, mixBlendMode: 'screen' }} />
-      <AbsoluteFill style={{ backgroundColor: CREAM, opacity: logoFlash, mixBlendMode: 'screen' }} />
       <AbsoluteFill style={{ backgroundColor: '#000', opacity: dissolve }} />
     </AbsoluteFill>
   );
