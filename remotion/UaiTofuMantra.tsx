@@ -287,12 +287,13 @@ const SLICE_SRCS: SliceSrc[] = [
 
 type FieldCfg = { srcIndex: number; x: number; y: number; rot: number; long: number };
 
-// 12 posições espalhadas pela tela INTEIRA (não só ao redor da caixa) — um
-// grid solto de 3 colunas x 5 linhas com o miolo (onde a embalagem fica)
-// vazado, mantendo espaçamento regular entre elas. As 6 fotos reais se
-// repetem 2x cada, em ângulos/tamanhos diferentes — nunca inventamos uma
-// fatia nova. Tamanhos (long) verificados numericamente contra a borda do
-// canvas considerando rotação + balanço de idle antes de subir aqui.
+// 16 posições espalhadas pela tela INTEIRA (não só ao redor da caixa) — a
+// grade de 3 colunas x 5 linhas de base (12 fatias) mais 4 fatias extras nos
+// vãos que sobravam vazios entre as fileiras, sempre com o miolo (onde a
+// embalagem fica) livre. As 6 fotos reais se repetem (2-3x cada, em
+// ângulos/tamanhos diferentes) — nunca inventamos uma fatia nova. Posições e
+// tamanhos (long) verificados numericamente: sem sair do canvas e sem
+// sobrepor a caixinha uma vez assentadas.
 const FIELD: FieldCfg[] = [
   { srcIndex: 0, x: 208, y: 215, rot: -18, long: 236 },
   { srcIndex: 1, x: 540, y: 195, rot: 8, long: 244 },
@@ -306,6 +307,10 @@ const FIELD: FieldCfg[] = [
   { srcIndex: 3, x: 907, y: 1370, rot: -16, long: 246 },
   { srcIndex: 4, x: 208, y: 1710, rot: 12, long: 230 },
   { srcIndex: 5, x: 872, y: 1710, rot: -10, long: 240 },
+  { srcIndex: 0, x: 500, y: 380, rot: 0, long: 190 },
+  { srcIndex: 5, x: 620, y: 1600, rot: 0, long: 180 },
+  { srcIndex: 1, x: 140, y: 1160, rot: 0, long: 190 },
+  { srcIndex: 2, x: 980, y: 1150, rot: 0, long: 120 },
 ];
 
 const SliceField: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => (
