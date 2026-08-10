@@ -12,30 +12,32 @@ import {
 
 // =============================================================================
 // UAI TOFU — "O Mantra"
-// Vertical 9:16, 30fps, 225 frames (7.5s).
+// Vertical 9:16, 30fps, 340 frames (~11.3s).
 //
 // Estrutura (seguindo a referência "Royal Tempeh" enviada pelo cliente):
 //   Cena 1 — Manifesto tipográfico (Lato Black, 3 frases empilhadas)
 //   Cena 2 — As palavras se fundem num ponto central; a embalagem nasce no
-//            centro e 12 fatias reais se espalham preenchendo a tela toda,
-//            balançando levemente
+//            centro e 16 fatias reais se espalham preenchendo a tela toda,
+//            balançando o tempo todo (nunca "congelam")
 //   Cena 3 — As fatias e a embalagem somem JUNTAS (encolhendo/desfocando no
-//            próprio lugar, com um stagger mínimo entre as fatias)
-//   Cena 4 — A logo real surge desse encolhimento, hold, dissolve pra preto
+//            próprio lugar, com um stagger mínimo entre as fatias) até sumir
+//            por completo da tela
+//   Cena 4 — SÓ DEPOIS de tudo sumido a logo real cresce, fica em hold, e
+//            dissolve pra preto — sequencial, não crossfade com a saída
 //
 // O fundo troca de verde profundo (texto) para o amarelo da marca (produto e
 // logo) numa única transição de cor compartilhada, na mesma janela da fusão.
 //
-// Duração estendida de 225 -> 300 frames (7.5s -> 10s): preencher a tela
-// inteira de fatias e depois convergi-las pra dentro da caixa é um beat bem
-// mais rico que precisa de espaço pra respirar — não cabia no tempo antigo
-// sem parecer apressado.
+// Duração estendida de 225 -> 340 frames (7.5s -> ~11.3s) ao longo das
+// iterações: preencher a tela inteira de fatias e dar tempo pra saída
+// terminar por completo antes da logo entrar são beats que precisam de
+// espaço pra respirar — não cabiam no tempo antigo sem parecer apressado.
 // =============================================================================
 
 export const FPS = 30;
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
-export const DURATION = 300;
+export const DURATION = 340;
 
 const CENTER_X = 540;
 const CENTER_Y = 960;
@@ -47,8 +49,9 @@ const MERGE_END = 100; // ponto de "fusão" — flash, embalagem+fatias nascem d
 const BOX_EXIT_START = 236; // embalagem e fatias começam a sumir JUNTAS
 const BOX_EXIT_END = 258;
 const EXIT_STAGGER = 0.6; // stagger mínimo entre fatias na saída — ainda lê como "junto", não em fila
-const LOGO_START = 250; // a logo já começa a crescer antes do encolhimento terminar — crossfade suave
-const DISSOLVE_START = 285;
+const FIELD_EXIT_DONE = BOX_EXIT_END + 15 * EXIT_STAGGER; // instante em que a última fatia (índice 15) some de vez
+const LOGO_START = FIELD_EXIT_DONE + 3; // só cresce DEPOIS que embalagem+fatias sumiram por completo
+const DISSOLVE_START = LOGO_START + 45; // tempo de sobra pra logo assentar (spring) e ficar em hold
 
 const clampCfg = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 
@@ -328,20 +331,6 @@ const SliceField: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =>
       const ey = interpolate(es, [0, 1], [CENTER_Y, f.y] as number[]);
       const entranceOpacity = interpolate(es, [0, 1], [0, 1]);
 
-      // Balanço vivo durante todo o respiro — fase e frequência próprias por
-      // fatia, envelope suave na entrada e desligando pouco antes da saída
-      // começar (pra não brigar com o encolhimento da saída).
-      const idlePhase = i * 1.24 + 0.5;
-      const idleEnv = interpolate(
-        frame,
-        [MERGE_END + 30, MERGE_END + 44, BOX_EXIT_START - 14, BOX_EXIT_START],
-        [0, 1, 1, 0],
-        clampCfg,
-      );
-      const idleX = idleEnv * Math.sin(frame * 0.032 + idlePhase) * 7;
-      const idleY = idleEnv * Math.sin(frame * 0.026 + idlePhase + 1.4) * 11;
-      const idleRot = idleEnv * Math.sin(frame * 0.022 + idlePhase + 0.7) * 3.5;
-
       // Saída em conjunto: a fatia encolhe e desfoca NO PRÓPRIO LUGAR, na
       // mesma janela (BOX_EXIT_START -> BOX_EXIT_END) que a embalagem usa
       // pra sumir — nada voa pro centro. Um stagger de frações de segundo
@@ -351,6 +340,21 @@ const SliceField: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =>
         ...clampCfg,
         easing: Easing.inOut(Easing.cubic),
       });
+
+      // Balanço vivo o tempo todo — fase e frequência próprias por fatia,
+      // entra suave e continua balançando até bem perto de sumir (sem
+      // "congelar" antes da saída começar), acompanhando o stagger de cada
+      // fatia em vez de um corte fixo global.
+      const idlePhase = i * 1.24 + 0.5;
+      const idleEnv = interpolate(
+        frame,
+        [MERGE_END + 30, MERGE_END + 44, BOX_EXIT_START + exitDelay - 4, BOX_EXIT_START + exitDelay + 6],
+        [0, 1, 1, 0],
+        clampCfg,
+      );
+      const idleX = idleEnv * Math.sin(frame * 0.032 + idlePhase) * 7;
+      const idleY = idleEnv * Math.sin(frame * 0.026 + idlePhase + 1.4) * 11;
+      const idleRot = idleEnv * Math.sin(frame * 0.022 + idlePhase + 0.7) * 3.5;
       const exitScale = interpolate(exitT, [0, 1], [1, 0.15]);
       const exitOpacity = interpolate(exitT, [0.35, 1], [1, 0]);
       const exitBlur = interpolate(exitT, [0, 1], [0, 8]);
@@ -384,9 +388,8 @@ const SliceField: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =>
 );
 
 // =============================================================================
-// CENA 4 — Logo (250-300)
-// A logo real cresce a partir do mesmo ponto onde a embalagem encolheu, fica
-// em hold, e dissolve pra preto no final.
+// CENA 4 — Logo (entra só depois que a Cena 3 termina por completo)
+// A logo real cresce no centro, fica em hold, e dissolve pra preto no final.
 // =============================================================================
 const LOGO = { src: 'logo.png', w: 460, h: 376 };
 const LOGO_DISPLAY_W = 420;
@@ -454,8 +457,8 @@ export const UaiTofuMantra: React.FC = () => {
         <SliceField frame={frame} fps={fps} />
       </AbsoluteFill>
 
-      {/* A logo cresce a partir do mesmo encolhimento da embalagem —
-          crossfade suave, sem flash, sem giro. */}
+      {/* A logo só entra depois que embalagem+fatias já sumiram por
+          completo — sequencial, sem crossfade, sem flash, sem giro. */}
       <AbsoluteFill style={{ opacity: interpolate(frame, [LOGO_START - 2, LOGO_START + 8], [0, 1], clampCfg) }}>
         <LogoScene frame={frame} fps={fps} />
       </AbsoluteFill>
