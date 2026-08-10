@@ -12,32 +12,35 @@ import {
 
 // =============================================================================
 // UAI TOFU — "O Mantra"
-// Vertical 9:16, 30fps, 340 frames (~11.3s).
+// Vertical 9:16, 30fps, 347 frames (~11.6s).
 //
 // Estrutura (seguindo a referência "Royal Tempeh" enviada pelo cliente):
 //   Cena 1 — Manifesto tipográfico (Lato Black, 3 frases empilhadas)
 //   Cena 2 — As palavras se fundem num ponto central; a embalagem nasce no
 //            centro e 16 fatias reais se espalham preenchendo a tela toda,
 //            balançando o tempo todo (nunca "congelam")
-//   Cena 3 — As fatias e a embalagem somem JUNTAS (encolhendo/desfocando no
-//            próprio lugar, com um stagger mínimo entre as fatias) até sumir
-//            por completo da tela
-//   Cena 4 — SÓ DEPOIS de tudo sumido a logo real cresce, fica em hold, e
-//            dissolve pra preto — sequencial, não crossfade com a saída
+//   Cena 3a — As fatias voam de volta, uma a uma, pra DENTRO da embalagem —
+//             encolhendo, desfocando e desaparecendo POR TRÁS dela (a
+//             embalagem fica por cima, absorvendo cada fatia)
+//   Cena 3b — SÓ DEPOIS que a última fatia sumiu a embalagem, sozinha,
+//             encolhe até desaparecer por completo
+//   Cena 4 — SÓ DEPOIS que a embalagem sumiu a logo real cresce, fica em
+//            hold, e dissolve pra preto — tudo sequencial, sem crossfade
 //
 // O fundo troca de verde profundo (texto) para o amarelo da marca (produto e
 // logo) numa única transição de cor compartilhada, na mesma janela da fusão.
 //
-// Duração estendida de 225 -> 340 frames (7.5s -> ~11.3s) ao longo das
-// iterações: preencher a tela inteira de fatias e dar tempo pra saída
-// terminar por completo antes da logo entrar são beats que precisam de
-// espaço pra respirar — não cabiam no tempo antigo sem parecer apressado.
+// Duração estendida de 225 -> 347 frames (7.5s -> ~11.6s) ao longo das
+// iterações: preencher a tela inteira de fatias e depois dar tempo pra cada
+// fase da saída (fatias -> caixinha -> logo) terminar por completo antes da
+// próxima começar são beats que precisam de espaço pra respirar — não
+// cabiam no tempo antigo sem parecer apressado.
 // =============================================================================
 
 export const FPS = 30;
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
-export const DURATION = 340;
+export const DURATION = 347;
 
 const CENTER_X = 540;
 const CENTER_Y = 960;
@@ -46,11 +49,13 @@ const CENTER_Y = 960;
 const S1_START = 0;
 const MERGE_START = 83; // palavras começam a colapsar pro centro
 const MERGE_END = 100; // ponto de "fusão" — flash, embalagem+fatias nascem daqui
-const BOX_EXIT_START = 236; // embalagem e fatias começam a sumir JUNTAS
-const BOX_EXIT_END = 258;
-const EXIT_STAGGER = 0.6; // stagger mínimo entre fatias na saída — ainda lê como "junto", não em fila
-const FIELD_EXIT_DONE = BOX_EXIT_END + 15 * EXIT_STAGGER; // instante em que a última fatia (índice 15) some de vez
-const LOGO_START = FIELD_EXIT_DONE + 3; // só cresce DEPOIS que embalagem+fatias sumiram por completo
+const CONVERGE_START = 210; // fatias começam a voar de volta pra dentro da embalagem, por trás dela
+const CONVERGE_STAGGER = 1.2;
+const CONVERGE_TRAVEL = 22;
+const CONVERGE_END = CONVERGE_START + 15 * CONVERGE_STAGGER + CONVERGE_TRAVEL; // última fatia (índice 15) absorvida
+const BOX_EXIT_START = CONVERGE_END + 2; // SÓ DEPOIS de todas as fatias sumidas a caixinha encolhe sozinha
+const BOX_EXIT_END = BOX_EXIT_START + 22;
+const LOGO_START = BOX_EXIT_END + 3; // só cresce DEPOIS que a caixinha sumiu por completo
 const DISSOLVE_START = LOGO_START + 45; // tempo de sobra pra logo assentar (spring) e ficar em hold
 
 const clampCfg = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
@@ -204,25 +209,29 @@ const MantraScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =
 };
 
 // =============================================================================
-// CENA 2 — Fusão -> Embalagem no centro + 12 fatias preenchendo a tela
-// (83-236)
+// CENA 2 — Fusão -> Embalagem no centro + 16 fatias preenchendo a tela
 // No instante da fusão (MERGE_END), um flash marca a transformação: a
-// embalagem nasce no centro e 12 fatias reais (as 6 fotos reais, reaproveitadas
+// embalagem nasce no centro e 16 fatias reais (as 6 fotos reais, reaproveitadas
 // em ângulos/posições diferentes — nunca fabricamos foto nova) se espalham
 // preenchendo a tela inteira, cada uma com seu próprio balanço, até o
-// instante em que tudo começa a sumir.
+// instante em que começam a voltar.
 //
-// CENA 3 — Saída em conjunto (236-258)
-// A embalagem e as 12 fatias somem JUNTAS — cada uma encolhe/desfoca no seu
-// próprio lugar (nada voa pro centro), com um stagger de poucos frames entre
-// elas pra não parecer um corte seco em bloco único.
+// CENA 3a — Sucção (CONVERGE_START -> CONVERGE_END)
+// As fatias voam de volta, uma a uma, pra DENTRO da embalagem — encolhendo,
+// desfocando e sumindo POR TRÁS dela (a embalagem renderiza por cima nesse
+// trecho, então cada fatia parece ser literalmente absorvida por ela).
+//
+// CENA 3b — Saída da embalagem (BOX_EXIT_START -> BOX_EXIT_END)
+// SÓ DEPOIS que a última fatia já foi absorvida, a embalagem — sozinha,
+// sem mais nada na tela — encolhe até desaparecer por completo.
 // =============================================================================
 const BOX = { src: 'box.png', w: 557, h: 705 };
 const BOX_DISPLAY_W = 540;
 
 // Embalagem: entra assentando com peso (spring amortecida, sem "pop") no
-// centro, fica parada durante toda a Cena 2, e encolhe/some junto com as
-// fatias a partir de BOX_EXIT_START.
+// centro, fica parada durante toda a Cena 2 e a sucção das fatias (ficando
+// por cima delas nesse trecho), e só encolhe/some sozinha a partir de
+// BOX_EXIT_START, quando a tela já está livre de fatias.
 const BoxScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const s = spring({ frame: Math.max(0, frame - MERGE_END), fps, config: { damping: 16, mass: 1.15, stiffness: 95 } });
   const entranceScale = interpolate(s, [0, 1], [0.08, 1]);
@@ -331,41 +340,44 @@ const SliceField: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =>
       const ey = interpolate(es, [0, 1], [CENTER_Y, f.y] as number[]);
       const entranceOpacity = interpolate(es, [0, 1], [0, 1]);
 
-      // Saída em conjunto: a fatia encolhe e desfoca NO PRÓPRIO LUGAR, na
-      // mesma janela (BOX_EXIT_START -> BOX_EXIT_END) que a embalagem usa
-      // pra sumir — nada voa pro centro. Um stagger de frações de segundo
-      // entre fatias evita o corte seco de "tudo em bloco único".
-      const exitDelay = i * EXIT_STAGGER;
-      const exitT = interpolate(frame, [BOX_EXIT_START + exitDelay, BOX_EXIT_END + exitDelay], [0, 1], {
+      // Sucção: cada fatia é puxada de volta pro centro (pra dentro da
+      // embalagem, que renderiza por cima nesse trecho), acelerando
+      // (Easing.in.exp — sensação de "sugada") e encolhendo/desfocando/
+      // sumindo ao longo do caminho. Mesma ordem/stagger da entrada.
+      const convergeDelay = CONVERGE_START + i * CONVERGE_STAGGER;
+      const ct = interpolate(frame, [convergeDelay, convergeDelay + CONVERGE_TRAVEL], [0, 1], {
         ...clampCfg,
-        easing: Easing.inOut(Easing.cubic),
+        easing: Easing.in(Easing.exp),
       });
 
       // Balanço vivo o tempo todo — fase e frequência próprias por fatia,
-      // entra suave e continua balançando até bem perto de sumir (sem
-      // "congelar" antes da saída começar), acompanhando o stagger de cada
-      // fatia em vez de um corte fixo global.
+      // entra suave e continua balançando até bem perto de ser sugada (sem
+      // "congelar" antes), acompanhando o stagger de cada fatia em vez de
+      // um corte fixo global.
       const idlePhase = i * 1.24 + 0.5;
       const idleEnv = interpolate(
         frame,
-        [MERGE_END + 30, MERGE_END + 44, BOX_EXIT_START + exitDelay - 4, BOX_EXIT_START + exitDelay + 6],
+        [MERGE_END + 30, MERGE_END + 44, convergeDelay - 4, convergeDelay + 4],
         [0, 1, 1, 0],
         clampCfg,
       );
       const idleX = idleEnv * Math.sin(frame * 0.032 + idlePhase) * 7;
       const idleY = idleEnv * Math.sin(frame * 0.026 + idlePhase + 1.4) * 11;
       const idleRot = idleEnv * Math.sin(frame * 0.022 + idlePhase + 0.7) * 3.5;
-      const exitScale = interpolate(exitT, [0, 1], [1, 0.15]);
-      const exitOpacity = interpolate(exitT, [0.35, 1], [1, 0]);
-      const exitBlur = interpolate(exitT, [0, 1], [0, 8]);
 
-      const x = ex + idleX;
-      const y = ey + idleY;
-      const scale = entranceScale * exitScale;
+      const baseX = ex + idleX;
+      const baseY = ey + idleY;
+      const x = interpolate(ct, [0, 1], [baseX, CENTER_X] as number[]);
+      const y = interpolate(ct, [0, 1], [baseY, CENTER_Y] as number[]);
+      const convergeScale = interpolate(ct, [0, 1], [1, 0.1]);
+      const convergeOpacity = interpolate(ct, [0.55, 1], [1, 0]);
+      const convergeBlur = interpolate(ct, [0.4, 1], [0, 7]);
+
+      const scale = entranceScale * convergeScale;
       const w = cfg.w * (f.long / Math.max(cfg.w, cfg.h)) * scale;
       const h = cfg.h * (f.long / Math.max(cfg.w, cfg.h)) * scale;
       const rot = f.rot + idleRot;
-      const opacity = entranceOpacity * exitOpacity;
+      const opacity = entranceOpacity * convergeOpacity;
 
       return (
         <Img
@@ -379,7 +391,7 @@ const SliceField: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =>
             height: h,
             opacity: opacity * 0.96,
             transform: `rotate(${rot}deg)`,
-            filter: exitBlur > 0.1 ? `blur(${exitBlur}px)` : undefined,
+            filter: convergeBlur > 0.1 ? `blur(${convergeBlur}px)` : undefined,
           }}
         />
       );
@@ -452,9 +464,12 @@ export const UaiTofuMantra: React.FC = () => {
 
       <MantraScene frame={frame} fps={fps} />
 
+      {/* SliceField antes, BoxScene depois: a embalagem renderiza por cima
+          das fatias, então na sucção (Cena 3a) elas somem visualmente por
+          trás dela, como se estivessem sendo absorvidas. */}
       <AbsoluteFill style={{ opacity: interpolate(frame, [MERGE_END - 4, MERGE_END + 4], [0, 1], clampCfg) }}>
-        <BoxScene frame={frame} fps={fps} />
         <SliceField frame={frame} fps={fps} />
+        <BoxScene frame={frame} fps={fps} />
       </AbsoluteFill>
 
       {/* A logo só entra depois que embalagem+fatias já sumiram por
