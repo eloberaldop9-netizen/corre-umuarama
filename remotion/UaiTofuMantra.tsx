@@ -112,25 +112,10 @@ type WordSpec = { text: string; color: string };
 type LineSpec = { words: WordSpec[]; delay: number };
 
 const LINES: LineSpec[] = [
-  { words: [{ text: 'EU', color: CREAM }, { text: 'COMO', color: YELLOW }, { text: 'TOFU', color: CREAM }], delay: 0 },
-  { words: [{ text: 'EU', color: CREAM }, { text: 'AMO', color: YELLOW }, { text: 'TOFU', color: CREAM }], delay: 20 },
-  { words: [{ text: 'EU', color: CREAM }, { text: 'VIVO', color: YELLOW }, { text: 'TOFU', color: CREAM }], delay: 40 },
+  { words: [{ text: 'EU', color: CREAM }, { text: 'COMO', color: YELLOW }, { text: 'UAI', color: CREAM }, { text: 'TOFU', color: CREAM }], delay: 0 },
+  { words: [{ text: 'EU', color: CREAM }, { text: 'AMO', color: YELLOW }, { text: 'UAI', color: CREAM }, { text: 'TOFU', color: CREAM }], delay: 20 },
+  { words: [{ text: 'EU', color: CREAM }, { text: 'VIVO', color: YELLOW }, { text: 'UAI', color: CREAM }, { text: 'TOFU', color: CREAM }], delay: 40 },
 ];
-
-// Grade cinética amarela bem sutil, com uma deriva contínua e lenta — só
-// pra a cena nunca ficar estática, sem depender de movimento de câmera.
-const KineticGrid: React.FC<{ frame: number }> = ({ frame }) => {
-  const drift = (frame * 0.25) % 96;
-  const opacity = 0.05 * interpolate(frame, [MERGE_START, MERGE_END], [1, 0], clampCfg);
-  if (opacity <= 0) return null;
-  return (
-    <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity }}>
-      {Array.from({ length: Math.ceil(HEIGHT / 96) + 1 }).map((_, i) => (
-        <line key={i} x1={0} y1={i * 96 - drift} x2={WIDTH} y2={i * 96 - drift} stroke={YELLOW} strokeWidth={1} />
-      ))}
-    </svg>
-  );
-};
 
 // Entrada polida — o mesmo princípio de movimento já aprovado pela marca em
 // "UAI, é ciência!": leve translateY + skew + scale, com spring suave. Nada
@@ -191,7 +176,6 @@ const MantraScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) =
 
   return (
     <AbsoluteFill>
-      <KineticGrid frame={frame} />
       <AbsoluteFill
         style={{
           transform: `scale(${mergeScale})`,
