@@ -45,7 +45,12 @@ export const HEIGHT = 1920;
 export const DURATION = 347;
 
 const CENTER_X = 540;
-const CENTER_Y = 960;
+const CENTER_Y = 960; // centro real da tela — usado pelo texto (Cena 1) e como ponto de nascimento dos cubos (flash da fusão)
+
+// A caixinha (e o "alvo" pra onde os cubos são sugados, e a logo que nasce
+// no mesmo lugar depois) fica um pouco ACIMA do centro real da tela — pedido
+// explícito do cliente pra não ficar "em cima" da fileira de cubos do meio.
+const FIELD_CENTER_Y = CENTER_Y - 25;
 
 // ---- Timeline (frames @ 30fps) --------------------------------------------
 const S1_START = 0;
@@ -243,7 +248,7 @@ const BoxScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
     <AbsoluteFill
       style={{
         transform: `scale(${scale})`,
-        transformOrigin: `${CENTER_X}px ${CENTER_Y}px`,
+        transformOrigin: `${CENTER_X}px ${FIELD_CENTER_Y}px`,
         opacity,
         filter: `blur(${blur}px)`,
       }}
@@ -252,7 +257,7 @@ const BoxScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
         style={{
           position: 'absolute',
           left: CENTER_X - w * 0.4,
-          top: CENTER_Y + h * 0.44,
+          top: FIELD_CENTER_Y + h * 0.44,
           width: w * 0.8,
           height: 36,
           opacity: shadowOpacity,
@@ -265,7 +270,7 @@ const BoxScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
         style={{
           position: 'absolute',
           left: CENTER_X - w / 2,
-          top: CENTER_Y - h / 2,
+          top: FIELD_CENTER_Y - h / 2,
           width: w,
           height: h,
         }}
@@ -291,27 +296,32 @@ const CUBE_SRCS: CubeSrc[] = [
 type FieldCfg = { srcIndex: number; x: number; y: number; rot: number; long: number };
 
 // 12 posições espalhadas pela tela INTEIRA (não só ao redor da caixa) — grid
-// de 3 colunas x 5 linhas com o miolo (onde a embalagem fica) vazado. Só 10
-// fotos reais aqui (contra 6 do vídeo do fatiado), então praticamente sem
-// repetição — 2 delas voltam em ângulo/posição diferente pra fechar as 12
-// posições. Nada de fillers extras: os cubos são bem mais "quadrados" que
-// as fatias (aspecto ~1:1), então no mesmo "long" ocupam bem mais área —
-// tentar encaixar posições extras nos vãos como no vídeo do fatiado dava
-// sobreposição entre cubos vizinhos. Posições/tamanhos verificados
-// numericamente: sem sair do canvas e sem sobrepor a caixinha assentados.
+// de 3 colunas x 5 linhas com o miolo (onde a embalagem fica, em
+// FIELD_CENTER_Y) vazado. Só 10 fotos reais aqui (contra 6 do vídeo do
+// fatiado), então praticamente sem repetição — 2 delas voltam em
+// ângulo/posição diferente pra fechar as 12 posições. Nada de fillers
+// extras: os cubos são bem mais "quadrados" que as fatias (aspecto ~1:1),
+// então no mesmo "long" ocupam MUITO mais área numa rotação — reaproveitar
+// direto as posições/tamanhos do vídeo do fatiado (ajustados só pra fatia)
+// deixava a caixinha sobrepondo várias fileiras de cubo. Cada linha e coluna
+// aqui foi resolvida calculando a metade da largura/altura já rotacionada de
+// cada cubo (não dá pra usar só o "long" cru) e garantindo folga real contra
+// a caixinha, contra a fileira vizinha e contra a borda do canvas — inclusive
+// considerando o balanço de idle (sway) e o overshoot do spring de entrada,
+// não só a posição de repouso. Verificado numericamente ponta a ponta.
 const FIELD: FieldCfg[] = [
-  { srcIndex: 0, x: 208, y: 215, rot: -18, long: 236 },
-  { srcIndex: 1, x: 540, y: 195, rot: 8, long: 244 },
-  { srcIndex: 2, x: 872, y: 215, rot: 14, long: 238 },
-  { srcIndex: 3, x: 173, y: 560, rot: -10, long: 248 },
-  { srcIndex: 4, x: 907, y: 560, rot: 16, long: 232 },
-  { srcIndex: 5, x: 158, y: 965, rot: -14, long: 250 },
-  { srcIndex: 6, x: 922, y: 965, rot: 10, long: 236 },
-  { srcIndex: 7, x: 173, y: 1370, rot: -8, long: 240 },
-  { srcIndex: 8, x: 540, y: 1390, rot: 18, long: 234 },
-  { srcIndex: 9, x: 907, y: 1370, rot: -16, long: 246 },
-  { srcIndex: 0, x: 208, y: 1710, rot: 12, long: 230 },
-  { srcIndex: 1, x: 872, y: 1710, rot: -10, long: 240 },
+  { srcIndex: 0, x: 208, y: 160, rot: -18, long: 230 },
+  { srcIndex: 1, x: 540, y: 170, rot: 8, long: 238 },
+  { srcIndex: 2, x: 872, y: 164, rot: 14, long: 232 },
+  { srcIndex: 3, x: 173, y: 456, rot: -10, long: 230 },
+  { srcIndex: 4, x: 907, y: 453, rot: 16, long: 220 },
+  { srcIndex: 5, x: 144, y: 935, rot: -14, long: 210 },
+  { srcIndex: 6, x: 936, y: 935, rot: 10, long: 200 },
+  { srcIndex: 7, x: 173, y: 1410, rot: -8, long: 220 },
+  { srcIndex: 8, x: 540, y: 1428, rot: 18, long: 226 },
+  { srcIndex: 9, x: 907, y: 1432, rot: -16, long: 222 },
+  { srcIndex: 0, x: 208, y: 1711, rot: 12, long: 220 },
+  { srcIndex: 1, x: 872, y: 1713, rot: -10, long: 228 },
 ];
 
 const CubeField: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => (
@@ -355,7 +365,7 @@ const CubeField: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => 
       const baseX = ex + idleX;
       const baseY = ey + idleY;
       const x = interpolate(ct, [0, 1], [baseX, CENTER_X] as number[]);
-      const y = interpolate(ct, [0, 1], [baseY, CENTER_Y] as number[]);
+      const y = interpolate(ct, [0, 1], [baseY, FIELD_CENTER_Y] as number[]);
       const convergeScale = interpolate(ct, [0, 1], [1, 0.1]);
       const convergeOpacity = interpolate(ct, [0.55, 1], [1, 0]);
       const convergeBlur = interpolate(ct, [0.4, 1], [0, 7]);
@@ -411,7 +421,7 @@ const LogoScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => 
         style={{
           opacity: glow,
           mixBlendMode: 'multiply',
-          background: `radial-gradient(circle at 50% 50%, #ffffff 0%, ${BG_YELLOW} 55%, transparent 75%)`,
+          background: `radial-gradient(circle at 50% ${(FIELD_CENTER_Y / HEIGHT) * 100}%, #ffffff 0%, ${BG_YELLOW} 55%, transparent 75%)`,
         }}
       />
       <Img
@@ -419,7 +429,7 @@ const LogoScene: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => 
         style={{
           position: 'absolute',
           left: CENTER_X - w / 2,
-          top: CENTER_Y - h / 2,
+          top: FIELD_CENTER_Y - h / 2,
           width: w,
           height: h,
           opacity,
