@@ -26,7 +26,6 @@ export const TEXTS = {
   scene6: {
     headline: 'IKIGAI',
     sub: 'Unidos pelo propósito,\nfortalecidos pela tradição.',
-    japanese: '志に結ばれ、伝統に力づけられる。',
   },
   scene7: {
     kicker: 'ACEU',

@@ -2,7 +2,7 @@
  * ACEU Nipon Fest 2026 — identidade visual oficial.
  * Fonte: manual de marca fornecido. Não alterar sem atualizar o manual.
  */
-import { FONT_BODY, FONT_DISPLAY, FONT_JP } from '../lib/fonts';
+import { FONT_BODY, FONT_DISPLAY } from '../lib/fonts';
 
 export const BRAND = {
   red: '#D71920', // Akai — energia, cultura japonesa
@@ -17,7 +17,6 @@ export const FONTS = {
   // geométrica mais próxima já carregada no projeto (Montserrat) para tipografia cinética.
   display: FONT_DISPLAY,
   body: FONT_BODY,
-  japanese: FONT_JP,
 } as const;
 
 // Duração local de cada cena (frames a 30fps), seguindo o roteiro do briefing.

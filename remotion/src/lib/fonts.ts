@@ -7,7 +7,6 @@ import {
   montserrat700,
   montserrat800,
   montserrat900,
-  notoSansJp,
 } from './fontData';
 
 /**
@@ -19,7 +18,6 @@ import {
  */
 export const FONT_DISPLAY = 'Montserrat';
 export const FONT_BODY = 'Inter';
-export const FONT_JP = 'Noto Sans JP';
 
 const FACES: { family: string; weight: string; base64: string }[] = [
   { family: FONT_DISPLAY, weight: '500', base64: montserrat500 },
@@ -30,8 +28,6 @@ const FACES: { family: string; weight: string; base64: string }[] = [
   { family: FONT_BODY, weight: '400', base64: inter400 },
   { family: FONT_BODY, weight: '500', base64: inter500 },
   { family: FONT_BODY, weight: '600', base64: inter600 },
-  { family: FONT_JP, weight: '400', base64: notoSansJp },
-  { family: FONT_JP, weight: '600', base64: notoSansJp },
 ];
 
 let injected = false;

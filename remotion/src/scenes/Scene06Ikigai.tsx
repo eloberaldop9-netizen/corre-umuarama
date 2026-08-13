@@ -83,22 +83,6 @@ export const Scene06Ikigai: React.FC = () => {
               }}
             />
           ))}
-          <AnimatedText
-            text={TEXTS.scene6.japanese}
-            delay={revealStart + 34}
-            exitStart={textExit + 4}
-            exitDirection="top"
-            stagger={1}
-            wordDur={16}
-            style={{
-              fontFamily: FONTS.japanese,
-              fontWeight: 400,
-              fontSize: 28,
-              color: BRAND.taupe,
-              textAlign: 'center',
-              marginTop: 22,
-            }}
-          />
         </div>
       </AbsoluteFill>
 
