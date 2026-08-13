@@ -18,7 +18,6 @@ export const Scene04Cultura: React.FC = () => {
   const headlineExit = 44;
 
   const chainStart = 48;
-  const lineProgress = ci(frame, [chainStart, chainStart + 20], [0, 1], Easing.out(Easing.cubic));
   const chainExit = ci(frame, [80, 84], [0, 1], Easing.in(Easing.cubic));
 
   return (
@@ -83,24 +82,6 @@ export const Scene04Cultura: React.FC = () => {
         }}
       >
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 26 }}>
-          <svg
-            width={6}
-            height={140}
-            style={{ position: 'absolute', left: '50%', top: 6, transform: 'translateX(-50%)' }}
-          >
-            <line
-              x1={3}
-              y1={0}
-              x2={3}
-              y2={140}
-              stroke={BRAND.offWhite}
-              strokeWidth={2}
-              strokeOpacity={0.6}
-              pathLength={1}
-              strokeDasharray={1}
-              strokeDashoffset={1 - lineProgress}
-            />
-          </svg>
           {TEXTS.scene4.chain.map((word, i) => {
             const wStart = chainStart + i * 8;
             const p = ci(frame, [wStart, wStart + 12], [0, 1], Easing.out(Easing.cubic));

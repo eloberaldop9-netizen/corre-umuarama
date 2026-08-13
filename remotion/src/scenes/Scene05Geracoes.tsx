@@ -9,10 +9,12 @@ import { BRAND, FONTS, SAFE_AREA } from '../config/brand';
 import { TEXTS } from '../config/texts';
 import { ci } from '../lib/animation';
 
+// Cada palavra só começa a entrar depois que a anterior terminou de sair
+// por completo — nunca simultâneas, para não haver sobreposição/fantasma.
 const BEAT_WORDS = [
-  { start: 22, end: 42 },
-  { start: 42, end: 62 },
-  { start: 62, end: 84 },
+  { start: 42, outStart: 54, outEnd: 62 },
+  { start: 66, outStart: 78, outEnd: 86 },
+  { start: 90, outStart: 104, outEnd: 112 },
 ];
 
 /** Cena 5 — Build-up (0:11–0:14). Palavras entram no ritmo, círculo domina o centro. */
@@ -20,9 +22,9 @@ export const Scene05Geracoes: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
 
-  const circleProgress = ci(frame, [0, 70], [0.65, 0.98], Easing.out(Easing.cubic));
+  const circleProgress = ci(frame, [0, 100], [0.65, 0.98], Easing.out(Easing.cubic));
   const circleRotate = -70 + frame * 0.35;
-  const leadExitStart = 22;
+  const leadExitStart = 20;
 
   return (
     <AbsoluteFill>
@@ -44,11 +46,11 @@ export const Scene05Geracoes: React.FC = () => {
       >
         <AnimatedText
           text={TEXTS.scene5.lead}
-          delay={4}
+          delay={2}
           exitStart={leadExitStart}
           exitDirection="top"
           stagger={2}
-          wordDur={22}
+          wordDur={14}
           style={{
             fontFamily: FONTS.display,
             fontWeight: 600,
@@ -63,11 +65,10 @@ export const Scene05Geracoes: React.FC = () => {
 
       <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center' }}>
         {TEXTS.scene5.words.map((word, i) => {
-          const { start, end } = BEAT_WORDS[i];
+          const { start, outStart, outEnd } = BEAT_WORDS[i];
           const inDur = 10;
-          const outDur = 8;
           const p = ci(frame, [start, start + inDur], [0, 1], Easing.out(Easing.back(1.9)));
-          const outP = ci(frame, [end - outDur, end], [0, 1], Easing.in(Easing.exp));
+          const outP = ci(frame, [outStart, outEnd], [0, 1], Easing.in(Easing.exp));
           const scale = p * (1 - outP * 0.1);
           const blur = ci(frame, [start, start + inDur * 0.6], [10, 0]) + outP * 16;
           const opacity = p * (1 - outP);

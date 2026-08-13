@@ -20,9 +20,10 @@ export const FONTS = {
   japanese: FONT_JP,
 } as const;
 
-// Duração local de cada cena (frames a 30fps), seguindo o roteiro do briefing:
-// S1 0-2s, S2 2-5s, S3 5-8s, S4 8-11s, S5 11-14s, S6 14-17s, S7 17-20s, S8 20-22s.
-export const SCENE_DURATIONS = [60, 90, 90, 90, 90, 90, 90, 90] as const;
+// Duração local de cada cena (frames a 30fps), seguindo o roteiro do briefing.
+// S5 é mais longa que os 3s originais do briefing para caber as 3 palavras
+// (GERAÇÕES/CULTURAS/HISTÓRIAS) inteiramente sequenciais, sem sobreposição.
+export const SCENE_DURATIONS = [60, 90, 90, 90, 116, 90, 90, 90] as const;
 
 // Overlap entre cenas (corte antecipado da próxima cena sobre o fim da
 // anterior) — garante zero frames vazios (Mandamento 7).

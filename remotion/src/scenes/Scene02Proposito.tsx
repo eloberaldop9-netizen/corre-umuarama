@@ -16,7 +16,7 @@ export const Scene02Proposito: React.FC = () => {
   const { width, height } = useVideoConfig();
 
   const camScale = ci(frame, [0, 90], [1, 1.07], Easing.inOut(Easing.cubic));
-  const circleProgress = ci(frame, [0, 60], [0.18, 0.62], Easing.out(Easing.cubic));
+  const circleProgress = ci(frame, [0, 68], [0.12, 1], Easing.out(Easing.cubic));
   const exitStart = 72;
 
   return (

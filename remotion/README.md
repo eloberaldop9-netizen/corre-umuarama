@@ -33,16 +33,18 @@ src/
   lib/animation.ts                   primitivas de entrada/saída (ci, entryUp, exitTo...)
   config/                            brand.ts (paleta/timing) e texts.ts (copy)
 public/
-  logos/aceu-seal.png                selo oficial ACEU (asset real, nunca redesenhado)
+  logos/aceu-kicker.png              "ACEU" recortado do manual (fonte exata do logo)
+  logos/nippon-fest-wordmark.png     "NIPPON FEST" + selo, recortado do manual (fonte exata)
   sakura/branch-0{1,2}.png           galho de sakura oficial do manual de marca
 ```
 
 ## Notas de produção
 
-- O selo ACEU é o asset oficial extraído do manual de marca — nunca é
-  redesenhado; o lockup "NIPPON FEST" ao redor dele é tipografia (Montserrat,
-  a alternativa geométrica mais próxima da fonte oficial, que não é
-  distribuída digitalmente).
+- O logotipo ("ACEU" / "NIPPON FEST" + selo) nunca é retipografado: são
+  recortes em altíssima resolução extraídos diretamente do PDF do manual de
+  marca, preservando a fonte oficial exata (que não é distribuída
+  digitalmente). Apenas o restante do vídeo (títulos de cena, corpo de
+  texto) usa Montserrat/Inter como tipografia cinética.
 - Trilha sonora não está incluída (áudio licenciado fica por conta da
   produção); as cenas já têm pontos de impacto/silêncio pensados para
   sincronizar com uma trilha cinematográfica japonesa contemporânea
