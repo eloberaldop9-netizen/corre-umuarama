@@ -26,7 +26,7 @@ export const Scene02Proposito: React.FC = () => {
 
       <AbsoluteFill style={{ transform: `scale(${camScale})` }}>
         <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center' }}>
-          <BrushCircle progress={circleProgress} size={860} color={BRAND.red} strokeWidth={24} seed={11} rotate={-70} />
+          <BrushCircle progress={circleProgress} size={920} color={BRAND.red} strokeWidth={24} seed={11} rotate={-70} />
         </AbsoluteFill>
 
         <SakuraPetals frame={frame} fps={30} width={width} height={height} count={9} seed={4} intensity={0.6} fadeInEnd={30} />
@@ -50,7 +50,7 @@ export const Scene02Proposito: React.FC = () => {
               style={{
                 fontFamily: FONTS.display,
                 fontWeight: 900,
-                fontSize: 128,
+                fontSize: 92,
                 textTransform: 'uppercase',
                 letterSpacing: '-0.01em',
                 color: BRAND.red,

@@ -33,7 +33,7 @@ export const Scene06Ikigai: React.FC = () => {
       </AbsoluteFill>
 
       <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center', opacity: circleFade }}>
-        <BrushCircle progress={circleProgress} size={860} color={BRAND.red} strokeWidth={26} seed={21} rotate={-70 + frame * 0.35} />
+        <BrushCircle progress={circleProgress} size={860} color={BRAND.red} strokeWidth={26} seed={35} rotate={-70 + frame * 0.35} />
       </AbsoluteFill>
 
       <AbsoluteFill style={{ backgroundColor: BRAND.offWhite, opacity: impactFlash, pointerEvents: 'none' }} />
