@@ -1,30 +1,26 @@
 import React from 'react';
-import { AbsoluteFill, Easing, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion';
 import { BackgroundBase } from '../components/BackgroundBase';
 import { SeigaihaPattern } from '../components/SeigaihaPattern';
 import { CrossCameraPetal } from '../components/SakuraPetals';
 import { AnimatedText } from '../components/AnimatedText';
-import { BrushCircle } from '../components/BrushCircle';
 import { FilmGrain } from '../components/FilmGrain';
 import { BRAND, FONTS, SAFE_AREA } from '../config/brand';
 import { TEXTS } from '../config/texts';
-import { ci } from '../lib/animation';
 
-/** Cena 1 — Suspense (0:00–0:02). Tela quase limpa, pétala atravessa o quadro. */
+/**
+ * Cena 1 — Suspense (0:00–0:02). Tela quase limpa, pétala atravessa o quadro.
+ * Sem o Ensō aqui de propósito — o círculo só começa a ser desenhado do
+ * zero na Cena 2 (Propósito), para o gesto de pincel ler como um início real.
+ */
 export const Scene01Suspense: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
-
-  const circleProgress = ci(frame, [4, 66], [0, 0.22], Easing.out(Easing.cubic));
 
   return (
     <AbsoluteFill>
       <BackgroundBase color={BRAND.offWhite} glow="rgba(215,25,32,0.05)" />
       <SeigaihaPattern color={BRAND.black} opacity={0.04} />
-
-      <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <BrushCircle progress={circleProgress} size={760} color={BRAND.red} strokeWidth={22} seed={3} />
-      </AbsoluteFill>
 
       <CrossCameraPetal frame={frame} start={2} dur={18} width={width} height={height} fromLeft />
 

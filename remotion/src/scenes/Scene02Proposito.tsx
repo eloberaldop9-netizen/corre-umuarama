@@ -16,7 +16,8 @@ export const Scene02Proposito: React.FC = () => {
   const { width, height } = useVideoConfig();
 
   const camScale = ci(frame, [0, 90], [1, 1.07], Easing.inOut(Easing.cubic));
-  const circleProgress = ci(frame, [0, 68], [0.12, 1], Easing.out(Easing.cubic));
+  // O traço começa do zero aqui — nenhuma cena anterior antecipa o Ensō.
+  const circleProgress = ci(frame, [2, 70], [0, 1], Easing.out(Easing.cubic));
   const exitStart = 80;
 
   return (
