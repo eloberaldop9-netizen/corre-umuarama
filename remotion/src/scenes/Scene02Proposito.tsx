@@ -17,7 +17,7 @@ export const Scene02Proposito: React.FC = () => {
 
   const camScale = ci(frame, [0, 90], [1, 1.07], Easing.inOut(Easing.cubic));
   const circleProgress = ci(frame, [0, 68], [0.12, 1], Easing.out(Easing.cubic));
-  const exitStart = 72;
+  const exitStart = 80;
 
   return (
     <AbsoluteFill>
@@ -59,11 +59,11 @@ export const Scene02Proposito: React.FC = () => {
             />
             <AnimatedText
               text={TEXTS.scene2.sub}
-              delay={30}
-              exitStart={exitStart + 4}
+              delay={22}
+              exitStart={exitStart + 2}
               exitDirection="top"
-              stagger={3}
-              wordDur={24}
+              stagger={2}
+              wordDur={20}
               style={{
                 fontFamily: FONTS.body,
                 fontWeight: 400,

@@ -14,7 +14,7 @@ export const Scene03Tradicao: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
 
-  const exitStart = 72;
+  const exitStart = 80;
   // A cena entra em off-white (herança visual da cena anterior) e o vermelho
   // "floresce" por cima em cross-dissolve — evita o corte seco brusco.
   const redBloom = ci(frame, [0, 26], [0, 1], Easing.inOut(Easing.cubic));
@@ -57,8 +57,8 @@ export const Scene03Tradicao: React.FC = () => {
           />
           <AnimatedText
             text={TEXTS.scene3.sub}
-            delay={44}
-            exitStart={exitStart + 4}
+            delay={40}
+            exitStart={exitStart + 2}
             exitDirection="right"
             stagger={2}
             wordDur={20}

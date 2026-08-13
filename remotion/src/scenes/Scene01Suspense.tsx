@@ -15,7 +15,7 @@ export const Scene01Suspense: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
 
-  const circleProgress = ci(frame, [4, 50], [0, 0.22], Easing.out(Easing.cubic));
+  const circleProgress = ci(frame, [4, 66], [0, 0.22], Easing.out(Easing.cubic));
 
   return (
     <AbsoluteFill>
@@ -40,7 +40,7 @@ export const Scene01Suspense: React.FC = () => {
           <AnimatedText
             text={TEXTS.scene1.line1}
             delay={8}
-            exitStart={40}
+            exitStart={54}
             exitDirection="top"
             mode="mask"
             stagger={4}
@@ -57,12 +57,12 @@ export const Scene01Suspense: React.FC = () => {
           />
           <AnimatedText
             text={TEXTS.scene1.line2}
-            delay={26}
-            exitStart={44}
+            delay={30}
+            exitStart={64}
             exitDirection="top"
             mode="mask"
             stagger={3}
-            wordDur={14}
+            wordDur={16}
             style={{
               fontFamily: FONTS.display,
               fontWeight: 700,

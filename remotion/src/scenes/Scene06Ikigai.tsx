@@ -85,7 +85,7 @@ export const Scene06Ikigai: React.FC = () => {
           ))}
           <AnimatedText
             text={TEXTS.scene6.japanese}
-            delay={revealStart + 38}
+            delay={revealStart + 34}
             exitStart={textExit + 4}
             exitDirection="top"
             stagger={1}

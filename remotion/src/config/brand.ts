@@ -21,9 +21,10 @@ export const FONTS = {
 } as const;
 
 // Duração local de cada cena (frames a 30fps), seguindo o roteiro do briefing.
-// S5 é mais longa que os 3s originais do briefing para caber as 3 palavras
-// (GERAÇÕES/CULTURAS/HISTÓRIAS) inteiramente sequenciais, sem sobreposição.
-export const SCENE_DURATIONS = [60, 90, 90, 90, 116, 90, 90, 90] as const;
+// S1, S4 e S5 são mais longas que o roteiro original: o texto precisa de
+// tempo de leitura de verdade (ver PARTE 4.1 da skill Motion Brabo) — sem
+// isso as palavras entravam e saíam rápido demais para ler.
+export const SCENE_DURATIONS = [78, 90, 90, 105, 140, 90, 90, 90] as const;
 
 // Overlap entre cenas (corte antecipado da próxima cena sobre o fim da
 // anterior) — garante zero frames vazios (Mandamento 7).

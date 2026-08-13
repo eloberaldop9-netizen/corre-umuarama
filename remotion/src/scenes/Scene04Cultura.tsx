@@ -15,10 +15,10 @@ export const Scene04Cultura: React.FC = () => {
   const { width, height } = useVideoConfig();
 
   const patternOpacity = ci(frame, [0, 40], [0, 0.07], Easing.out(Easing.cubic));
-  const headlineExit = 44;
+  const headlineExit = 62;
 
-  const chainStart = 48;
-  const chainExit = ci(frame, [80, 84], [0, 1], Easing.in(Easing.cubic));
+  const chainStart = 68;
+  const chainExit = ci(frame, [93, 97], [0, 1], Easing.in(Easing.cubic));
 
   return (
     <AbsoluteFill>
@@ -37,11 +37,11 @@ export const Scene04Cultura: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <AnimatedText
             text={TEXTS.scene4.headline}
-            delay={12}
+            delay={10}
             exitStart={headlineExit}
             exitDirection="left"
             stagger={2}
-            wordDur={28}
+            wordDur={26}
             style={{
               fontFamily: FONTS.display,
               fontWeight: 900,
@@ -54,11 +54,11 @@ export const Scene04Cultura: React.FC = () => {
           />
           <AnimatedText
             text={TEXTS.scene4.sub}
-            delay={30}
-            exitStart={headlineExit + 4}
+            delay={24}
+            exitStart={headlineExit + 2}
             exitDirection="left"
-            stagger={3}
-            wordDur={24}
+            stagger={2}
+            wordDur={20}
             style={{
               fontFamily: FONTS.body,
               fontWeight: 400,
@@ -83,8 +83,8 @@ export const Scene04Cultura: React.FC = () => {
       >
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 26 }}>
           {TEXTS.scene4.chain.map((word, i) => {
-            const wStart = chainStart + i * 8;
-            const p = ci(frame, [wStart, wStart + 12], [0, 1], Easing.out(Easing.cubic));
+            const wStart = chainStart + i * 6;
+            const p = ci(frame, [wStart, wStart + 10], [0, 1], Easing.out(Easing.cubic));
             const isLast = i === TEXTS.scene4.chain.length - 1;
             return (
               <div

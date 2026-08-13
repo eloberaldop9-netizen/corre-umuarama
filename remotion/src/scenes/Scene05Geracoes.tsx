@@ -11,10 +11,11 @@ import { ci } from '../lib/animation';
 
 // Cada palavra só começa a entrar depois que a anterior terminou de sair
 // por completo — nunca simultâneas, para não haver sobreposição/fantasma.
+// Hold mais longo (10f) entre entrada e saída para dar tempo de leitura.
 const BEAT_WORDS = [
-  { start: 42, outStart: 54, outEnd: 62 },
-  { start: 66, outStart: 78, outEnd: 86 },
-  { start: 90, outStart: 104, outEnd: 112 },
+  { start: 48, outStart: 68, outEnd: 76 },
+  { start: 80, outStart: 100, outEnd: 108 },
+  { start: 112, outStart: 132, outEnd: 138 },
 ];
 
 /** Cena 5 — Build-up (0:11–0:14). Palavras entram no ritmo, círculo domina o centro. */
@@ -22,9 +23,9 @@ export const Scene05Geracoes: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
 
-  const circleProgress = ci(frame, [0, 100], [0.65, 0.98], Easing.out(Easing.cubic));
+  const circleProgress = ci(frame, [0, 130], [0.65, 0.98], Easing.out(Easing.cubic));
   const circleRotate = -70 + frame * 0.35;
-  const leadExitStart = 20;
+  const leadExitStart = 28;
 
   return (
     <AbsoluteFill>
