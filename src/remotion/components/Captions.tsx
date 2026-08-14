@@ -73,16 +73,22 @@ export const Captions: React.FC<{
         const exitScale = ci(exitP, [0, 1], [1, 0.94]);
         const exitOpacity = ci(exitP, [0.25, 1], [1, 0]);
 
+        const highlighted = isHighlighted(word, highlights);
+        const highlightPop = highlighted
+          ? ci(frame, [appear, appear + wordDur + 6], [1.32, 1], Easing.out(Easing.back(1.8)))
+          : 1;
+
         return (
           <span
             key={i}
             style={{
               display: 'inline-block',
-              transform: `translateY(${entryY + exitY}px) scale(${exitScale})`,
+              transform: `translateY(${entryY + exitY}px) scale(${exitScale * highlightPop})`,
               opacity: entryP * exitOpacity,
               filter: `blur(${entryBlur + exitBlur}px)`,
-              color: isHighlighted(word, highlights) ? highlightColor : 'inherit',
-              fontWeight: isHighlighted(word, highlights) ? 800 : 600,
+              color: highlighted ? highlightColor : 'inherit',
+              fontWeight: highlighted ? 800 : 600,
+              textShadow: highlighted ? `0 0 24px ${highlightColor}88` : 'none',
             }}
           >
             {word}

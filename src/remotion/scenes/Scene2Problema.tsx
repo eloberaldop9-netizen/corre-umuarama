@@ -1,5 +1,6 @@
 import React from 'react';
-import {AbsoluteFill, staticFile, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Easing, staticFile, useCurrentFrame} from 'remotion';
+import {WifiOff} from 'lucide-react';
 import {COLORS} from '../constants';
 import {Noise} from '../components/Noise';
 import {MediaCard} from '../components/MediaCard';
@@ -9,6 +10,41 @@ import {ci, entry3D, exitTo, mergeStyles} from '../motion';
 
 const LOCAL_DURATION = 388;
 const EXIT_START = 368;
+
+// Janela da frase "sofrer bloqueios e ficar fora do ar," (ver captions.ts)
+const BADGE_IN = 215;
+const BADGE_OUT = 278;
+
+const SignalLostBadge: React.FC<{frame: number}> = ({frame}) => {
+  const p = ci(frame, [BADGE_IN, BADGE_IN + 16], [0, 1]);
+  const scale = ci(frame, [BADGE_IN, BADGE_IN + 16], [0.4, 1], Easing.out(Easing.back(2)));
+  const outP = ci(frame, [BADGE_OUT, BADGE_OUT + 14], [0, 1], Easing.in(Easing.exp));
+  const outScale = ci(outP, [0, 1], [1, 0.5]);
+  const shake = frame > BADGE_IN + 16 && frame < BADGE_OUT ? Math.sin(frame * 1.4) * 2 : 0;
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: -18,
+        right: -18,
+        width: 76,
+        height: 76,
+        borderRadius: '50%',
+        backgroundColor: COLORS.brandRed,
+        border: `3px solid ${COLORS.black}`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: p * (1 - outP),
+        transform: `scale(${scale * outScale}) rotate(${shake}deg)`,
+        boxShadow: '0 8px 24px rgba(230,0,11,0.6)',
+      }}
+    >
+      <WifiOff size={34} color={COLORS.textPrimary} />
+    </div>
+  );
+};
 
 export const Scene2Problema: React.FC = () => {
   const frame = useCurrentFrame();
@@ -54,6 +90,7 @@ export const Scene2Problema: React.FC = () => {
           <div
             style={{
               ...cardStyle,
+              position: 'relative',
               transform: `${cardStyle.transform} translateY(${breathe}px) scale(${kenBurns})`,
             }}
           >
@@ -62,6 +99,7 @@ export const Scene2Problema: React.FC = () => {
               glowOpacity={glowPulse}
               loopDurationInFrames={151}
             />
+            <SignalLostBadge frame={frame} />
           </div>
         </div>
       </AbsoluteFill>

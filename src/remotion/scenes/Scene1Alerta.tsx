@@ -96,7 +96,13 @@ export const Scene1Alerta: React.FC = () => {
         </div>
 
         <div style={{position: 'absolute', top: '62%', width: '84%'}}>
-          <Captions chunks={scene1Captions} frame={frame} fontSize={56} style={{color: COLORS.black}} />
+          <Captions
+            chunks={scene1Captions}
+            frame={frame}
+            fontSize={56}
+            style={{color: COLORS.black}}
+            highlightColor={COLORS.textPrimary}
+          />
         </div>
       </AbsoluteFill>
     </AbsoluteFill>
