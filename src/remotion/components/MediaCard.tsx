@@ -1,5 +1,5 @@
 import React from 'react';
-import {OffthreadVideo} from 'remotion';
+import {Loop, OffthreadVideo} from 'remotion';
 import {COLORS} from '../constants';
 
 export const MediaCard: React.FC<{
@@ -8,7 +8,21 @@ export const MediaCard: React.FC<{
   glowOpacity: number;
   size?: number;
   style?: React.CSSProperties;
-}> = ({src, startFrom = 0, glowOpacity, size = 800, style}) => {
+  loopDurationInFrames?: number;
+}> = ({src, startFrom = 0, glowOpacity, size = 800, style, loopDurationInFrames}) => {
+  const video = (
+    <OffthreadVideo
+      src={src}
+      startFrom={startFrom}
+      muted
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+      }}
+    />
+  );
+
   return (
     <div
       style={{
@@ -23,16 +37,11 @@ export const MediaCard: React.FC<{
         ...style,
       }}
     >
-      <OffthreadVideo
-        src={src}
-        startFrom={startFrom}
-        muted
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-        }}
-      />
+      {loopDurationInFrames ? (
+        <Loop durationInFrames={loopDurationInFrames}>{video}</Loop>
+      ) : (
+        video
+      )}
     </div>
   );
 };
