@@ -13,10 +13,14 @@ import {COLORS} from '../constants';
 import {FONT_MONTSERRAT} from '../fonts';
 import {Captions} from '../components/Captions';
 import {scene6Captions} from '../captions';
+import {entryFrom} from '../motion';
 
 export const Scene6Cta: React.FC = () => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
+
+  // ---- ENTRADA DO GRUPO: da DIREITA (Mandamento 6: 5→6) ----
+  const groupEntry = entryFrom(frame, 0, 'right', 420, 26);
 
   const logoSpring = spring({frame, fps, config: {damping: 13, mass: 0.9}});
   const logoScale = interpolate(logoSpring, [0, 1], [0.8, 1]);
@@ -47,6 +51,7 @@ export const Scene6Cta: React.FC = () => {
             flexDirection: 'column',
             alignItems: 'center',
             gap: 56,
+            ...groupEntry,
           }}
         >
           <div style={{transform: `scale(${logoScale})`, opacity: logoOpacity}}>

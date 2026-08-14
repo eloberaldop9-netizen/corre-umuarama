@@ -1,42 +1,31 @@
 import React from 'react';
-import {
-  AbsoluteFill,
-  interpolate,
-  spring,
-  staticFile,
-  useCurrentFrame,
-  useVideoConfig,
-  Easing,
-} from 'remotion';
+import {AbsoluteFill, Easing, staticFile, useCurrentFrame} from 'remotion';
 import {COLORS} from '../constants';
 import {Noise} from '../components/Noise';
 import {MediaCard} from '../components/MediaCard';
 import {Captions} from '../components/Captions';
 import {scene4Captions} from '../captions';
+import {ci} from '../motion';
 
 const LOCAL_DURATION = 178;
 const EXIT_START = 155;
 
 export const Scene4Conclusao: React.FC = () => {
   const frame = useCurrentFrame();
-  const {fps} = useVideoConfig();
 
-  const cardSpring = spring({frame, fps, config: {damping: 13, mass: 0.9}});
-  const cardScaleIn = interpolate(cardSpring, [0, 1], [0.7, 1]);
-  const cardOpacityIn = interpolate(cardSpring, [0, 1], [0, 1]);
-  const cardBlurIn = interpolate(cardSpring, [0, 1], [20, 0]);
+  // ---- ENTRADA: grupo inteiro desliza da ESQUERDA (Mandamento 6: 3→4) ----
+  const entryP = ci(frame, [0, 26], [0, 1], Easing.out(Easing.cubic));
+  const entryX = ci(frame, [0, 26], [-360, 0], Easing.out(Easing.cubic));
+  const entryBlur = ci(frame, [0, 18], [16, 0]);
 
-  const breathe = frame >= 25 && frame < EXIT_START ? Math.sin((frame - 25) * 0.15) * 5 : 0;
-  const glowPulse = interpolate(Math.sin(frame * 0.15), [-1, 1], [0.15, 0.35]);
+  const breathe = frame >= 30 && frame < EXIT_START ? Math.sin((frame - 30) * 0.15) * 5 : 0;
+  const glowPulse = ci(Math.sin(frame * 0.15), [-1, 1], [0.15, 0.35]);
 
-  const exitProgress = interpolate(frame, [EXIT_START, LOCAL_DURATION], [0, 1], {
-    easing: Easing.in(Easing.exp),
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const exitScale = interpolate(exitProgress, [0, 1], [1, 0]);
-  const exitOpacity = interpolate(exitProgress, [0, 1], [1, 0]);
-  const exitBlur = interpolate(exitProgress, [0, 1], [0, 30]);
+  // ---- SAÍDA CRIATIVA: Scale Collapse (Mandamento 8.3 / transição 4→5) ----
+  const exitP = ci(frame, [EXIT_START, LOCAL_DURATION], [0, 1], Easing.in(Easing.cubic));
+  const exitScale = ci(exitP, [0, 1], [1, 0.3]);
+  const exitBlur = ci(exitP, [0, 1], [0, 30]);
+  const exitOpacity = ci(exitP, [0, 1], [1, 0]);
 
   return (
     <AbsoluteFill style={{backgroundColor: COLORS.black}}>
@@ -52,29 +41,30 @@ export const Scene4Conclusao: React.FC = () => {
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            gap: 56,
-            transform: `scale(${exitScale})`,
-            opacity: exitOpacity,
-            filter: `blur(${exitBlur}px)`,
+            justifyContent: 'center',
+            gap: 44,
+            width: '90%',
+            opacity: entryP * exitOpacity,
+            transform: `translateX(${entryX}px) scale(${exitScale})`,
+            filter: `blur(${entryBlur + exitBlur}px)`,
           }}
         >
-          <div style={{width: '82%', minHeight: 140}}>
-            <Captions chunks={scene4Captions} frame={frame} fontSize={44} />
+          <div style={{flex: 1, textAlign: 'left'}}>
+            <Captions
+              chunks={scene4Captions}
+              frame={frame}
+              fontSize={38}
+              style={{justifyContent: 'flex-start', textAlign: 'left'}}
+            />
           </div>
 
-          <div
-            style={{
-              transform: `translateY(${breathe}px) scale(${cardScaleIn})`,
-              opacity: cardOpacityIn,
-              filter: `blur(${cardBlurIn}px)`,
-            }}
-          >
+          <div style={{transform: `translateY(${breathe}px)`, flexShrink: 0}}>
             <MediaCard
               src={staticFile('video/cliente-familia.mov')}
               glowOpacity={glowPulse}
               loopDurationInFrames={151}
+              size={420}
             />
           </div>
         </div>
