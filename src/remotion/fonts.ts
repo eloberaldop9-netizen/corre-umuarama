@@ -1,13 +1,31 @@
-import {loadFont as loadPoppins} from '@remotion/google-fonts/Poppins';
-import {loadFont as loadMontserrat} from '@remotion/google-fonts/Montserrat';
+import {staticFile} from 'remotion';
 
-const {fontFamily: poppinsFontFamily} = loadPoppins('normal', {
-  weights: ['600', '900'],
-});
+export const FONT_POPPINS = 'Poppins';
+export const FONT_MONTSERRAT = 'Montserrat';
 
-const {fontFamily: montserratFontFamily} = loadMontserrat('normal', {
-  weights: ['500', '700', '800'],
-});
-
-export const FONT_POPPINS = poppinsFontFamily;
-export const FONT_MONTSERRAT = montserratFontFamily;
+export const fontsCss = `
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  src: url('${staticFile('fonts/poppins-600.woff2')}') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 900;
+  src: url('${staticFile('fonts/poppins-900.woff2')}') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 500;
+  src: url('${staticFile('fonts/montserrat-500.woff2')}') format('woff2');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  src: url('${staticFile('fonts/montserrat-700.woff2')}') format('woff2');
+}
+`;

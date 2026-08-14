@@ -130,8 +130,8 @@ export const Scene4Solucao: React.FC = () => {
             }}
           >
             <Img
-              src={staticFile('video/v10net-logo.png')}
-              style={{width: 280, height: 'auto', borderRadius: 40}}
+              src={staticFile('video/v10net-logo-circle.png')}
+              style={{width: 260, height: 'auto'}}
             />
           </div>
 

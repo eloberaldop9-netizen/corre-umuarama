@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Audio, Sequence, staticFile} from 'remotion';
 import {SCENE_STARTS, SCENE_DURATIONS} from './constants';
+import {fontsCss} from './fonts';
 import {Scene1Alerta} from './scenes/Scene1Alerta';
 import {Scene2Homem} from './scenes/Scene2Homem';
 import {Scene3Familia} from './scenes/Scene3Familia';
@@ -9,6 +10,7 @@ import {Scene4Solucao} from './scenes/Scene4Solucao';
 export const AlertaIptvVideo: React.FC = () => {
   return (
     <AbsoluteFill style={{backgroundColor: '#000000'}}>
+      <style dangerouslySetInnerHTML={{__html: fontsCss}} />
       <Audio src={staticFile('video/alerta-voiceover.mp3')} />
 
       <Sequence

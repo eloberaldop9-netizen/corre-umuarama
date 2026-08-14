@@ -92,11 +92,7 @@ export const Scene1Alerta: React.FC = () => {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const cameraZ = interpolate(diveProgress, [0, 1], [-800, 400]);
-  const alertaScaleFromCamera = interpolate(cameraZ, [-800, 0, 400], [0.6, 1, 4], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
+  const alertaScaleFromCamera = interpolate(diveProgress, [0, 1], [1, 4]);
   const alertaExitBlur = interpolate(diveProgress, [0, 1], [0, 30]);
 
   const bgOpacity = interpolate(frame, [75, 90], [1, 0], {
@@ -124,12 +120,11 @@ export const Scene1Alerta: React.FC = () => {
         style={{
           alignItems: 'center',
           justifyContent: 'center',
-          perspective: 1000,
         }}
       >
         <div
           style={{
-            transform: `translateZ(${cameraZ > 0 ? 0 : cameraZ}px) scale(${alertaScale * alertaScaleFromCamera}) translateX(${jitterX}px)`,
+            transform: `scale(${alertaScale * alertaScaleFromCamera}) translateX(${jitterX}px)`,
             opacity: alertaOpacity,
             filter: `blur(${(alertaBlur + alertaExitBlur).toFixed(1)}px)`,
             fontFamily: FONT_POPPINS,
