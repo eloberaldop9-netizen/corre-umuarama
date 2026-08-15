@@ -1,48 +1,81 @@
 import React from 'react';
-import {
-  AbsoluteFill,
-  Img,
-  interpolate,
-  spring,
-  staticFile,
-  useCurrentFrame,
-  useVideoConfig,
-} from 'remotion';
-import {MessageCircle} from 'lucide-react';
+import {AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
+import {Headphones, MousePointer2, Phone} from 'lucide-react';
 import {COLORS} from '../constants';
 import {FONT_MONTSERRAT} from '../fonts';
-import {Captions} from '../components/Captions';
+import {DynamicSubtitle} from '../components/DynamicSubtitle';
 import {scene6Captions} from '../captions';
-import {entryFrom} from '../motion';
+import {ci} from '../motion';
+
+const CLICK_AT = 56; // fim de "equipe." (ver captions.ts)
 
 export const Scene6Cta: React.FC = () => {
   const frame = useCurrentFrame();
-  const {fps} = useVideoConfig();
 
-  // ---- ENTRADA DO GRUPO: da DIREITA (Mandamento 6: 5→6) ----
-  const groupEntry = entryFrom(frame, 0, 'right', 420, 26);
+  // ---- Logo desliza para o topo ----
+  const logoP = ci(frame, [0, 20], [0, 1], Easing.out(Easing.cubic));
+  const logoY = ci(frame, [0, 20], [40, 0], Easing.out(Easing.cubic));
 
-  const logoSpring = spring({frame, fps, config: {damping: 13, mass: 0.9}});
-  const logoScale = interpolate(logoSpring, [0, 1], [0.8, 1]);
-  const logoOpacity = interpolate(logoSpring, [0, 1], [0, 1]);
+  // ---- Avatar de suporte entra da esquerda ----
+  const avatarP = ci(frame, [10, 30], [0, 1], Easing.out(Easing.back(1.6)));
+  const avatarX = ci(frame, [10, 30], [-200, 0], Easing.out(Easing.back(1.6)));
 
-  const textSpring = spring({frame: frame - 6, fps, config: {damping: 15, mass: 1}});
-  const textTranslateY = interpolate(textSpring, [0, 1], [30, 0]);
-  const textOpacity = interpolate(textSpring, [0, 1], [0, 1]);
+  // ---- Botão de contato: bounce brutal ----
+  const ctaP = ci(frame, [22, 40], [0, 1]);
+  const ctaScale = interpolate(frame, [22, 30, 40], [0, 1.1, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
 
-  const ctaSpring = spring({frame: frame - 24, fps, config: {damping: 10, mass: 0.8}});
-  const ctaScale = interpolate(ctaSpring, [0, 0.7, 1], [0, 1.05, 1]);
-  const ctaOpacity = interpolate(ctaSpring, [0, 1], [0, 1]);
-  const ctaPulse = 1 + Math.sin(Math.max(0, frame - 24) * 0.12) * 0.025;
+  // ---- Cursor clicando no botão, sincronizado com a última palavra ----
+  const cursorP = ci(frame, [CLICK_AT - 14, CLICK_AT], [0, 1], Easing.out(Easing.cubic));
+  const cursorOpacity = frame >= CLICK_AT - 14 && frame < CLICK_AT + 14 ? 1 : 0;
+  const isPressed = frame >= CLICK_AT && frame < CLICK_AT + 6;
+  const pressScale = isPressed ? 0.92 : 1;
+  const clickGlowP = ci(frame, [CLICK_AT, CLICK_AT + 22], [0, 1], Easing.out(Easing.cubic));
+
+  // ---- Respiração contínua pós-entrada ----
+  const breathe = frame > 40 ? 1 + Math.sin((frame - 40) * 0.12) * 0.025 : 1;
 
   return (
-    <AbsoluteFill style={{backgroundColor: COLORS.black}}>
+    <AbsoluteFill style={{backgroundColor: COLORS.ice}}>
       <AbsoluteFill
         style={{
-          background:
-            'radial-gradient(ellipse at 50% 100%, rgba(255,255,255,0.08), transparent 50%)',
+          background: 'radial-gradient(ellipse at 50% 0%, #FFFFFF 0%, #E4E6EA 100%)',
         }}
       />
+
+      <div
+        style={{
+          position: 'absolute',
+          top: 130,
+          left: '50%',
+          transform: `translate(-50%, ${logoY}px)`,
+          opacity: logoP,
+        }}
+      >
+        <Img src={staticFile('video/v10net-logo-circle.png')} style={{width: 150, height: 'auto'}} />
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          top: 470,
+          left: '50%',
+          transform: `translateX(calc(-50% + ${avatarX - 210}px))`,
+          opacity: avatarP,
+          width: 110,
+          height: 110,
+          borderRadius: '50%',
+          backgroundColor: COLORS.surfaceDark,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 16px 40px rgba(0,0,0,0.18)',
+        }}
+      >
+        <Headphones size={48} color={COLORS.white} />
+      </div>
 
       <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
         <div
@@ -51,51 +84,71 @@ export const Scene6Cta: React.FC = () => {
             flexDirection: 'column',
             alignItems: 'center',
             gap: 56,
-            ...groupEntry,
+            marginTop: 160,
           }}
         >
-          <div style={{transform: `scale(${logoScale})`, opacity: logoOpacity}}>
-            <Img
-              src={staticFile('video/v10net-logo-circle.png')}
-              style={{width: 200, height: 'auto'}}
-            />
-          </div>
-
-          <div
-            style={{
-              width: '84%',
-              minHeight: 100,
-              transform: `translateY(${textTranslateY}px)`,
-              opacity: textOpacity,
-            }}
-          >
-            <Captions chunks={scene6Captions} frame={frame} fontSize={44} />
-          </div>
-
-          <div
-            style={{
-              transform: `scale(${ctaScale * ctaPulse})`,
-              opacity: ctaOpacity,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 16,
-              backgroundColor: COLORS.brandRed,
-              borderRadius: 100,
-              padding: '26px 52px',
-              boxShadow: '0 20px 60px rgba(230,0,11,0.6)',
-            }}
-          >
-            <MessageCircle size={34} color={COLORS.textPrimary} />
-            <span
+          <div style={{position: 'relative'}}>
+            {/* Glow do clique */}
+            <div
               style={{
-                fontFamily: FONT_MONTSERRAT,
-                fontWeight: 700,
-                fontSize: 36,
-                color: COLORS.textPrimary,
+                position: 'absolute',
+                inset: -20,
+                borderRadius: 100,
+                border: `3px solid ${COLORS.brandRed}`,
+                opacity: clickGlowP > 0 ? (1 - clickGlowP) * 0.8 : 0,
+                transform: `scale(${1 + clickGlowP * 0.4})`,
+                pointerEvents: 'none',
+              }}
+            />
+            <div
+              style={{
+                transform: `scale(${ctaScale * breathe * pressScale})`,
+                opacity: ctaP,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 16,
+                backgroundColor: COLORS.brandRed,
+                borderRadius: 100,
+                padding: '26px 48px',
+                boxShadow: '0 20px 50px rgba(230,0,11,0.35)',
               }}
             >
-              Fale com a Nossa Equipe
-            </span>
+              <Phone size={30} color={COLORS.white} />
+              <span
+                style={{
+                  fontFamily: FONT_MONTSERRAT,
+                  fontWeight: 700,
+                  fontSize: 38,
+                  color: COLORS.white,
+                }}
+              >
+                (44) 99945-1266
+              </span>
+            </div>
+
+            {/* Cursor digital que "clica" */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: -10,
+                right: ci(cursorP, [0, 1], [-60, 10]),
+                opacity: cursorOpacity,
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
+              }}
+            >
+              <MousePointer2 size={36} color={COLORS.black} fill={COLORS.white} />
+            </div>
+          </div>
+
+          <div style={{width: '84%', minHeight: 100}}>
+            <DynamicSubtitle
+              chunks={scene6Captions}
+              frame={frame}
+              fontSize={44}
+              activeColor={COLORS.brandRed}
+              trailColor={COLORS.trailGrayLight}
+              style={{justifyContent: 'center', textAlign: 'center'}}
+            />
           </div>
         </div>
       </AbsoluteFill>

@@ -10,10 +10,17 @@ export const DURATION_IN_FRAMES = 1215; // 40.5s, gives ~0.7s tail after the VO 
 
 export const COLORS = {
   brandRed: '#e6000b',
+  brandDarkRed: '#8a0006',
   black: '#000000',
+  white: '#FFFFFF',
+  ice: '#F5F6F8',
   surfaceDark: '#111113',
   textPrimary: '#FFFFFF',
   textSecondary: '#A0A0A8',
+  success: '#00A650',
+  alertYellow: '#FFD400',
+  trailGray: '#666666',
+  trailGrayLight: '#A0A0A8',
 } as const;
 
 // Absolute start frame of each scene on the master timeline.

@@ -1,66 +1,151 @@
 import React from 'react';
-import {AbsoluteFill, Easing, useCurrentFrame} from 'remotion';
-import {CheckCircle2, Smartphone, Wifi} from 'lucide-react';
+import {AbsoluteFill, Easing, interpolate, useCurrentFrame} from 'remotion';
+import {Instagram, Wifi, Youtube} from 'lucide-react';
 import {COLORS} from '../constants';
-import {FONT_POPPINS} from '../fonts';
 import {Noise} from '../components/Noise';
-import {Captions} from '../components/Captions';
+import {DynamicSubtitle} from '../components/DynamicSubtitle';
 import {scene3Captions} from '../captions';
-import {ci, mergeStyles} from '../motion';
+import {ci} from '../motion';
 
 const LOCAL_DURATION = 253;
-const EXIT_START = 232;
+const EXIT_START = 218;
 
-const ChecklistRow: React.FC<{
+// Janelas derivadas da distribuição de palavras em captions.ts (scene3Captions).
+const WIFI_IN = 97;
+const APPS_IN = 133;
+
+const AppIcon: React.FC<{
   icon: React.ReactNode;
-  label: string;
+  color: string;
   revealFrame: number;
   frame: number;
-  exitDelay: number;
-}> = ({icon, label, revealFrame, frame, exitDelay}) => {
-  const entryDur = 20;
-  const entryP = ci(frame, [revealFrame, revealFrame + entryDur], [0, 1]);
-  const entryScale = ci(frame, [revealFrame, revealFrame + entryDur], [0.6, 1], Easing.out(Easing.back(1.7)));
-  const entryBlur = ci(frame, [revealFrame, revealFrame + entryDur * 0.5], [6, 0]);
-  const checkP = ci(frame, [revealFrame + 12, revealFrame + 24], [0, 1], Easing.out(Easing.back(2)));
+  offsetX: number;
+}> = ({icon, color, revealFrame, frame, offsetX}) => {
+  const p = ci(frame, [revealFrame, revealFrame + 16], [0, 1]);
+  const scale = interpolate(
+    frame,
+    [revealFrame, revealFrame + 10, revealFrame + 16],
+    [0, 1.2, 1],
+    {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'},
+  );
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 210,
+        left: '50%',
+        transform: `translateX(${offsetX - 28}px) scale(${scale})`,
+        opacity: p,
+        width: 56,
+        height: 56,
+        borderRadius: 16,
+        backgroundColor: color,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: `0 8px 20px ${color}66`,
+      }}
+    >
+      {icon}
+    </div>
+  );
+};
 
-  const exitStart = EXIT_START + exitDelay;
-  const exitP = ci(frame, [exitStart, exitStart + 14], [0, 1], Easing.in(Easing.exp));
-  const exitY = ci(exitP, [0, 1], [0, -30]);
-  const exitBlur = ci(exitP, [0, 1], [0, 16]);
-  const exitOp = ci(exitP, [0.3, 1], [1, 0]);
-  const exitScale = ci(exitP, [0, 1], [1, 0.95]);
+const PhoneMockup: React.FC<{frame: number}> = ({frame}) => {
+  const entryP = ci(frame, [0, 26], [0, 1], Easing.out(Easing.back(1.3)));
+  const entryScale = ci(frame, [0, 26], [0.5, 1], Easing.out(Easing.back(1.3)));
+
+  const wifiP = ci(frame, [WIFI_IN, WIFI_IN + 12], [0, 1], Easing.out(Easing.back(2)));
+  const wifiRing = ci(frame, [WIFI_IN, WIFI_IN + 30], [0, 1]);
 
   return (
     <div
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 24,
-        width: 720,
-        padding: '28px 36px',
-        borderRadius: 28,
-        backgroundColor: COLORS.surfaceDark,
-        border: '1px solid rgba(255,255,255,0.1)',
-        opacity: entryP * exitOp,
-        transform: `translateY(${exitY}px) scale(${entryScale * exitScale})`,
-        filter: `blur(${entryBlur + exitBlur}px)`,
+        position: 'relative',
+        width: 340,
+        height: 620,
+        opacity: entryP,
+        transform: `scale(${entryScale})`,
       }}
     >
-      <div style={{color: COLORS.textPrimary, flexShrink: 0}}>{icon}</div>
       <div
         style={{
-          fontFamily: FONT_POPPINS,
-          fontWeight: 600,
-          fontSize: 34,
-          color: COLORS.textPrimary,
-          flex: 1,
+          position: 'absolute',
+          inset: 0,
+          borderRadius: 46,
+          backgroundColor: COLORS.surfaceDark,
+          border: `2px solid rgba(255,255,255,0.14)`,
+          boxShadow: '0 40px 90px rgba(0,0,0,0.6)',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: 14,
+          left: 14,
+          right: 14,
+          bottom: 14,
+          borderRadius: 34,
+          backgroundColor: '#0a0a0d',
+          overflow: 'hidden',
         }}
       >
-        {label}
-      </div>
-      <div style={{opacity: checkP, flexShrink: 0}}>
-        <CheckCircle2 size={44} color="#3ddc84" />
+        {/* Wi-Fi central, acende verde + anéis concêntricos */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 80,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {[0, 1, 2].map((i) => {
+            const ringP = ((wifiRing * 60 - i * 18) % 60) / 60;
+            const ringScale = ci(Math.max(0, ringP), [0, 1], [0.4, 2.4]);
+            const ringOpacity = frame >= WIFI_IN ? ci(Math.max(0, ringP), [0, 1], [0.5, 0]) : 0;
+            return (
+              <div
+                key={i}
+                style={{
+                  position: 'absolute',
+                  width: 70,
+                  height: 70,
+                  borderRadius: '50%',
+                  border: `2px solid ${COLORS.success}`,
+                  opacity: ringOpacity,
+                  transform: `scale(${ringScale})`,
+                }}
+              />
+            );
+          })}
+          <Wifi
+            size={64}
+            color={frame >= WIFI_IN ? COLORS.success : COLORS.trailGray}
+            strokeWidth={2.4}
+            style={{
+              filter: frame >= WIFI_IN ? `drop-shadow(0 0 ${10 * wifiP}px ${COLORS.success})` : 'none',
+              transform: `scale(${1 + wifiP * 0.15})`,
+            }}
+          />
+        </div>
+
+        <AppIcon
+          icon={<Youtube size={30} color={COLORS.white} />}
+          color="#FF3B3B"
+          revealFrame={APPS_IN}
+          frame={frame}
+          offsetX={-40}
+        />
+        <AppIcon
+          icon={<Instagram size={26} color={COLORS.white} />}
+          color="#C13584"
+          revealFrame={APPS_IN + 8}
+          frame={frame}
+          offsetX={40}
+        />
       </div>
     </div>
   );
@@ -69,16 +154,12 @@ const ChecklistRow: React.FC<{
 export const Scene3Teste: React.FC = () => {
   const frame = useCurrentFrame();
 
-  const groupEntry = mergeStyles(
-    {opacity: ci(frame, [0, 20], [0, 1], Easing.out(Easing.cubic))},
-    {transform: `translateY(${ci(frame, [0, 26], [420, 0], Easing.out(Easing.cubic))}px)`},
-  );
-
-  const exitP = ci(frame, [EXIT_START, LOCAL_DURATION], [0, 1], Easing.in(Easing.exp));
-  const exitX = ci(exitP, [0, 1], [0, 1200]);
-  const exitBlur = ci(exitP, [0, 1], [0, 20]);
-  const exitOpacity = ci(exitP, [0.35, 1], [1, 0]);
-  const exitScale = ci(exitP, [0, 1], [1, 0.94]);
+  // ---- SAÍDA: colapso gravitacional ----
+  const exitP = ci(frame, [EXIT_START, LOCAL_DURATION], [0, 1], Easing.in(Easing.cubic));
+  const exitScale = ci(exitP, [0, 1], [1, 0]);
+  const exitRotate = ci(exitP, [0, 1], [0, 90]);
+  const exitOpacity = ci(exitP, [0, 1], [1, 0]);
+  const exitBlur = ci(exitP, [0, 1], [0, 10]);
 
   return (
     <AbsoluteFill style={{backgroundColor: COLORS.black}}>
@@ -95,7 +176,7 @@ export const Scene3Teste: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'center',
           opacity: exitOpacity,
-          transform: `translateX(${exitX}px) scale(${exitScale})`,
+          transform: `scale(${exitScale}) rotate(${exitRotate}deg)`,
           filter: `blur(${exitBlur}px)`,
         }}
       >
@@ -104,30 +185,18 @@ export const Scene3Teste: React.FC = () => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 64,
-            opacity: groupEntry.opacity,
-            transform: groupEntry.transform,
+            gap: 56,
           }}
         >
-          <div style={{display: 'flex', flexDirection: 'column', gap: 28}}>
-            <ChecklistRow
-              icon={<Wifi size={40} />}
-              label="Wi-Fi conectado"
-              revealFrame={80}
-              exitDelay={0}
-              frame={frame}
-            />
-            <ChecklistRow
-              icon={<Smartphone size={40} />}
-              label="Apps funcionando"
-              revealFrame={142}
-              exitDelay={4}
-              frame={frame}
-            />
-          </div>
+          <PhoneMockup frame={frame} />
 
-          <div style={{width: '80%', minHeight: 90}}>
-            <Captions chunks={scene3Captions} frame={frame} fontSize={44} />
+          <div style={{width: '84%', minHeight: 90}}>
+            <DynamicSubtitle
+              chunks={scene3Captions}
+              frame={frame}
+              fontSize={44}
+              style={{justifyContent: 'center', textAlign: 'center'}}
+            />
           </div>
         </div>
       </AbsoluteFill>
