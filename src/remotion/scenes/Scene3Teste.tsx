@@ -33,13 +33,13 @@ const AppIcon: React.FC<{
     <div
       style={{
         position: 'absolute',
-        top: 210,
+        top: 240,
         left: '50%',
-        transform: `translateX(${offsetX - 28}px) scale(${scale})`,
+        transform: `translateX(${offsetX - 40}px) scale(${scale})`,
         opacity: p,
-        width: 56,
-        height: 56,
-        borderRadius: 16,
+        width: 80,
+        height: 80,
+        borderRadius: 20,
         backgroundColor: color,
         display: 'flex',
         alignItems: 'center',
@@ -112,8 +112,8 @@ const PhoneMockup: React.FC<{frame: number}> = ({frame}) => {
                 key={i}
                 style={{
                   position: 'absolute',
-                  width: 70,
-                  height: 70,
+                  width: 94,
+                  height: 94,
                   borderRadius: '50%',
                   border: `2px solid ${COLORS.success}`,
                   opacity: ringOpacity,
@@ -123,7 +123,7 @@ const PhoneMockup: React.FC<{frame: number}> = ({frame}) => {
             );
           })}
           <Wifi
-            size={64}
+            size={88}
             color={frame >= WIFI_IN ? COLORS.success : COLORS.trailGray}
             strokeWidth={2.4}
             style={{
@@ -134,18 +134,18 @@ const PhoneMockup: React.FC<{frame: number}> = ({frame}) => {
         </div>
 
         <AppIcon
-          icon={<Youtube size={30} color={COLORS.white} />}
+          icon={<Youtube size={44} color={COLORS.white} />}
           color="#FF3B3B"
           revealFrame={APPS_IN}
           frame={frame}
-          offsetX={-40}
+          offsetX={-52}
         />
         <AppIcon
-          icon={<Instagram size={26} color={COLORS.white} />}
+          icon={<Instagram size={38} color={COLORS.white} />}
           color="#C13584"
           revealFrame={APPS_IN_2}
           frame={frame}
-          offsetX={40}
+          offsetX={52}
         />
       </div>
     </div>

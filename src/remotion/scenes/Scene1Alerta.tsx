@@ -1,9 +1,29 @@
 import React from 'react';
 import {AbsoluteFill, Easing, interpolate, random, useCurrentFrame} from 'remotion';
+import {TriangleAlert} from 'lucide-react';
 import {ci} from '../motion';
 import {COLORS} from '../constants';
 import {FONT_POPPINS} from '../fonts';
 import {Noise} from '../components/Noise';
+
+// Ícone de alerta sutil pulsando atrás do texto enquanto "ALERTA!" está na tela.
+const AlertIconBackdrop: React.FC<{frame: number}> = ({frame}) => {
+  const introP = ci(frame, [0, 24], [0, 1], Easing.out(Easing.cubic));
+  const pulse = 1 + Math.sin(frame * 0.09) * 0.06;
+  const rotate = Math.sin(frame * 0.035) * 6;
+  return (
+    <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
+      <div
+        style={{
+          opacity: introP * 0.16,
+          transform: `scale(${pulse}) rotate(${rotate}deg)`,
+        }}
+      >
+        <TriangleAlert size={620} color={COLORS.textPrimary} strokeWidth={1.2} />
+      </div>
+    </AbsoluteFill>
+  );
+};
 
 const Waves: React.FC<{frame: number}> = ({frame}) => {
   const rings = [0, 1, 2];
@@ -135,6 +155,7 @@ export const Scene1Alerta: React.FC = () => {
       <AbsoluteFill style={{backgroundColor: COLORS.brandRed, opacity: bgOpacity}}>
         <Noise opacity={0.06} />
         <Waves frame={frame} />
+        <AlertIconBackdrop frame={frame} />
       </AbsoluteFill>
 
       <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
@@ -146,8 +167,7 @@ export const Scene1Alerta: React.FC = () => {
             fontFamily: FONT_POPPINS,
             fontWeight: 900,
             fontSize: 150,
-            color: 'transparent',
-            WebkitTextStroke: `4px ${COLORS.textPrimary}`,
+            color: COLORS.textPrimary,
             textAlign: 'center',
             lineHeight: 1,
             letterSpacing: '-2px',

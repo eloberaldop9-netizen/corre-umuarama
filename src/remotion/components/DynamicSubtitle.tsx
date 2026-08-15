@@ -111,7 +111,13 @@ export const DynamicSubtitle: React.FC<{
       {lines.map((line, lineIndex) => (
         <div
           key={lineIndex}
-          style={{display: 'flex', flexWrap: 'nowrap', gap: '0.38em', justifyContent}}
+          style={{
+            display: 'flex',
+            flexWrap: 'nowrap',
+            flexShrink: 0,
+            gap: '0.38em',
+            justifyContent,
+          }}
         >
           {line.map((word) => {
             const i = wordIndex++;
@@ -152,6 +158,8 @@ export const DynamicSubtitle: React.FC<{
                 key={i}
                 style={{
                   display: 'inline-block',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
                   opacity: popIn * exitOpacity,
                   transform: `translateY(${translateY + exitY}px) scale(${scale * exitScale})`,
                   filter: `blur(${exitBlur}px)`,

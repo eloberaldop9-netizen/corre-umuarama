@@ -12,13 +12,13 @@ const CLICK_AT = 53; // início de "equipe." (distribuição ponderada, ver capt
 export const Scene6Cta: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // ---- Logo desliza para o topo ----
+  // ---- Logo assenta acima do cluster de contato ----
   const logoP = ci(frame, [0, 20], [0, 1], Easing.out(Easing.cubic));
-  const logoY = ci(frame, [0, 20], [40, 0], Easing.out(Easing.cubic));
+  const logoY = ci(frame, [0, 20], [30, 0], Easing.out(Easing.cubic));
 
-  // ---- Avatar de suporte entra da esquerda ----
+  // ---- Avatar de suporte entra da esquerda, colado ao botão ----
   const avatarP = ci(frame, [10, 30], [0, 1], Easing.out(Easing.back(1.6)));
-  const avatarX = ci(frame, [10, 30], [-200, 0], Easing.out(Easing.back(1.6)));
+  const avatarX = ci(frame, [10, 30], [-80, 0], Easing.out(Easing.back(1.6)));
 
   // ---- Botão de contato: bounce brutal ----
   const ctaP = ci(frame, [22, 40], [0, 1]);
@@ -45,102 +45,101 @@ export const Scene6Cta: React.FC = () => {
         }}
       />
 
-      <div
-        style={{
-          position: 'absolute',
-          top: 130,
-          left: '50%',
-          transform: `translate(-50%, ${logoY}px)`,
-          opacity: logoP,
-        }}
-      >
-        <Img src={staticFile('video/v10net-logo-circle.png')} style={{width: 150, height: 'auto'}} />
-      </div>
-
-      <div
-        style={{
-          position: 'absolute',
-          top: 470,
-          left: '50%',
-          transform: `translateX(calc(-50% + ${avatarX - 210}px))`,
-          opacity: avatarP,
-          width: 110,
-          height: 110,
-          borderRadius: '50%',
-          backgroundColor: COLORS.surfaceDark,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 16px 40px rgba(0,0,0,0.18)',
-        }}
-      >
-        <Headphones size={48} color={COLORS.white} />
-      </div>
-
       <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 56,
-            marginTop: 160,
+            gap: 28,
           }}
         >
-          <div style={{position: 'relative'}}>
-            {/* Glow do clique */}
-            <div
-              style={{
-                position: 'absolute',
-                inset: -20,
-                borderRadius: 100,
-                border: `3px solid ${COLORS.brandRed}`,
-                opacity: clickGlowP > 0 ? (1 - clickGlowP) * 0.8 : 0,
-                transform: `scale(${1 + clickGlowP * 0.4})`,
-                pointerEvents: 'none',
-              }}
+          <div
+            style={{
+              transform: `translateY(${logoY}px)`,
+              opacity: logoP,
+            }}
+          >
+            <Img
+              src={staticFile('video/v10net-logo-circle.png')}
+              style={{width: 130, height: 'auto'}}
             />
+          </div>
+
+          <div style={{position: 'relative', display: 'flex', alignItems: 'center', gap: 20}}>
             <div
               style={{
-                transform: `scale(${ctaScale * breathe * pressScale})`,
-                opacity: ctaP,
+                transform: `translateX(${avatarX}px)`,
+                opacity: avatarP,
+                width: 96,
+                height: 96,
+                borderRadius: '50%',
+                backgroundColor: COLORS.surfaceDark,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 16,
-                backgroundColor: COLORS.brandRed,
-                borderRadius: 100,
-                padding: '26px 48px',
-                boxShadow: '0 20px 50px rgba(230,0,11,0.35)',
+                justifyContent: 'center',
+                boxShadow: '0 16px 36px rgba(0,0,0,0.18)',
+                flexShrink: 0,
               }}
             >
-              <Phone size={30} color={COLORS.white} />
-              <span
-                style={{
-                  fontFamily: FONT_MONTSERRAT,
-                  fontWeight: 700,
-                  fontSize: 38,
-                  color: COLORS.white,
-                }}
-              >
-                (44) 99945-1266
-              </span>
+              <Headphones size={42} color={COLORS.white} />
             </div>
 
-            {/* Cursor digital que "clica" */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: -10,
-                right: ci(cursorP, [0, 1], [-60, 10]),
-                opacity: cursorOpacity,
-                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
-              }}
-            >
-              <MousePointer2 size={36} color={COLORS.black} fill={COLORS.white} />
+            <div style={{position: 'relative'}}>
+              {/* Glow do clique */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: -20,
+                  borderRadius: 100,
+                  border: `3px solid ${COLORS.brandRed}`,
+                  opacity: clickGlowP > 0 ? (1 - clickGlowP) * 0.8 : 0,
+                  transform: `scale(${1 + clickGlowP * 0.4})`,
+                  pointerEvents: 'none',
+                }}
+              />
+              <div
+                style={{
+                  transform: `scale(${ctaScale * breathe * pressScale})`,
+                  opacity: ctaP,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 16,
+                  backgroundColor: COLORS.brandRed,
+                  borderRadius: 100,
+                  padding: '26px 48px',
+                  boxShadow: '0 20px 50px rgba(230,0,11,0.35)',
+                }}
+              >
+                <Phone size={30} color={COLORS.white} />
+                <span
+                  style={{
+                    fontFamily: FONT_MONTSERRAT,
+                    fontWeight: 700,
+                    fontSize: 38,
+                    color: COLORS.white,
+                  }}
+                >
+                  (44) 99945-1266
+                </span>
+              </div>
+
+              {/* Cursor digital que "clica" */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: -10,
+                  right: ci(cursorP, [0, 1], [-60, 10]),
+                  opacity: cursorOpacity,
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
+                }}
+              >
+                <MousePointer2 size={36} color={COLORS.black} fill={COLORS.white} />
+              </div>
             </div>
           </div>
 
-          <div style={{width: '84%', minHeight: 100}}>
+          <div style={{width: '84%', minHeight: 100, marginTop: 8}}>
             <DynamicSubtitle
               chunks={scene6Captions}
               frame={frame}
