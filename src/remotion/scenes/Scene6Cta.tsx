@@ -7,7 +7,7 @@ import {DynamicSubtitle} from '../components/DynamicSubtitle';
 import {scene6Captions} from '../captions';
 import {ci} from '../motion';
 
-const CLICK_AT = 56; // fim de "equipe." (ver captions.ts)
+const CLICK_AT = 53; // início de "equipe." (distribuição ponderada, ver captions.ts)
 
 export const Scene6Cta: React.FC = () => {
   const frame = useCurrentFrame();

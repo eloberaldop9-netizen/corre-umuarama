@@ -17,6 +17,25 @@ export const ci = (
     extrapolateRight: 'clamp',
   });
 
+const hexToRgb = (hex: string): [number, number, number] => {
+  const clean = hex.replace('#', '');
+  const full = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean;
+  const num = parseInt(full.slice(0, 6), 16);
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+};
+
+/** Smoothly blends two hex colors (0 = colorA, 1 = colorB). Falls back to colorB for non-hex input. */
+export const lerpColor = (t: number, colorA: string, colorB: string): string => {
+  if (!colorA.startsWith('#') || !colorB.startsWith('#')) return t < 0.5 ? colorA : colorB;
+  const [r1, g1, b1] = hexToRgb(colorA);
+  const [r2, g2, b2] = hexToRgb(colorB);
+  const clamped = Math.max(0, Math.min(1, t));
+  const r = Math.round(r1 + (r2 - r1) * clamped);
+  const g = Math.round(g1 + (g2 - g1) * clamped);
+  const b = Math.round(b1 + (b2 - b1) * clamped);
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
 export const SPRING = {
   text: {damping: 14, mass: 0.8},
   card: {damping: 13, mass: 0.9},

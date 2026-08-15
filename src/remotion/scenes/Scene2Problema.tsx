@@ -12,12 +12,12 @@ import {ci, entry3D, exitTo, mergeStyles} from '../motion';
 const LOCAL_DURATION = 388;
 const EXIT_START = 370;
 
-// Janelas derivadas da distribuição de palavras em captions.ts (scene2Captions).
-const GLITCH_IN = 122;
-const GLITCH_OUT = 142;
-const STAMP_IN = 221;
+// Janelas derivadas da distribuição (ponderada por tamanho da palavra) em captions.ts.
+const GLITCH_IN = 124;
+const GLITCH_OUT = 144;
+const STAMP_IN = 223;
 const STAMP_OUT = 250;
-const FLICKER_IN = 233;
+const FLICKER_IN = 237;
 const FLICKER_OUT = 274;
 
 const RGBGlitch: React.FC<{frame: number; children: React.ReactNode}> = ({frame, children}) => {

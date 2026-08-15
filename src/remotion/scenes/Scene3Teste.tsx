@@ -10,9 +10,10 @@ import {ci} from '../motion';
 const LOCAL_DURATION = 253;
 const EXIT_START = 218;
 
-// Janelas derivadas da distribuição de palavras em captions.ts (scene3Captions).
-const WIFI_IN = 97;
+// Janelas derivadas da distribuição (ponderada por tamanho da palavra) em captions.ts.
+const WIFI_IN = 96;
 const APPS_IN = 133;
+const APPS_IN_2 = 143;
 
 const AppIcon: React.FC<{
   icon: React.ReactNode;
@@ -142,7 +143,7 @@ const PhoneMockup: React.FC<{frame: number}> = ({frame}) => {
         <AppIcon
           icon={<Instagram size={26} color={COLORS.white} />}
           color="#C13584"
-          revealFrame={APPS_IN + 8}
+          revealFrame={APPS_IN_2}
           frame={frame}
           offsetX={40}
         />
