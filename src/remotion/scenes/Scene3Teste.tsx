@@ -4,6 +4,7 @@ import {Instagram, Wifi, Youtube} from 'lucide-react';
 import {COLORS} from '../constants';
 import {Noise} from '../components/Noise';
 import {DynamicSubtitle} from '../components/DynamicSubtitle';
+import {Sfx} from '../components/Sfx';
 import {scene3Captions} from '../captions';
 import {ci} from '../motion';
 
@@ -164,6 +165,12 @@ export const Scene3Teste: React.FC = () => {
 
   return (
     <AbsoluteFill style={{backgroundColor: COLORS.black}}>
+      <Sfx name="whoosh-up" from={0} volume={0.3} />
+      <Sfx name="chime" from={WIFI_IN} volume={0.5} />
+      <Sfx name="pop" from={APPS_IN} volume={0.4} />
+      <Sfx name="pop" from={APPS_IN_2} volume={0.4} />
+      <Sfx name="whoosh-down" from={EXIT_START} volume={0.4} />
+
       <AbsoluteFill
         style={{
           background:

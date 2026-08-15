@@ -4,6 +4,7 @@ import {COLORS} from '../constants';
 import {DynamicSubtitle} from '../components/DynamicSubtitle';
 import {scene5Captions} from '../captions';
 import {ci, exitTo} from '../motion';
+import {Sfx} from '../components/Sfx';
 
 const EXIT_START = 210;
 const RING_END = 88; // fim de "continua entregando a sua conexão normalmente,"
@@ -72,6 +73,9 @@ export const Scene5V10Net: React.FC = () => {
 
   return (
     <AbsoluteFill style={{backgroundColor: COLORS.ice}}>
+      <Sfx name="chime" from={0} volume={0.3} />
+      <Sfx name="whoosh-down" from={EXIT_START} volume={0.35} />
+
       <AbsoluteFill
         style={{
           background:

@@ -6,6 +6,7 @@ import {FONT_MONTSERRAT} from '../fonts';
 import {DynamicSubtitle} from '../components/DynamicSubtitle';
 import {scene6Captions} from '../captions';
 import {ci} from '../motion';
+import {Sfx} from '../components/Sfx';
 
 const CLICK_AT = 53; // início de "equipe." (distribuição ponderada, ver captions.ts)
 
@@ -39,6 +40,10 @@ export const Scene6Cta: React.FC = () => {
 
   return (
     <AbsoluteFill style={{backgroundColor: COLORS.ice}}>
+      <Sfx name="pop" from={22} volume={0.4} />
+      <Sfx name="click" from={CLICK_AT} volume={0.6} />
+      <Sfx name="ding" from={CLICK_AT + 6} volume={0.45} />
+
       <AbsoluteFill
         style={{
           background: 'radial-gradient(ellipse at 50% 0%, #FFFFFF 0%, #E4E6EA 100%)',

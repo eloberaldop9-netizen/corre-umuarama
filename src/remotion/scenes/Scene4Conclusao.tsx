@@ -3,6 +3,7 @@ import {AbsoluteFill, Easing, interpolate, staticFile, useCurrentFrame} from 're
 import {COLORS} from '../constants';
 import {FONT_POPPINS} from '../fonts';
 import {MediaCard} from '../components/MediaCard';
+import {Sfx} from '../components/Sfx';
 import {scene4Captions} from '../captions';
 import {ci} from '../motion';
 
@@ -114,6 +115,10 @@ export const Scene4Conclusao: React.FC = () => {
 
   return (
     <AbsoluteFill style={{backgroundColor: COLORS.black}}>
+      <Sfx name="whoosh-up" from={0} volume={0.3} />
+      <Sfx name="impact" from={VERDICT_START} volume={0.55} />
+      <Sfx name="whoosh-down" from={WIPE_START} volume={0.5} />
+
       <AbsoluteFill
         style={{
           opacity: 0.16,

@@ -5,6 +5,7 @@ import {ci} from '../motion';
 import {COLORS} from '../constants';
 import {FONT_POPPINS} from '../fonts';
 import {Noise} from '../components/Noise';
+import {Sfx} from '../components/Sfx';
 
 // Ícone de alerta sutil pulsando atrás do texto enquanto "ALERTA!" está na tela.
 const AlertIconBackdrop: React.FC<{frame: number}> = ({frame}) => {
@@ -152,6 +153,9 @@ export const Scene1Alerta: React.FC = () => {
 
   return (
     <AbsoluteFill style={{backgroundColor: COLORS.black}}>
+      <Sfx name="impact" from={2} volume={0.7} />
+      <Sfx name="whoosh-up" from={diveStart} volume={0.5} />
+
       <AbsoluteFill style={{backgroundColor: COLORS.brandRed, opacity: bgOpacity}}>
         <Noise opacity={0.06} />
         <Waves frame={frame} />
