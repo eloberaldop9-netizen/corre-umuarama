@@ -12,11 +12,12 @@ import {
 
 // =============================================================================
 // UAI TOFU — "O Dashboard Nutricional"
-// Vertical 9:16, 60fps, 510 frames (8.5s). Animação standalone — não faz
+// Vertical 9:16, 60fps, 615 frames (10.25s). Animação standalone — não faz
 // parte da série "O Mantra", reutiliza os assets do Defumado já existentes
 // (caixinha, fatias, logo em public/uai-tofu/).
 //
-// Estrutura (Padrão VERBO Motion O.S., decupagem do cliente):
+// Estrutura (Padrão VERBO Motion O.S., decupagem do cliente + ajustes de
+// feedback do cliente):
 //   Cena 1 (0-120)   — Escaneamento: caixinha + linha de scanner, dolly in,
 //                       sai em Z-PUSH (afunda pro fundo enquanto os cards
 //                       da Cena 2 "nascem" dela).
@@ -24,18 +25,26 @@ import {
 //                       destaque com CountUp + anel de progresso, mais dois
 //                       cards menores), sai em SHATTER (os cards voam pras
 //                       bordas da tela).
-//   Cena 3 (343-510) — Sabor: fatias reais aterrissam com peso, tipografia
-//                       de impacto, dolly out leve, DISSOLVE final pro
-//                       verde sólido.
+//   Cena 3 (343-480) — Sabor: uma fatia real grande aterrissa com peso e
+//                       fica girando levemente (nunca parada), o slogan da
+//                       marca entra letra por letra, dolly out leve.
+//   Cena 4 (490-615) — Desfecho: a logo real cresce e domina o quadro
+//                       enquanto o fundo termina de voltar pro verde sólido
+//                       — o final "cadê a logo?" que faltava na v1. Só
+//                       começa DEPOIS que a fatia+slogan já sumiram (sem
+//                       overlap — testei com crossfade e ficou uma dupla-
+//                       exposição feia, produto e logo brigando pelo centro).
 //
 // Todos os frames citados nos comentários são ABSOLUTOS (linha do tempo
-// mestre), com overlap de 7 frames entre cenas — a cena seguinte já começa
-// a entrar antes da anterior terminar de sair.
+// mestre), com overlap entre cenas — a cena seguinte já começa a entrar
+// antes da anterior terminar de sair.
 //
 // Notas de implementação (decisões não especificadas na decupagem):
 //   - Duração do CountUp/anel: 125->175 (50f), terminando bem antes do
 //     micro-pulso em 180.
-//   - "SABOR SURREAL." entra 20f depois de "NUTRIÇÃO BRUTA." (355->375).
+//   - Duração estendida de 510 -> 615 frames (8.5s -> 10.25s) pra caber a
+//     Cena 4 (cartela de logo) que não existia na v1 — o cliente sentiu
+//     falta de um desfecho de marca no final.
 //   - backdrop-filter testado num still isolado antes do render completo —
 //     Chromium headless do Remotion renderiza normalmente.
 // =============================================================================
@@ -43,7 +52,7 @@ import {
 export const FPS = 60;
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
-export const DURATION = 510;
+export const DURATION = 615;
 
 const CENTER_X = 540;
 const CENTER_Y = 960;
@@ -218,25 +227,55 @@ const Scene1: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
 
           {microTexts.map((m, i) => {
             const dist = Math.abs(h / 2 + scanY - (h / 2 + m.y));
-            const flicker = interpolate(dist, [0, 40, 90], [1, 1, 0], clampCfg) * scanOpacity;
+            // Envelope de visibilidade (mais largo pra combinar com o texto
+            // maior) + um "pop" com leve overshoot bem na hora em que o
+            // scanner cruza a altura do texto, e um deslizar de fora pra
+            // dentro — leitura de HUD, não um flicker simples.
+            const flicker = interpolate(dist, [0, 60, 130], [1, 1, 0], clampCfg) * scanOpacity;
+            const popScale = interpolate(dist, [0, 25, 90], [1, 1.1, 0.7], clampCfg);
+            const side = i === 0 ? -1 : 1;
+            const slideX = interpolate(dist, [0, 90], [0, side * -50], clampCfg);
+            const tickScale = interpolate(dist, [0, 50], [1, 0], clampCfg);
+            const glow = interpolate(dist, [0, 30], [1, 0], clampCfg);
+
             return (
               <div
                 key={i}
                 style={{
                   position: 'absolute',
-                  left: i === 0 ? -280 : undefined,
-                  right: i === 1 ? -270 : undefined,
-                  top: h / 2 + m.y - 10,
-                  fontFamily,
-                  fontWeight: 900,
-                  fontSize: 20,
-                  letterSpacing: 1.5,
-                  color: ACCENT_TECH,
+                  left: i === 0 ? -320 : undefined,
+                  right: i === 1 ? -310 : undefined,
+                  top: h / 2 + m.y - 14,
+                  display: 'flex',
+                  flexDirection: i === 0 ? 'row' : 'row-reverse',
+                  alignItems: 'center',
+                  gap: 10,
+                  transform: `translateX(${slideX}px) scale(${popScale})`,
                   opacity: flicker,
                   whiteSpace: 'nowrap',
                 }}
               >
-                {m.text}
+                <div
+                  style={{
+                    width: 4,
+                    height: 28,
+                    background: ACCENT_TECH,
+                    transform: `scaleY(${tickScale})`,
+                    boxShadow: `0 0 ${12 + glow * 16}px ${ACCENT_TECH}`,
+                  }}
+                />
+                <div
+                  style={{
+                    fontFamily,
+                    fontWeight: 900,
+                    fontSize: 30,
+                    letterSpacing: 1.5,
+                    color: ACCENT_TECH,
+                    textShadow: `0 0 ${glow * 20}px ${ACCENT_TECH}`,
+                  }}
+                >
+                  {m.text}
+                </div>
               </div>
             );
           })}
@@ -494,16 +533,24 @@ const SLICE_SRCS: SliceSrc[] = [
 ];
 
 // Uma única fatia grande (em vez da pilha de 5 — ficava estranho, muito
-// amontoado) — pouso de peso, bem no centro, protagonista sozinha.
+// amontoado) — pouso de peso, bem no centro, protagonista sozinha. Fica
+// girando bem devagar e levemente o tempo todo depois de pousar (pedido do
+// cliente: "não pode só surgir e ficar parada").
 type StackCfg = { srcIndex: number; dx: number; dy: number; rot: number; long: number };
-const STACK: StackCfg[] = [{ srcIndex: 0, dx: 0, dy: 0, rot: -3, long: 700 }];
+const STACK: StackCfg[] = [{ srcIndex: 0, dx: 0, dy: 0, rot: -3, long: 920 }];
 
 const SLICES_START = 345;
 const TITLE_START = 358;
+const LETTER_STAGGER = 1.4; // frames entre cada letra no reveal do slogan
+
+// A fatia e o slogan têm sua PRÓPRIA saída (encolhem/desfocam e somem) bem
+// antes da Cena 4 (logo) entrar — não dependem mais do dissolve final, que
+// agora acontece bem mais tarde, durante o hold da logo.
+const SLICE_EXIT_START = 452;
+const SLICE_EXIT_END = 480;
+
 const DOLLY_OUT_START = 345;
-const DOLLY_OUT_END = 490;
-const DISSOLVE_START = 490;
-const DISSOLVE_END = 510;
+const DOLLY_OUT_END = 452;
 
 const SLICES_CENTER_Y = 820;
 
@@ -520,30 +567,54 @@ const Scene3: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const dollyZ = interpolate(frame, [DOLLY_OUT_START, DOLLY_OUT_END], [0, -200], { ...clampCfg, easing: Easing.inOut(Easing.cubic) });
   const dollyScale = interpolate(dollyZ, [-200, 0], [0.94, 1]);
 
-  const dissolveT = interpolate(frame, [DISSOLVE_START, DISSOLVE_END], [0, 1], clampCfg);
+  // Saída compartilhada da fatia + slogan: encolhe, desfoca e sobe um
+  // pouco, liberando o centro do quadro pra Cena 4.
+  const exitT = interpolate(frame, [SLICE_EXIT_START, SLICE_EXIT_END], [0, 1], { ...clampCfg, easing: Easing.in(Easing.cubic) });
+  const exitOpacity = interpolate(exitT, [0, 1], [1, 0]);
+  const exitScale = interpolate(exitT, [0, 1], [1, 0.85]);
+  const exitBlur = interpolate(exitT, [0, 1], [0, 10]);
+  const exitYShift = interpolate(exitT, [0, 1], [0, -50]);
 
-  const title = (text: string, start: number, top: number) => {
-    const s = spring({ frame: frame - start, fps, config: { damping: 12, mass: 1 } });
-    const ty = lerp(s, -30, 0);
-    const opacity = interpolate(frame, [start, start + 10], [0, 1], clampCfg) * interpolate(dissolveT, [0, 1], [1, 0]);
+  // Slogan letra por letra: cada caractere nasce com seu próprio spring,
+  // com um pequeno atraso em relação ao anterior.
+  const titleLine = (text: string, start: number, top: number) => {
+    const chars = Array.from(text);
     return (
       <div
         style={{
           position: 'absolute',
           left: 0,
           right: 0,
-          top,
+          top: top + exitYShift,
           textAlign: 'center',
           fontFamily,
           fontWeight: 900,
           fontSize: 62,
-          letterSpacing: -0.5,
           color: ACCENT_TECH,
-          transform: `translateY(${ty - dissolveT * 20}px)`,
-          opacity,
+          whiteSpace: 'nowrap',
+          filter: exitBlur > 0.1 ? `blur(${exitBlur}px)` : undefined,
         }}
       >
-        {text}
+        {chars.map((ch, idx) => {
+          if (ch === ' ') return <span key={idx} style={{ display: 'inline-block', width: '0.28em' }} />;
+          const charStart = start + idx * LETTER_STAGGER;
+          const cs = spring({ frame: frame - charStart, fps, config: { damping: 14, mass: 0.6 } });
+          const ty = lerp(cs, 22, 0);
+          const rot = lerp(cs, 10, 0);
+          const charOpacity = interpolate(frame, [charStart, charStart + 6], [0, 1], clampCfg) * exitOpacity;
+          return (
+            <span
+              key={idx}
+              style={{
+                display: 'inline-block',
+                transform: `translateY(${ty}px) rotate(${rot}deg)`,
+                opacity: charOpacity,
+              }}
+            >
+              {ch}
+            </span>
+          );
+        })}
       </div>
     );
   };
@@ -562,18 +633,23 @@ const Scene3: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
             const cfg = SLICE_SRCS[c.srcIndex];
             const localStart = SLICES_START + i * 3;
             const s = spring({ frame: frame - localStart, fps, config: { damping: 10, mass: 1.2 } });
-            const scale = lerp(s, 1.3, 1);
-            const blur = lerp(s, 20, 0);
-            const opacity = interpolate(frame, [localStart, localStart + 8], [0, 1], clampCfg) * interpolate(dissolveT, [0, 1], [1, 0]);
+            const landScale = lerp(s, 1.3, 1);
+            const landBlur = lerp(s, 20, 0);
+            const landOpacity = interpolate(frame, [localStart, localStart + 8], [0, 1], clampCfg);
 
+            const scale = landScale * exitScale;
+            const opacity = landOpacity * exitOpacity;
+            const blur = landBlur + exitBlur;
+
+            // Giro contínuo e bem leve — nunca fica parada depois de pousar.
             const idlePhase = i * 1.4;
-            const idleRot = Math.sin(frame * 0.03 + idlePhase) * 1.6;
+            const idleRot = Math.sin(frame * 0.018 + idlePhase) * 9;
 
             const long = c.long * scale;
             const w = cfg.w * (long / Math.max(cfg.w, cfg.h));
             const h = cfg.h * (long / Math.max(cfg.w, cfg.h));
             const x = CENTER_X + c.dx;
-            const y = SLICES_CENTER_Y + c.dy - dissolveT * 20;
+            const y = SLICES_CENTER_Y + c.dy + exitYShift;
 
             return (
               <Img
@@ -595,8 +671,59 @@ const Scene3: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
         </div>
       </div>
 
-      {title(SLOGAN_LINE1, TITLE_START, 1350)}
-      {title(SLOGAN_LINE2, TITLE_START + 6, 1425)}
+      {titleLine(SLOGAN_LINE1, TITLE_START, 1350)}
+      {titleLine(SLOGAN_LINE2, TITLE_START + 30, 1425)}
+    </AbsoluteFill>
+  );
+};
+
+// =============================================================================
+// CENA 4 — Desfecho: a logo (490-615)
+// SÓ DEPOIS que a fatia + o slogan já saíram a logo real cresce, dominante,
+// no centro — o "cadê a marca no final?" que faltava na v1. Mesmo
+// tratamento (spring + glow) já aprovado nas peças "O Mantra".
+// =============================================================================
+const LOGO = { src: 'logo.png', w: 460, h: 376 };
+const LOGO_DISPLAY_W = 480;
+// Só começa DEPOIS que a fatia + slogan já sumiram por completo (saem em
+// 452->480) — um pequeno respiro de tela vazia antes da logo, sem
+// sobrepor o produto (testei com overlap e ficou uma dupla-exposição feia).
+const LOGO_START = 490;
+
+const DISSOLVE_START = 575;
+const DISSOLVE_END = 600;
+
+const Scene4: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
+  const local = frame - LOGO_START;
+  const s = spring({ frame: Math.max(0, local), fps, config: { damping: 16, mass: 1, stiffness: 95 } });
+  const scale = lerp(s, 0.5, 1);
+  const opacity = interpolate(frame, [LOGO_START, LOGO_START + 18], [0, 1], clampCfg);
+
+  const glow = interpolate(local, [0, 18, 70], [0, 0.4, 0.22], clampCfg);
+
+  const w = LOGO_DISPLAY_W * scale;
+  const h = w * (LOGO.h / LOGO.w);
+
+  return (
+    <AbsoluteFill>
+      <AbsoluteFill
+        style={{
+          opacity: glow,
+          mixBlendMode: 'screen',
+          background: `radial-gradient(circle at 50% 50%, #ffffff 0%, ${ACCENT_TECH} 45%, transparent 72%)`,
+        }}
+      />
+      <Img
+        src={staticFile(`uai-tofu/${LOGO.src}`)}
+        style={{
+          position: 'absolute',
+          left: CENTER_X - w / 2,
+          top: CENTER_Y - h / 2,
+          width: w,
+          height: h,
+          opacity,
+        }}
+      />
     </AbsoluteFill>
   );
 };
@@ -625,6 +752,7 @@ export const UaiTofuDashboard: React.FC = () => {
       <Scene1 frame={frame} fps={fps} />
       <Scene2 frame={frame} fps={fps} />
       <Scene3 frame={frame} fps={fps} />
+      <Scene4 frame={frame} fps={fps} />
     </AbsoluteFill>
   );
 };
