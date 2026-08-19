@@ -5,6 +5,7 @@ import { UaiTofuReveal, DURATION as UAI_TOFU_DURATION } from './UaiTofuReveal';
 import { UaiSoyToProduct, DURATION as UAI_SOY_DURATION } from './UaiSoyToProduct';
 import { UaiTofuMantra, DURATION as UAI_MANTRA_DURATION, FPS as UAI_MANTRA_FPS } from './UaiTofuMantra';
 import { UaiTofuFrescalMantra, DURATION as UAI_FRESCAL_DURATION, FPS as UAI_FRESCAL_FPS } from './UaiTofuFrescalMantra';
+import { UaiTofuDashboard, DURATION as UAI_DASHBOARD_DURATION, FPS as UAI_DASHBOARD_FPS } from './UaiTofuDashboard';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -38,6 +39,14 @@ export const RemotionRoot: React.FC = () => {
         component={UaiTofuFrescalMantra}
         durationInFrames={UAI_FRESCAL_DURATION}
         fps={UAI_FRESCAL_FPS}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="UaiTofuDashboard"
+        component={UaiTofuDashboard}
+        durationInFrames={UAI_DASHBOARD_DURATION}
+        fps={UAI_DASHBOARD_FPS}
         width={1080}
         height={1920}
       />
