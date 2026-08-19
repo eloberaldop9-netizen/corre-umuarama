@@ -137,10 +137,10 @@ const AmbientSmoke: React.FC<{ frame: number }> = ({ frame }) => {
 // CENA 1 — O Escaneamento (0-120)
 // =============================================================================
 const BOX = { src: 'box.png', w: 557, h: 705 };
-const BOX_DISPLAY_W = 480;
+const BOX_DISPLAY_W = 580;
 
-const SCANNER_START = 20;
-const SCANNER_END = 90;
+const SCANNER_START = 15;
+const SCANNER_END = 95;
 const BOX_EXIT_START = 100;
 const BOX_EXIT_END = 120;
 
@@ -170,11 +170,13 @@ const Scene1: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const blur = entranceBlur + exitBlur;
   const opacity = interpolate(frame, [0, 8], [0, 1], clampCfg) * exitOpacity;
 
-  // Scanner: varre de cima a baixo da caixinha, com glow. Micro-textos
-  // piscam nas laterais quando a linha passa perto da sua altura.
+  // Scanner: varre de cima a baixo da caixinha, com glow. Easing senoidal
+  // (em vez de cúbico) — movimento mais suave, sem a "freada" mais brusca
+  // do cúbico nas pontas. Micro-textos piscam nas laterais quando a linha
+  // passa perto da sua altura.
   const scanT = interpolate(frame, [SCANNER_START, SCANNER_END], [0, 1], {
     ...clampCfg,
-    easing: Easing.inOut(Easing.cubic),
+    easing: Easing.inOut(Easing.sin),
   });
   const scanY = lerp(scanT, -300, 300);
   const scanOpacity = interpolate(frame, [SCANNER_START - 4, SCANNER_START, SCANNER_END, SCANNER_END + 6], [0, 1, 1, 0], clampCfg);
@@ -222,12 +224,12 @@ const Scene1: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
                 key={i}
                 style={{
                   position: 'absolute',
-                  left: i === 0 ? -240 : undefined,
-                  right: i === 1 ? -230 : undefined,
-                  top: h / 2 + m.y - 8,
+                  left: i === 0 ? -280 : undefined,
+                  right: i === 1 ? -270 : undefined,
+                  top: h / 2 + m.y - 10,
                   fontFamily,
                   fontWeight: 900,
-                  fontSize: 15,
+                  fontSize: 20,
                   letterSpacing: 1.5,
                   color: ACCENT_TECH,
                   opacity: flicker,
@@ -491,20 +493,13 @@ const SLICE_SRCS: SliceSrc[] = [
   { src: 'slice6.png', w: 388, h: 286 },
 ];
 
-// Fatias empilhadas (não espalhadas pela tela como no vídeo "O Mantra") —
-// pilha compacta e levemente abanada, no estilo "prontas pra comer".
+// Uma única fatia grande (em vez da pilha de 5 — ficava estranho, muito
+// amontoado) — pouso de peso, bem no centro, protagonista sozinha.
 type StackCfg = { srcIndex: number; dx: number; dy: number; rot: number; long: number };
-const STACK: StackCfg[] = [
-  { srcIndex: 3, dx: -95, dy: 55, rot: -12, long: 460 },
-  { srcIndex: 1, dx: 80, dy: 75, rot: 10, long: 450 },
-  { srcIndex: 5, dx: -40, dy: -30, rot: -4, long: 475 },
-  { srcIndex: 0, dx: 55, dy: -70, rot: 8, long: 435 },
-  { srcIndex: 4, dx: 0, dy: 15, rot: -2, long: 420 },
-];
+const STACK: StackCfg[] = [{ srcIndex: 0, dx: 0, dy: 0, rot: -3, long: 700 }];
 
 const SLICES_START = 345;
-const TITLE1_START = 355;
-const TITLE2_START = 375;
+const TITLE_START = 358;
 const DOLLY_OUT_START = 345;
 const DOLLY_OUT_END = 490;
 const DISSOLVE_START = 490;
@@ -512,11 +507,16 @@ const DISSOLVE_END = 510;
 
 const SLICES_CENTER_Y = 820;
 
+// Slogan real da marca — duas linhas curtas em vez da frase técnica
+// original, fonte bem menor pra caber confortável na largura do canvas.
+const SLOGAN_LINE1 = 'Cuidar de você nunca';
+const SLOGAN_LINE2 = 'foi tão gostoso.';
+
 const Scene3: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const sceneOpacity = interpolate(frame, [343, 350], [0, 1], clampCfg);
 
   // Dolly out leve — recua sutilmente ao longo da cena pra dar respiro à
-  // composição (fatias + tipografia), sem chegar a "flutuar" longe demais.
+  // composição (fatia + tipografia), sem chegar a "flutuar" longe demais.
   const dollyZ = interpolate(frame, [DOLLY_OUT_START, DOLLY_OUT_END], [0, -200], { ...clampCfg, easing: Easing.inOut(Easing.cubic) });
   const dollyScale = interpolate(dollyZ, [-200, 0], [0.94, 1]);
 
@@ -524,7 +524,7 @@ const Scene3: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
 
   const title = (text: string, start: number, top: number) => {
     const s = spring({ frame: frame - start, fps, config: { damping: 12, mass: 1 } });
-    const ty = lerp(s, -40, 0);
+    const ty = lerp(s, -30, 0);
     const opacity = interpolate(frame, [start, start + 10], [0, 1], clampCfg) * interpolate(dissolveT, [0, 1], [1, 0]);
     return (
       <div
@@ -536,8 +536,8 @@ const Scene3: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
           textAlign: 'center',
           fontFamily,
           fontWeight: 900,
-          fontSize: 90,
-          letterSpacing: -1,
+          fontSize: 62,
+          letterSpacing: -0.5,
           color: ACCENT_TECH,
           transform: `translateY(${ty - dissolveT * 20}px)`,
           opacity,
@@ -595,8 +595,8 @@ const Scene3: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
         </div>
       </div>
 
-      {title('NUTRIÇÃO BRUTA.', TITLE1_START, 1330)}
-      {title('SABOR SURREAL.', TITLE2_START, 1440)}
+      {title(SLOGAN_LINE1, TITLE_START, 1350)}
+      {title(SLOGAN_LINE2, TITLE_START + 6, 1425)}
     </AbsoluteFill>
   );
 };
