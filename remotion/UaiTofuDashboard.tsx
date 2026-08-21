@@ -227,16 +227,16 @@ const Scene1: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
 
           {microTexts.map((m, i) => {
             const dist = Math.abs(h / 2 + scanY - (h / 2 + m.y));
-            // Envelope de visibilidade (mais largo pra combinar com o texto
-            // maior) + um "pop" com leve overshoot bem na hora em que o
-            // scanner cruza a altura do texto, e um deslizar de fora pra
-            // dentro — leitura de HUD, não um flicker simples.
-            const flicker = interpolate(dist, [0, 60, 130], [1, 1, 0], clampCfg) * scanOpacity;
-            const popScale = interpolate(dist, [0, 25, 90], [1, 1.1, 0.7], clampCfg);
+            // Envelope de visibilidade + um "pop" BEM mais discreto que a
+            // versão anterior (o cliente achou forte demais): quase sem
+            // overshoot, deslocamento pequeno e espalhado por uma faixa de
+            // distância maior — a transição fica gradual, não um "soco".
+            const flicker = interpolate(dist, [0, 90, 180], [1, 1, 0], clampCfg) * scanOpacity;
+            const popScale = interpolate(dist, [0, 50, 160], [1, 1.02, 0.9], clampCfg);
             const side = i === 0 ? -1 : 1;
-            const slideX = interpolate(dist, [0, 90], [0, side * -50], clampCfg);
-            const tickScale = interpolate(dist, [0, 50], [1, 0], clampCfg);
-            const glow = interpolate(dist, [0, 30], [1, 0], clampCfg);
+            const slideX = interpolate(dist, [0, 160], [0, side * -18], clampCfg);
+            const tickScale = interpolate(dist, [0, 90], [1, 0], clampCfg);
+            const glow = interpolate(dist, [0, 70], [1, 0], clampCfg);
 
             return (
               <div
@@ -245,11 +245,11 @@ const Scene1: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
                   position: 'absolute',
                   left: i === 0 ? -320 : undefined,
                   right: i === 1 ? -310 : undefined,
-                  top: h / 2 + m.y - 14,
+                  top: h / 2 + m.y - 18,
                   display: 'flex',
                   flexDirection: i === 0 ? 'row' : 'row-reverse',
                   alignItems: 'center',
-                  gap: 10,
+                  gap: 12,
                   transform: `translateX(${slideX}px) scale(${popScale})`,
                   opacity: flicker,
                   whiteSpace: 'nowrap',
@@ -258,20 +258,20 @@ const Scene1: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
                 <div
                   style={{
                     width: 4,
-                    height: 28,
+                    height: 34,
                     background: ACCENT_TECH,
                     transform: `scaleY(${tickScale})`,
-                    boxShadow: `0 0 ${12 + glow * 16}px ${ACCENT_TECH}`,
+                    boxShadow: `0 0 ${6 + glow * 6}px ${ACCENT_TECH}`,
                   }}
                 />
                 <div
                   style={{
                     fontFamily,
                     fontWeight: 900,
-                    fontSize: 30,
+                    fontSize: 38,
                     letterSpacing: 1.5,
                     color: ACCENT_TECH,
-                    textShadow: `0 0 ${glow * 20}px ${ACCENT_TECH}`,
+                    textShadow: `0 0 ${glow * 8}px ${ACCENT_TECH}`,
                   }}
                 >
                   {m.text}
