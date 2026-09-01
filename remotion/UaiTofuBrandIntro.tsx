@@ -19,11 +19,10 @@ export const HEIGHT = 1080;
 export const FPS = 60;
 export const DURATION = 360;
 
-const BG = '#FBBD3C';
+const BG = '#FCBD2A';
 const GREEN = '#20402F';
 const RED = '#C6281F';
 const CREAM = '#FFFDF6';
-const GOLD = '#E8A317';
 
 const clampCfg = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 
@@ -148,40 +147,13 @@ const Tagline: React.FC<{ frame: number }> = ({ frame }) => {
 
 type IconKind = 'vegano' | 'proteico' | 'amor';
 
-const CowIcon: React.FC<{ color: string }> = ({ color }) => (
-  <svg width={44} height={38} viewBox="0 0 32 28" fill="none">
-    <path d="M9 8 Q3 4 5 0" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
-    <path d="M23 8 Q29 4 27 0" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
-    <rect x={4} y={8} width={24} height={17} rx={8.5} stroke={color} strokeWidth={1.8} />
-    <path d="M10 14 q2.2 -3.4 4.4 0" stroke={color} strokeWidth={1.8} strokeLinecap="round" fill="none" />
-    <path d="M17.6 14 q2.2 -3.4 4.4 0" stroke={color} strokeWidth={1.8} strokeLinecap="round" fill="none" />
-    <path d="M13 21.5 q3 2.2 6 0" stroke={color} strokeWidth={1.8} strokeLinecap="round" fill="none" />
-    <circle cx={14} cy={18.5} r={0.9} fill={color} />
-    <circle cx={18} cy={18.5} r={0.9} fill={color} />
-  </svg>
-);
-
-const ProteinIcon: React.FC<{ color: string }> = ({ color }) => (
-  <svg width={40} height={40} viewBox="0 0 24 24" fill="none">
-    <rect x={2} y={5} width={4} height={14} rx={2} fill={color} />
-    <rect x={6} y={10.5} width={12} height={3} rx={1.5} fill={color} />
-    <rect x={18} y={5} width={4} height={14} rx={2} fill={color} />
-  </svg>
-);
-
-const HeartIcon: React.FC<{ color: string }> = ({ color }) => (
-  <svg width={38} height={38} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-      fill={color}
-    />
-  </svg>
-);
-
-const ICONS: { kind: IconKind; label: string[]; bg: string; ring: string; icon: string }[] = [
-  { kind: 'vegano', label: ['Vegano'], bg: GREEN, ring: GOLD, icon: GOLD },
-  { kind: 'proteico', label: ['Protéico'], bg: 'transparent', ring: RED, icon: RED },
-  { kind: 'amor', label: ['Feito com', 'amor'], bg: RED, ring: CREAM, icon: CREAM },
+// Selos extraídos como recorte real (alpha cutout) direto da vinheta oficial
+// do cliente (mesmo pipeline de chroma-key do resto do projeto) — não
+// redesenhados, para ficarem idênticos ao original.
+const ICONS: { kind: IconKind; src: string; label: string[]; labelColor: string }[] = [
+  { kind: 'vegano', src: 'vegano.png', label: ['Vegano'], labelColor: GREEN },
+  { kind: 'proteico', src: 'proteico.png', label: ['Protéico'], labelColor: RED },
+  { kind: 'amor', src: 'amor.png', label: ['Feito com', 'amor'], labelColor: RED },
 ];
 
 const IconBadge: React.FC<{ frame: number; fps: number; index: number; cfg: (typeof ICONS)[number] }> = ({
@@ -197,22 +169,7 @@ const IconBadge: React.FC<{ frame: number; fps: number; index: number; cfg: (typ
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity, transform: `scale(${scale})` }}>
-      <div
-        style={{
-          width: 108,
-          height: 108,
-          borderRadius: '50%',
-          background: cfg.bg,
-          border: `3px solid ${cfg.ring}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {cfg.kind === 'vegano' && <CowIcon color={cfg.icon} />}
-        {cfg.kind === 'proteico' && <ProteinIcon color={cfg.icon} />}
-        {cfg.kind === 'amor' && <HeartIcon color={cfg.icon} />}
-      </div>
+      <Img src={staticFile(`uai-tofu/badges/${cfg.src}`)} style={{ width: 112, height: 112 }} />
       <div
         style={{
           marginTop: 12,
@@ -220,7 +177,7 @@ const IconBadge: React.FC<{ frame: number; fps: number; index: number; cfg: (typ
           fontWeight: 900,
           fontSize: 22,
           letterSpacing: 0.4,
-          color: cfg.kind === 'vegano' ? GREEN : RED,
+          color: cfg.labelColor,
           textAlign: 'center',
           lineHeight: 1.15,
         }}
