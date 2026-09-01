@@ -6,6 +6,7 @@ import { UaiSoyToProduct, DURATION as UAI_SOY_DURATION } from './UaiSoyToProduct
 import { UaiTofuMantra, DURATION as UAI_MANTRA_DURATION, FPS as UAI_MANTRA_FPS } from './UaiTofuMantra';
 import { UaiTofuFrescalMantra, DURATION as UAI_FRESCAL_DURATION, FPS as UAI_FRESCAL_FPS } from './UaiTofuFrescalMantra';
 import { UaiTofuDashboard, DURATION as UAI_DASHBOARD_DURATION, FPS as UAI_DASHBOARD_FPS } from './UaiTofuDashboard';
+import { UaiTofuBrandIntro, DURATION as UAI_BRAND_INTRO_DURATION, FPS as UAI_BRAND_INTRO_FPS, WIDTH as UAI_BRAND_INTRO_WIDTH, HEIGHT as UAI_BRAND_INTRO_HEIGHT } from './UaiTofuBrandIntro';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -49,6 +50,14 @@ export const RemotionRoot: React.FC = () => {
         fps={UAI_DASHBOARD_FPS}
         width={1080}
         height={1920}
+      />
+      <Composition
+        id="UaiTofuBrandIntro"
+        component={UaiTofuBrandIntro}
+        durationInFrames={UAI_BRAND_INTRO_DURATION}
+        fps={UAI_BRAND_INTRO_FPS}
+        width={UAI_BRAND_INTRO_WIDTH}
+        height={UAI_BRAND_INTRO_HEIGHT}
       />
       <Composition
         id="UaiCienciaIntro"
