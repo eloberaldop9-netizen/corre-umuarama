@@ -1,0 +1,82 @@
+import React from 'react';
+import { Composition } from 'remotion';
+import { UaiCienciaIntro } from './UaiCienciaIntro';
+import { UaiTofuReveal, DURATION as UAI_TOFU_DURATION } from './UaiTofuReveal';
+import { UaiSoyToProduct, DURATION as UAI_SOY_DURATION } from './UaiSoyToProduct';
+import { UaiTofuMantra, DURATION as UAI_MANTRA_DURATION, FPS as UAI_MANTRA_FPS } from './UaiTofuMantra';
+import { UaiTofuFrescalMantra, DURATION as UAI_FRESCAL_DURATION, FPS as UAI_FRESCAL_FPS } from './UaiTofuFrescalMantra';
+import { UaiTofuDashboard, DURATION as UAI_DASHBOARD_DURATION, FPS as UAI_DASHBOARD_FPS } from './UaiTofuDashboard';
+import { UaiTofuBrandIntro, DURATION as UAI_BRAND_INTRO_DURATION, FPS as UAI_BRAND_INTRO_FPS, WIDTH as UAI_BRAND_INTRO_WIDTH, HEIGHT as UAI_BRAND_INTRO_HEIGHT } from './UaiTofuBrandIntro';
+
+export const RemotionRoot: React.FC = () => {
+  return (
+    <>
+      <Composition
+        id="UaiTofuReveal"
+        component={UaiTofuReveal}
+        durationInFrames={UAI_TOFU_DURATION}
+        fps={60}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="UaiSoyToProduct"
+        component={UaiSoyToProduct}
+        durationInFrames={UAI_SOY_DURATION}
+        fps={60}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="UaiTofuMantra"
+        component={UaiTofuMantra}
+        durationInFrames={UAI_MANTRA_DURATION}
+        fps={UAI_MANTRA_FPS}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="UaiTofuFrescalMantra"
+        component={UaiTofuFrescalMantra}
+        durationInFrames={UAI_FRESCAL_DURATION}
+        fps={UAI_FRESCAL_FPS}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="UaiTofuDashboard"
+        component={UaiTofuDashboard}
+        durationInFrames={UAI_DASHBOARD_DURATION}
+        fps={UAI_DASHBOARD_FPS}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="UaiTofuBrandIntro"
+        component={UaiTofuBrandIntro}
+        durationInFrames={UAI_BRAND_INTRO_DURATION}
+        fps={UAI_BRAND_INTRO_FPS}
+        width={UAI_BRAND_INTRO_WIDTH}
+        height={UAI_BRAND_INTRO_HEIGHT}
+      />
+      <Composition
+        id="UaiCienciaIntro"
+        component={UaiCienciaIntro}
+        durationInFrames={120}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ subtitle: 'com Dr. Éric Slywitch' }}
+      />
+      <Composition
+        id="UaiCienciaIntroEntrevista"
+        component={UaiCienciaIntro}
+        durationInFrames={120}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ subtitle: 'Entrevista com Dr. Eric' }}
+      />
+    </>
+  );
+};
