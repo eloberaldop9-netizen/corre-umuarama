@@ -169,13 +169,13 @@ const IconBadge: React.FC<{ frame: number; fps: number; index: number; cfg: (typ
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity, transform: `scale(${scale})` }}>
-      <Img src={staticFile(`uai-tofu/badges/${cfg.src}`)} style={{ width: 112, height: 112 }} />
+      <Img src={staticFile(`uai-tofu/badges/${cfg.src}`)} style={{ width: 142, height: 142 }} />
       <div
         style={{
-          marginTop: 12,
+          marginTop: 14,
           fontFamily,
           fontWeight: 900,
-          fontSize: 22,
+          fontSize: 24,
           letterSpacing: 0.4,
           color: cfg.labelColor,
           textAlign: 'center',
