@@ -41,6 +41,10 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
 
   const historiaGlow = 0.15 + Math.max(0, Math.sin(frame * 0.04)) * 0.3;
 
+  // "Em 2020," — abertura, sincronizada com as primeiras palavras reais
+  const emOp = ci(frame, [7, 21], [0, 1], Easing.out(Easing.cubic));
+  const em2020Op = ci(frame, [22, 36], [0, 1], Easing.out(Easing.cubic));
+
   // "mais votada" — legenda secundária, sincronizada
   const maisOp = ci(frame, [138, 152], [0, 1], Easing.out(Easing.cubic));
   const maisY = ci(frame, [138, 152], [16, 0], Easing.out(Easing.cubic));
@@ -72,6 +76,43 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
           alignItems: 'center',
         }}
       >
+        {/* Em 2020, — abertura */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 10,
+            marginBottom: 10,
+            zIndex: 10,
+            opacity: (1 - exitAna),
+          }}
+        >
+          <span
+            style={{
+              fontFamily: FONT.sans,
+              fontWeight: 600,
+              fontSize: 34,
+              letterSpacing: -1,
+              color: COLOR.textLight,
+              opacity: emOp,
+            }}
+          >
+            EM
+          </span>
+          <span
+            style={{
+              fontFamily: FONT.sans,
+              fontWeight: 700,
+              fontSize: 34,
+              letterSpacing: -1,
+              color: COLOR.gold,
+              opacity: em2020Op,
+            }}
+          >
+            2020,
+          </span>
+        </div>
+
         {/* Nome */}
         <div
           style={{
