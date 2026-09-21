@@ -9,20 +9,21 @@ import { Scene5_Assinatura } from './scenes/Scene5_Assinatura';
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
 export const FPS = 30;
-export const TOTAL_FRAMES = 857; // ~28.6s
+export const TOTAL_FRAMES = 860; // ~28.7s
 
-// Timing derivado da TRANSCRIÇÃO REAL fornecida pelo usuário, alinhada aos
-// timestamps reais de fala (ffmpeg silencedetect sobre narracao.mp3, 10
-// pausas reais detectadas). A frase 3 é uma oração longa e contínua ("Mas
-// essa trajetória... 1.621 votos, mostrando... cidade.") por isso a Cena 3
-// e a Cena 4 dividem esse trecho: Cena 3 cobre até "1.621 votos," e a
-// Cena 4 assume em "mostrando desde o início..." (já span da Cena 4).
+// Timing derivado de FORÇA DE ALINHAMENTO REAL (aeneas + espeak-ng, DTW por
+// oração, ancorado nas pausas reais detectadas via ffmpeg silencedetect em
+// narracao.mp3) — não é mais estimativa por peso silábico. Cada palavra da
+// transcrição tem um frame de início real medido no áudio. A oração 3 é
+// longa e contínua ("Mas essa trajetória... 1.621 votos, mostrando...
+// cidade.") por isso a Cena 3 cobre até "1.621 votos," e a Cena 4 assume em
+// "mostrando desde o início..." (sem lettering, mas presente no áudio).
 export const SCENES = {
-  s1: { from: 0, duration: 192 }, // "Em 2020... cidade." (0–172)
-  s2: { from: 172, duration: 182 }, // "Foram 2.373 votos... cada lar." (182–334)
-  s3: { from: 334, duration: 340 }, // "Mas essa trajetória... 1.621 votos," (347–612)
-  s4: { from: 615, duration: 174 }, // "mostrando...cidade. Essa é a marca... gente." (629–769)
-  s5: { from: 769, duration: 88 }, // "Essa é uma parte... Umuarama." (773–822)
+  s1: { from: 0, duration: 210 }, // "Em 2020... cidade." (0–177)
+  s2: { from: 172, duration: 200 }, // "Foram 2.373 votos... cada lar." (177–339)
+  s3: { from: 335, duration: 280 }, // "Mas essa trajetória... 1.621 votos," (340–547)
+  s4: { from: 585, duration: 175 }, // "mostrando...cidade. Essa é a marca... gente." (562–717)
+  s5: { from: 735, duration: 125 }, // "Essa é uma parte... Umuarama." (717–821)
 } as const;
 
 /**

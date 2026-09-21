@@ -6,12 +6,13 @@ import { AssetImage } from '../lib/AssetImage';
 import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
-// Cena 3 — O Arquivo Investigativo | frames locais 0–340 (11.3s)
-// Transcrição real (frase única e longa, com peso silábico — "1.621" leva
-// bem mais tempo pra ser dito que uma palavra comum):
-// "Mas"@13 "essa"@19 "trajetória"@31 "começou"@70 "antes:"@94 "em"@118 "sua"@126
-// "estreia"@141 "na"@165 "política,"@173 "Ana"@211 "já"@219 "havia"@222
-// "conquistado"@234 "1.621"@249 "votos,"@283
+// Cena 3 — O Arquivo Investigativo | frames locais 0–280 (9.3s)
+// Transcrição real (forced alignment real, ancorada nas pausas reais do
+// áudio — "1.621" é falado entre os frames 153 e 207, 54 frames / 1.8s,
+// bem mais devagar que a estimativa anterior de 32 frames):
+// "Mas"@5 "essa"@13 "trajetória"@22 "começou"@39 "antes:"@51 "em"@65 "sua"@72
+// "estreia"@78 "na"@90 "política,"@95 "Ana"@113 "já"@117 "havia"@126
+// "conquistado"@135 "1.621"@153–207 "votos,"@207–212
 export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -20,26 +21,27 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
   const landingScale = ci(frame, [0, 25], [1.15, 1], Easing.out(Easing.cubic));
   const shake = handheldShake(frame, 0.5);
 
-  const p1 = spring({ frame, fps, config: SPRING.card, delay: 20 });
-  const p2 = spring({ frame, fps, config: SPRING.card, delay: 75 });
-  const p3 = spring({ frame, fps, config: SPRING.card, delay: 130 });
-  const p4 = spring({ frame, fps, config: SPRING.card, delay: 178 });
+  const p1 = spring({ frame, fps, config: SPRING.card, delay: 5 });
+  const p2 = spring({ frame, fps, config: SPRING.card, delay: 40 });
+  const p3 = spring({ frame, fps, config: SPRING.card, delay: 75 });
+  const p4 = spring({ frame, fps, config: SPRING.card, delay: 100 });
 
   // "estreia" — pequena legenda, sincronizada com a palavra real
-  const estreiaOp = ci(frame, [141, 157], [0, 1], Easing.out(Easing.cubic));
+  const estreiaOp = ci(frame, [78, 94], [0, 1], Easing.out(Easing.cubic));
 
-  // Fotos saem — abrem espaço antes de "1.621 votos" ser dito
-  const photosExit = ci(frame, [212, 240], [0, 1], Easing.inOut(Easing.cubic));
+  // Fotos saem — abrem espaço enquanto "conquistado" é dito, terminando
+  // exatamente quando "1.621" começa a ser falado
+  const photosExit = ci(frame, [120, 153], [0, 1], Easing.inOut(Easing.cubic));
 
-  // Número — contagem real, sincronizada com "1.621" (que leva ~1s pra ser
-  // falado: "mil, seiscentos e vinte e um")
-  const numberOp = ci(frame, [249, 263], [0, 1], Easing.out(Easing.cubic));
-  const numberBlur = ci(frame, [249, 267], [10, 0], Easing.out(Easing.cubic));
-  const numberValue = countUp(frame, 249, 32, 1621);
-  const votosOp = ci(frame, [283, 298], [0, 1], Easing.out(Easing.cubic));
-  const votosY = ci(frame, [283, 298], [18, 0], Easing.out(Easing.cubic));
+  // Número — contagem real, sincronizada com "1.621" (54 frames / 1.8s:
+  // "mil, seiscentos e vinte e um")
+  const numberOp = ci(frame, [153, 167], [0, 1], Easing.out(Easing.cubic));
+  const numberBlur = ci(frame, [153, 171], [10, 0], Easing.out(Easing.cubic));
+  const numberValue = countUp(frame, 153, 54, 1621);
+  const votosOp = ci(frame, [207, 222], [0, 1], Easing.out(Easing.cubic));
+  const votosY = ci(frame, [207, 222], [18, 0], Easing.out(Easing.cubic));
 
-  const exitAll = ci(frame, [308, 336], [0, 1], Easing.in(Easing.exp));
+  const exitAll = ci(frame, [252, 278], [0, 1], Easing.in(Easing.exp));
 
   const photo = (
     file: string | null | undefined,
@@ -114,7 +116,7 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
             right: 0,
             textAlign: 'center',
             zIndex: 40,
-            opacity: estreiaOp * (1 - ci(frame, [206, 222], [0, 1])),
+            opacity: estreiaOp * (1 - ci(frame, [108, 124], [0, 1])),
           }}
         >
           <span

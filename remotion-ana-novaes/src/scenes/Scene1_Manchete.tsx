@@ -6,15 +6,16 @@ import { AssetImage } from '../lib/AssetImage';
 import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
-// Cena 1 — A Manchete Histórica | frames locais 0–192 (6.4s)
-// Transcrição real (peso silábico): "Em"@7 "2020,"@12 "Ana"@46 "Novais"@54 "fez"@62 "história"@66
-//                    "mais"@140 "votada"@144
+// Cena 1 — A Manchete Histórica | frames locais 0–210 (7.0s)
+// Transcrição real (forced alignment real, não estimativa):
+// "Em"@0 "2020,"@13 "Ana"@42 "Novais"@47 "fez"@60 "história"@70
+//                    "mais"@136 "votada"@146 "cidade."@159–177
 // Composição centralizada — retrato e nome no centro do quadro.
 export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const dollyScale = ci(frame, [0, 192], [0.92, 1.02], Easing.out(Easing.cubic));
+  const dollyScale = ci(frame, [0, 210], [0.92, 1.02], Easing.out(Easing.cubic));
 
   const bgOp = ci(frame, [0, 20], [0, 1], Easing.inOut(Easing.quad));
 
@@ -22,47 +23,47 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
   const portraitBlur = ci(frame, [10, 42], [16, 0], Easing.out(Easing.cubic));
   const portraitOp = ci(frame, [10, 34], [0, 1]);
 
-  const anaSp = spring({ frame, fps, config: SPRING.text, delay: 46 });
+  const anaSp = spring({ frame, fps, config: SPRING.text, delay: 42 });
   const anaY = ci(anaSp, [0, 1], [26, 0]);
-  const anaBl = ci(frame - 46, [0, 14], [10, 0]);
+  const anaBl = ci(frame - 42, [0, 14], [10, 0]);
 
-  const novaisSp = spring({ frame, fps, config: SPRING.text, delay: 54 });
+  const novaisSp = spring({ frame, fps, config: SPRING.text, delay: 47 });
   const novaisY = ci(novaisSp, [0, 1], [26, 0]);
-  const novaisBl = ci(frame - 54, [0, 14], [10, 0]);
+  const novaisBl = ci(frame - 47, [0, 14], [10, 0]);
 
-  const fezSp = spring({ frame, fps, config: { damping: 14, mass: 0.85 }, delay: 62 });
+  const fezSp = spring({ frame, fps, config: { damping: 14, mass: 0.85 }, delay: 60 });
   const fezScale = ci(fezSp, [0, 1], [1.15, 1]);
-  const fezBl = ci(frame - 62, [0, 14], [10, 0]);
+  const fezBl = ci(frame - 60, [0, 14], [10, 0]);
 
-  const historiaSp = spring({ frame, fps, config: { damping: 13, mass: 0.95 }, delay: 66 });
+  const historiaSp = spring({ frame, fps, config: { damping: 13, mass: 0.95 }, delay: 70 });
   const historiaScale = ci(historiaSp, [0, 1], [1.25, 1]);
-  const historiaBl = ci(frame - 66, [0, 16], [14, 0]);
-  const historiaOp = ci(frame, [66, 80], [0, 1]);
+  const historiaBl = ci(frame - 70, [0, 16], [14, 0]);
+  const historiaOp = ci(frame, [70, 84], [0, 1]);
 
   const historiaGlow = 0.15 + Math.max(0, Math.sin(frame * 0.04)) * 0.3;
 
   // "Em 2020," — abertura, sincronizada com as primeiras palavras reais
-  const emOp = ci(frame, [7, 21], [0, 1], Easing.out(Easing.cubic));
-  const em2020Op = ci(frame, [12, 26], [0, 1], Easing.out(Easing.cubic));
+  const emOp = ci(frame, [0, 14], [0, 1], Easing.out(Easing.cubic));
+  const em2020Op = ci(frame, [13, 27], [0, 1], Easing.out(Easing.cubic));
 
-  // "mais votada" — legenda secundária, sincronizada
-  const maisOp = ci(frame, [140, 154], [0, 1], Easing.out(Easing.cubic));
-  const maisY = ci(frame, [140, 154], [16, 0], Easing.out(Easing.cubic));
-  const votadaOp = ci(frame, [144, 158], [0, 1], Easing.out(Easing.cubic));
-  const votadaY = ci(frame, [144, 158], [16, 0], Easing.out(Easing.cubic));
+  // "mais votada" — legenda secundária, sincronizada (real: mais@136 votada@146)
+  const maisOp = ci(frame, [136, 150], [0, 1], Easing.out(Easing.cubic));
+  const maisY = ci(frame, [136, 150], [16, 0], Easing.out(Easing.cubic));
+  const votadaOp = ci(frame, [146, 160], [0, 1], Easing.out(Easing.cubic));
+  const votadaY = ci(frame, [146, 160], [16, 0], Easing.out(Easing.cubic));
 
-  // ── Saída (165–192) — RASGA E ENGOLE ────────────────────
-  const exitPortrait = ci(frame, [165, 187], [0, 1], Easing.in(Easing.exp));
+  // ── Saída (178–210) — segura "votada" até "cidade." terminar (177), depois RASGA E ENGOLE ──
+  const exitPortrait = ci(frame, [178, 202], [0, 1], Easing.in(Easing.exp));
   const portraitTX = exitPortrait * -1100;
   const portraitExitBlur = exitPortrait * 16;
 
-  const exitAna = ci(frame, [168, 188], [0, 1], Easing.in(Easing.exp));
-  const exitFez = ci(frame, [171, 190], [0, 1], Easing.in(Easing.exp));
+  const exitAna = ci(frame, [181, 203], [0, 1], Easing.in(Easing.exp));
+  const exitFez = ci(frame, [184, 205], [0, 1], Easing.in(Easing.exp));
 
-  const exitHistoria = ci(frame, [175, 192], [0, 1], Easing.in(Easing.exp));
+  const exitHistoria = ci(frame, [188, 210], [0, 1], Easing.in(Easing.exp));
   const historiaExitScale = ci(exitHistoria, [0, 1], [1, 16]);
   const historiaExitOp = ci(exitHistoria, [0, 1], [1, 0]);
-  const flashOp = ci(frame, [180, 192], [0, 0.85]);
+  const flashOp = ci(frame, [196, 210], [0, 0.85]);
 
   return (
     <AbsoluteFill style={{ opacity: bgOp }}>
@@ -142,7 +143,7 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
                 display: 'inline-block',
                 transform: `translateY(${anaY}px)`,
                 filter: `blur(${anaBl}px)`,
-                opacity: ci(frame, [46, 60], [0, 1]),
+                opacity: ci(frame, [42, 56], [0, 1]),
               }}
             >
               ANA
@@ -152,7 +153,7 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
                 display: 'inline-block',
                 transform: `translateY(${novaisY}px)`,
                 filter: `blur(${novaisBl}px)`,
-                opacity: ci(frame, [54, 68], [0, 1]),
+                opacity: ci(frame, [47, 61], [0, 1]),
               }}
             >
               NOVAIS
@@ -193,7 +194,7 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
               color: COLOR.textLight,
               transform: `scale(${fezScale}) translateX(${exitFez * -1200}px)`,
               filter: `blur(${fezBl + exitFez * 18}px)`,
-              opacity: (1 - exitFez) * ci(frame, [62, 76], [0, 1]),
+              opacity: (1 - exitFez) * ci(frame, [60, 74], [0, 1]),
             }}
           >
             FEZ

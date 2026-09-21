@@ -6,29 +6,29 @@ import { AssetImage } from '../lib/AssetImage';
 import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
-// Cena 5 — A Assinatura (Lockup Final) | frames locais 0–88 (2.9s)
-// Transcrição real (peso silábico): "Ana"@33 "Novais"@37 "Umuarama."@43
+// Cena 5 — A Assinatura (Lockup Final) | frames locais 0–125 (4.2s)
+// Transcrição real (forced alignment real): "Ana"@48 "Novais"@49–67 "Umuarama."@68–86
 export const Scene5_Assinatura: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
 
-  const microZoom = ci(frame, [0, 88], [1, 1.02], Easing.inOut(Easing.quad));
+  const microZoom = ci(frame, [0, 125], [1, 1.02], Easing.inOut(Easing.quad));
   const bgFadeIn = ci(frame, [0, 22], [0, 1], Easing.out(Easing.quad));
   const photoOp = ci(frame, [0, 24], [0, 0.32], Easing.out(Easing.quad));
 
-  const anaOp = ci(frame, [33, 49], [0, 1], Easing.out(Easing.cubic));
-  const anaY = ci(frame, [33, 49], [16, 0], Easing.out(Easing.cubic));
-  const anaBl = ci(frame, [33, 49], [12, 0], Easing.out(Easing.cubic));
+  const anaOp = ci(frame, [48, 64], [0, 1], Easing.out(Easing.cubic));
+  const anaY = ci(frame, [48, 64], [16, 0], Easing.out(Easing.cubic));
+  const anaBl = ci(frame, [48, 64], [12, 0], Easing.out(Easing.cubic));
 
-  const novaisOp = ci(frame, [37, 53], [0, 1], Easing.out(Easing.cubic));
-  const novaisY = ci(frame, [37, 53], [16, 0], Easing.out(Easing.cubic));
-  const novaisBl = ci(frame, [37, 53], [12, 0], Easing.out(Easing.cubic));
+  const novaisOp = ci(frame, [49, 65], [0, 1], Easing.out(Easing.cubic));
+  const novaisY = ci(frame, [49, 65], [16, 0], Easing.out(Easing.cubic));
+  const novaisBl = ci(frame, [49, 65], [12, 0], Easing.out(Easing.cubic));
 
-  const lineScale = ci(frame, [46, 56], [0, 1], Easing.inOut(Easing.cubic));
+  const lineScale = ci(frame, [68, 78], [0, 1], Easing.inOut(Easing.cubic));
 
-  const marcaOp = ci(frame, [47, 59], [0, 1], Easing.out(Easing.cubic));
-  const umuaramaOp = ci(frame, [43, 55], [0, 1], Easing.out(Easing.cubic));
+  const marcaOp = ci(frame, [70, 82], [0, 1], Easing.out(Easing.cubic));
+  const umuaramaOp = ci(frame, [68, 80], [0, 1], Easing.out(Easing.cubic));
 
-  const finalFade = ci(frame, [62, 82], [1, 0]);
+  const finalFade = ci(frame, [100, 122], [1, 0]);
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#000000', opacity: bgFadeIn }}>

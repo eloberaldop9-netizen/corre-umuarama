@@ -4,45 +4,46 @@ import { ci, countUp, formatPtBrInt } from '../lib/motion';
 import { PaperBackground, RadarPulse, HalftoneOverlay } from '../lib/Background';
 import { COLOR, FONT } from '../lib/palette';
 
-// Cena 2 — O Eco (Mapa e Número) | frames locais 0–182 (6.1s)
-// Transcrição real, com peso silábico (números falados levam bem mais tempo
-// que uma palavra comum: "2.373" = "dois mil, trezentos e setenta e três"):
-// "2.373"@17 "votos,"@54 | "ecoou"@91 "em"@109 "cada"@115 "bairro"@126 "e"@138 "cada"@144 "lar."@156
+// Cena 2 — O Eco (Mapa e Número) | frames locais 0–200 (6.7s)
+// Transcrição real (forced alignment real sobre o áudio — "2.373" é falado
+// entre os frames 19 e 77, 58 frames / 1.93s, bem mais devagar que o
+// estimado antes):
+// "2.373"@19–77 "votos,"@77 | "ecoou"@114 "em"@126 "cada"@126 "bairro"@136 "e"@144 "cada"@148 "lar."@154–167
 // Câmera: Pan Horizontal sutil
 export const Scene2_Eco: React.FC = () => {
   const frame = useCurrentFrame();
 
-  const panX = ci(frame, [0, 182], [-40, 22], Easing.inOut(Easing.quad));
+  const panX = ci(frame, [0, 200], [-40, 22], Easing.inOut(Easing.quad));
   const bgFadeIn = ci(frame, [0, 20], [0, 1], Easing.out(Easing.quad));
   const mapOp = ci(frame, [0, 25], [0, 0.15], Easing.out(Easing.quad));
 
   // Número — contagem real, sem tremor. Duração da contagem casada com o
-  // tempo real que leva pra falar "dois mil, trezentos e setenta e três".
-  const numberValue = countUp(frame, 17, 35, 2373);
-  const numberOp = ci(frame, [17, 29], [0, 1], Easing.out(Easing.cubic));
-  const numberBlur = ci(frame, [17, 33], [12, 0], Easing.out(Easing.cubic));
+  // tempo real que leva pra falar "dois mil, trezentos e setenta e três" (58 frames).
+  const numberValue = countUp(frame, 19, 58, 2373);
+  const numberOp = ci(frame, [19, 33], [0, 1], Easing.out(Easing.cubic));
+  const numberBlur = ci(frame, [19, 37], [12, 0], Easing.out(Easing.cubic));
 
-  const votosOp = ci(frame, [54, 69], [0, 1], Easing.out(Easing.cubic));
-  const votosY = ci(frame, [54, 69], [24, 0], Easing.out(Easing.cubic));
+  const votosOp = ci(frame, [77, 92], [0, 1], Easing.out(Easing.cubic));
+  const votosY = ci(frame, [77, 92], [24, 0], Easing.out(Easing.cubic));
 
-  const splatterP = ci(frame, [17, 35], [0, 1], Easing.out(Easing.exp));
+  const splatterP = ci(frame, [19, 45], [0, 1], Easing.out(Easing.exp));
   const splatterScale = splatterP < 0.5 ? interp(splatterP, 0, 0.5, 0, 1.1) : interp(splatterP, 0.5, 1, 1.1, 1);
   const splatterOp = splatterP < 0.6 ? interp(splatterP, 0, 0.6, 0, 1) : interp(splatterP, 0.6, 1, 1, 0);
 
-  const exitLower = ci(frame, [168, 182], [0, 1], Easing.in(Easing.exp));
-  const exitNum = ci(frame, [172, 182], [0, 1], Easing.in(Easing.exp));
-  const exitMap = ci(frame, [174, 182], [0, 1], Easing.in(Easing.exp));
+  const exitLower = ci(frame, [182, 200], [0, 1], Easing.in(Easing.exp));
+  const exitNum = ci(frame, [186, 200], [0, 1], Easing.in(Easing.exp));
+  const exitMap = ci(frame, [190, 200], [0, 1], Easing.in(Easing.exp));
 
   const rowA = [
-    { text: 'ECOOU', delay: 91 },
-    { text: 'EM', delay: 109 },
-    { text: 'CADA', delay: 115 },
-    { text: 'BAIRRO', delay: 126 },
+    { text: 'ECOOU', delay: 114 },
+    { text: 'EM', delay: 126 },
+    { text: 'CADA', delay: 126 },
+    { text: 'BAIRRO', delay: 136 },
   ];
   const rowB = [
-    { text: 'E', delay: 138 },
-    { text: 'CADA', delay: 144 },
-    { text: 'LAR', delay: 156 },
+    { text: 'E', delay: 144 },
+    { text: 'CADA', delay: 148 },
+    { text: 'LAR', delay: 154 },
   ];
 
   return (
