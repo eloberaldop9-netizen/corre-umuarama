@@ -7,22 +7,22 @@ import { AnimatedText } from '../lib/AnimatedText';
 import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
-// Cena 4 — O Compromisso (A Rua e O Povo) | frames locais 0–127 (4.2s)
-// Câmera: Crane Up — y: -400 → +200 em [0,127], Easing.inOut(cubic)
+// Cena 4 — O Compromisso (A Rua e O Povo) | frames locais 0–154 (5.1s, ajustado à narração)
+// Câmera: Crane Up — y: -400 → +200 em [0,154], Easing.inOut(cubic)
 export const Scene4_Compromisso: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
 
-  const craneY = ci(frame, [0, 127], [90, -90], Easing.inOut(Easing.cubic));
+  const craneY = ci(frame, [0, 154], [90, -90], Easing.inOut(Easing.cubic));
 
   const gridScale = ci(frame, [5, 30], [0.9, 1], Easing.out(Easing.cubic));
 
-  // Saída — Burn / Derrete (105–127)
-  const exitText = ci(frame, [105, 127], [0, 1], Easing.in(Easing.exp));
-  const exitPhotos = ci(frame, [110, 127], [0, 1], Easing.in(Easing.cubic));
-  const exitLeaks = ci(frame, [115, 127], [0, 1]);
+  // Saída — Burn / Derrete (132–154)
+  const exitText = ci(frame, [132, 154], [0, 1], Easing.in(Easing.exp));
+  const exitPhotos = ci(frame, [137, 154], [0, 1], Easing.in(Easing.cubic));
+  const exitLeaks = ci(frame, [142, 154], [0, 1]);
 
   const photos = [assets.rua?.[0], assets.rua?.[1], assets.rua?.[2]];
-  const labels = ['FOTO — ANA NA RUA', 'FOTO — COM A COMUNIDADE', 'FOTO — AÇÃO REAL'];
+  const labels = ['ANA COM A COMUNIDADE', 'ANA EM REUNIÃO COM MORADORES', 'FOTO DE RUA (aguardando)'];
 
   return (
     <AbsoluteFill>

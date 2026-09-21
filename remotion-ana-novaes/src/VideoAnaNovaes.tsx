@@ -9,18 +9,24 @@ import { Scene5_Assinatura } from './scenes/Scene5_Assinatura';
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
 export const FPS = 30;
-export const TOTAL_FRAMES = 720; // ~24s
+export const TOTAL_FRAMES = 822; // 27.4s — casado com a duração real do áudio de narração
 
 // Overlap padrão de 7 frames entre cenas — mesma fórmula da decupagem:
 // from[N] = from[N-1] + duration[N-1] - OVERLAP
+//
+// Durações estendidas em relação à decupagem original (720f/24s) para caber
+// a narração gravada (27.4s = 822f). O tempo extra (+102f) foi distribuído
+// proporcionalmente ao tamanho de cada trecho falado, como HOLD adicional
+// (as entradas/saídas de cada cena mantêm o timing original — só o "respiro"
+// do meio cresceu). Ajuste fino ainda pode ser necessário ouvindo o áudio.
 const OVERLAP = 7;
 
 export const SCENES = {
-  s1: { from: 0, duration: 180 },
-  s2: { from: 0 + 180 - OVERLAP, duration: 157 }, // 173
-  s3: { from: 173 + 157 - OVERLAP, duration: 157 }, // 323
-  s4: { from: 323 + 157 - OVERLAP, duration: 127 }, // 473
-  s5: { from: 473 + 127 - OVERLAP, duration: 127 }, // 593
+  s1: { from: 0, duration: 207 },
+  s2: { from: 0 + 207 - OVERLAP, duration: 172 }, // 200
+  s3: { from: 200 + 172 - OVERLAP, duration: 172 }, // 365
+  s4: { from: 365 + 172 - OVERLAP, duration: 154 }, // 530
+  s5: { from: 530 + 154 - OVERLAP, duration: 145 }, // 677 -> ends 822
 } as const;
 
 /**
@@ -41,11 +47,19 @@ export interface AnaNovaesAssets {
 }
 
 export const ASSETS: AnaNovaesAssets = {
-  retratoAna: null, // ex: 'retrato-ana.png'
-  mapaUmuarama: null, // ex: 'mapa-umuarama.svg' (opcional — há placeholder vetorial próprio)
-  arquivo: [null, null, null], // ex: ['arquivo-1.jpg', 'arquivo-2.jpg', 'arquivo-3.jpg']
-  rua: [null, null, null], // ex: ['rua-1.jpg', 'rua-2.jpg', 'rua-3.jpg']
-  narracao: null, // ex: 'narracao.mp3'
+  retratoAna: 'retrato-ana.jpg', // recorte do banner oficial — baixa resolução, trocar por um headshot dedicado quando possível
+  mapaUmuarama: null, // segue no placeholder vetorial próprio (AbstractMap em Scene2_Eco.tsx)
+  arquivo: [
+    'arquivo-banner.jpg', // banner oficial de campanha (Podemos)
+    null, // aguardando foto/print de arquivo da estreia política
+    'arquivo-camara-ia.jpg', // frame do vídeo gerado por IA — selo "CONTEÚDO GERADO POR IA" aplicado na cena
+  ],
+  rua: [
+    'rua-1-abraco.jpg', // abraço em visita (cadeira de rodas)
+    'rua-2-reuniao.jpg', // reunião com moradores
+    null, // aguardando 3ª foto de rua
+  ],
+  narracao: 'narracao.mp3',
 };
 
 export const VideoAnaNovaes: React.FC = () => {

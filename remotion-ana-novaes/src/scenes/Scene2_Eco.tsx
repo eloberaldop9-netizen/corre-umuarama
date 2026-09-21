@@ -4,13 +4,13 @@ import { ci, SPRING } from '../lib/motion';
 import { PaperBackground, RadarPulse } from '../lib/Background';
 import { COLOR, FONT } from '../lib/palette';
 
-// Cena 2 — O Eco (Mapa e Número) | frames locais 0–157 (5.2s)
-// Câmera: Pan Horizontal — x: -300 → +150 em [0,157], Easing.inOut(quad)
+// Cena 2 — O Eco (Mapa e Número) | frames locais 0–172 (5.7s, ajustado à narração)
+// Câmera: Pan Horizontal — x: -300 → +150 em [0,172], Easing.inOut(quad)
 export const Scene2_Eco: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const panX = ci(frame, [0, 157], [-75, 37.5], Easing.inOut(Easing.quad));
+  const panX = ci(frame, [0, 172], [-75, 37.5], Easing.inOut(Easing.quad));
 
   // Entradas (0–45)
   const mapOp = ci(frame, [0, 25], [0, 0.15], Easing.out(Easing.quad));
@@ -36,11 +36,11 @@ export const Scene2_Eco: React.FC = () => {
   const jitterX = Math.sin(frame * 0.6) * 1.5;
   const jitterY = Math.cos(frame * 0.5) * 1.5;
 
-  // Saída — Colapso gravitacional (125–157)
-  const exitEcoou = ci(frame, [125, 155], [0, 1], Easing.in(Easing.exp));
-  const exitVotos = ci(frame, [128, 158], [0, 1], Easing.in(Easing.exp));
-  const exitNum = ci(frame, [134, 157], [0, 1], Easing.in(Easing.exp));
-  const exitMap = ci(frame, [138, 157], [0, 1], Easing.in(Easing.exp));
+  // Saída — Colapso gravitacional (140–172)
+  const exitEcoou = ci(frame, [140, 170], [0, 1], Easing.in(Easing.exp));
+  const exitVotos = ci(frame, [143, 173], [0, 1], Easing.in(Easing.exp));
+  const exitNum = ci(frame, [149, 172], [0, 1], Easing.in(Easing.exp));
+  const exitMap = ci(frame, [153, 172], [0, 1], Easing.in(Easing.exp));
 
   return (
     <AbsoluteFill>
@@ -69,7 +69,7 @@ export const Scene2_Eco: React.FC = () => {
             marginLeft: -350,
             marginTop: -350,
             borderRadius: '50%',
-            background: `radial-gradient(circle, ${COLOR.accent}22 0%, transparent 70%)`,
+            background: `radial-gradient(circle, ${COLOR.purple}33 0%, transparent 70%)`,
             transform: `scale(${splatterScale})`,
             opacity: splatterOp,
           }}
@@ -90,7 +90,7 @@ export const Scene2_Eco: React.FC = () => {
               fontSize: 240,
               letterSpacing: -8,
               color: COLOR.textDark,
-              textShadow: `8px 8px 0 ${COLOR.accent}`,
+              textShadow: `8px 8px 0 ${COLOR.purple}`,
               transform: `scale(${numScale * (1 - exitNum * 0.9)}) rotateZ(${exitNum * -15}deg) translate(${jitterX}px, ${jitterY}px)`,
               filter: `blur(${numBlur + exitNum * 40}px)`,
               opacity: 1 - exitNum,

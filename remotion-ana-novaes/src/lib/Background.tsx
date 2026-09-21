@@ -29,7 +29,7 @@ export const VoidBackground: React.FC<{ glowOpacity?: number }> = ({ glowOpacity
       style={{
         position: 'absolute',
         inset: 0,
-        background: `radial-gradient(circle at 50% 30%, rgba(217,45,32,${glowOpacity}), transparent 70%)`,
+        background: `radial-gradient(circle at 50% 30%, rgba(91,46,140,${glowOpacity}), transparent 70%)`,
       }}
     />
     <NoiseOverlay opacity={0.08} />
@@ -74,8 +74,8 @@ export const CinematicBackground: React.FC = () => {
         style={{
           position: 'absolute',
           inset: -200,
-          background: `radial-gradient(circle at ${20 + leakX}% ${30 + leakY}%, rgba(217,98,32,0.55), transparent 55%),
-            radial-gradient(circle at ${85 - leakX}% ${75 - leakY}%, rgba(217,45,32,0.35), transparent 50%)`,
+          background: `radial-gradient(circle at ${20 + leakX}% ${30 + leakY}%, rgba(232,178,61,0.55), transparent 55%),
+            radial-gradient(circle at ${85 - leakX}% ${75 - leakY}%, rgba(216,140,40,0.35), transparent 50%)`,
           filter: 'blur(90px)',
           mixBlendMode: 'screen',
         }}
@@ -125,7 +125,7 @@ export const DustParticles: React.FC<{ count?: number }> = ({ count = 28 }) => {
 export const RadarPulse: React.FC<{ frame: number; loopFrames?: number; color?: string }> = ({
   frame,
   loopFrames = 45,
-  color = COLOR.accent,
+  color = COLOR.purple,
 }) => {
   const local = frame % loopFrames;
   const progress = local / loopFrames;

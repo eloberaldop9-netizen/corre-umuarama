@@ -4,12 +4,12 @@ import { ci } from '../lib/motion';
 import { NoiseOverlay } from '../lib/Background';
 import { COLOR, FONT } from '../lib/palette';
 
-// Cena 5 — A Assinatura (Lockup Final) | frames locais 0–127 (4.2s)
+// Cena 5 — A Assinatura (Lockup Final) | frames locais 0–145 (4.8s, ajustado à narração)
 // Câmera: estática, micro-zoom de respiro (scale sutil ao longo de toda a cena)
 export const Scene5_Assinatura: React.FC = () => {
   const frame = useCurrentFrame();
 
-  const microZoom = ci(frame, [0, 127], [1, 1.03], Easing.inOut(Easing.quad));
+  const microZoom = ci(frame, [0, 145], [1, 1.03], Easing.inOut(Easing.quad));
 
   const anaOp = ci(frame, [10, 32], [0, 1], Easing.out(Easing.cubic));
   const anaY = ci(frame, [10, 32], [20, 0], Easing.out(Easing.cubic));
@@ -27,8 +27,8 @@ export const Scene5_Assinatura: React.FC = () => {
   const umuaramaOp = ci(frame, [55, 73], [0, 1], Easing.out(Easing.cubic));
   const umuaramaY = ci(frame, [55, 73], [-15, 0], Easing.out(Easing.cubic));
 
-  // Fade cinematográfico final (105–127)
-  const finalFade = ci(frame, [105, 127], [1, 0]);
+  // Fade cinematográfico final (123–145)
+  const finalFade = ci(frame, [123, 145], [1, 0]);
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#000000' }}>
@@ -69,7 +69,7 @@ export const Scene5_Assinatura: React.FC = () => {
               filter: `blur(${novaesBl}px)`,
             }}
           >
-            NOVAES
+            NOVAIS
           </div>
         </div>
 

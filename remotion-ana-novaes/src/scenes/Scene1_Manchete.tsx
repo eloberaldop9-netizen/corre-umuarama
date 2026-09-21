@@ -6,14 +6,14 @@ import { AssetImage } from '../lib/AssetImage';
 import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
-// Cena 1 — A Manchete Histórica | frames locais 0–180 (6.0s)
-// Câmera: Dolly In Dramático — z: -600 → -200 em [0,180], Easing.out(cubic)
+// Cena 1 — A Manchete Histórica | frames locais 0–207 (6.9s, ajustado à narração)
+// Câmera: Dolly In Dramático — z: -600 → -200 em [0,207], Easing.out(cubic)
 export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   // Dolly-in simulado: perspectiva aproxima o quadro suavemente ao longo de toda a cena.
-  const dollyScale = ci(frame, [0, 180], [0.86, 1.04], Easing.out(Easing.cubic));
+  const dollyScale = ci(frame, [0, 207], [0.86, 1.04], Easing.out(Easing.cubic));
 
   // ── Entradas (frames 0–60) ──────────────────────────────────────────
   const bgOp = ci(frame, [0, 20], [0, 1], Easing.inOut(Easing.quad));
@@ -42,27 +42,27 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
   // ── Hold — micro-animações (60–150) ─────────────────────────────────
   const historiaGlow = 0.2 + Math.max(0, Math.sin(frame * 0.05)) * 0.4;
 
-  // ── Saída (155–180) — RASGA E ENGOLE ────────────────────────────────
-  const exitPortrait = ci(frame, [155, 175], [0, 1], Easing.in(Easing.exp));
+  // ── Saída (182–207) — RASGA E ENGOLE ────────────────────────────────
+  const exitPortrait = ci(frame, [182, 202], [0, 1], Easing.in(Easing.exp));
   const portraitSkew = interpolateSafe(exitPortrait, -15);
   const portraitTX = interpolateSafe(exitPortrait, -1200);
   const portraitExitBlur = interpolateSafe(exitPortrait, 20);
 
-  const exitAna = ci(frame, [158, 178], [0, 1], Easing.in(Easing.exp));
-  const exitFez = ci(frame, [161, 181], [0, 1], Easing.in(Easing.exp));
+  const exitAna = ci(frame, [185, 205], [0, 1], Easing.in(Easing.exp));
+  const exitFez = ci(frame, [188, 207], [0, 1], Easing.in(Easing.exp));
 
-  const exitHistoria = ci(frame, [165, 180], [0, 1], Easing.in(Easing.exp));
+  const exitHistoria = ci(frame, [192, 207], [0, 1], Easing.in(Easing.exp));
   const historiaExitScale = ci(exitHistoria, [0, 1], [1, 30]);
   const historiaExitOp = ci(exitHistoria, [0, 1], [1, 0]);
-  // Flash vermelho: enquanto HISTÓRIA devora a tela, um véu accent cobre tudo.
-  const flashOp = ci(frame, [168, 180], [0, 0.9]);
+  // Flash roxo: enquanto HISTÓRIA devora a tela, um véu accent cobre tudo.
+  const flashOp = ci(frame, [195, 207], [0, 0.9]);
 
   return (
     <AbsoluteFill style={{ opacity: bgOp }}>
       <VoidBackground />
 
       <AbsoluteFill style={{ transform: `scale(${dollyScale})`, transformOrigin: '50% 40%' }}>
-        {/* Camada de trás: ANA NOVAES em serifa, cortada pelo retrato */}
+        {/* Camada de trás: ANA NOVAIS em serifa, cortada pelo retrato */}
         <div
           style={{
             position: 'absolute',
@@ -81,7 +81,7 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
             opacity: (1 - exitAna) ** 0.6,
           }}
         >
-          ANA NOVAES
+          ANA NOVAIS
         </div>
 
         {/* Retrato — camada intermediária */}
@@ -98,12 +98,18 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
             opacity: portraitOp * (1 - exitPortrait),
             transform: `skewX(${portraitSkew}deg) translateX(${portraitTX}px)`,
             boxShadow: '0 20px 100px rgba(0,0,0,0.9)',
+            WebkitMaskImage: assets.retratoAna
+              ? 'radial-gradient(ellipse 72% 88% at 50% 38%, black 58%, transparent 100%)'
+              : undefined,
+            maskImage: assets.retratoAna
+              ? 'radial-gradient(ellipse 72% 88% at 50% 38%, black 58%, transparent 100%)'
+              : undefined,
           }}
         >
           <AssetImage
             file={assets.retratoAna}
-            label="RETRATO — ANA NOVAES (PNG recortado, fundo transparente)"
-            style={{ width: '100%', height: '100%', borderRadius: 12 }}
+            label="RETRATO — ANA NOVAIS"
+            style={{ width: '100%', height: '100%', borderRadius: assets.retratoAna ? 0 : 12 }}
           />
         </div>
 
@@ -142,7 +148,7 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
               opacity: historiaOp * historiaExitOp,
               transform: `scale(${historiaScale * (0.94 + 0.06 / Math.max(historiaExitScale, 1))})`,
               filter: `blur(${historiaBl}px)`,
-              textShadow: `0 0 ${10 + historiaGlow * 30}px rgba(217,45,32,${historiaGlow})`,
+              textShadow: `0 0 ${10 + historiaGlow * 30}px rgba(240,201,61,${historiaGlow})`,
             }}
           >
             HISTÓRIA
@@ -150,10 +156,10 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
         </div>
       </AbsoluteFill>
 
-      {/* Flash vermelho que devora a tela — transição ótica para a Cena 2 */}
+      {/* Flash roxo que devora a tela — transição ótica para a Cena 2 */}
       <AbsoluteFill
         style={{
-          backgroundColor: COLOR.accent,
+          backgroundColor: COLOR.purple,
           opacity: flashOp,
           transform: `scale(${1 + (historiaExitScale - 1) * 0.02})`,
         }}

@@ -7,7 +7,7 @@ import { AnimatedText } from '../lib/AnimatedText';
 import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
-// Cena 3 — O Arquivo Investigativo | frames locais 0–157 (5.2s)
+// Cena 3 — O Arquivo Investigativo | frames locais 0–172 (5.7s, ajustado à narração)
 // Câmera: Handheld contínuo + Z-Dive de aterrissagem (z: 500 → 0 em [0,25])
 export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
@@ -28,10 +28,10 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
 
   const circleFlicker = 0.85 + Math.sin(frame * 0.4) * 0.15;
 
-  // Saída — FLIP 3D CORTINA (135–157)
-  const exitText = ci(frame, [135, 157], [0, 1], Easing.in(Easing.exp));
-  const exitStack = ci(frame, [138, 157], [0, 1], Easing.in(Easing.exp));
-  const flashOp = ci(frame, [154, 157], [0, 1]);
+  // Saída — FLIP 3D CORTINA (150–172)
+  const exitText = ci(frame, [150, 172], [0, 1], Easing.in(Easing.exp));
+  const exitStack = ci(frame, [153, 172], [0, 1], Easing.in(Easing.exp));
+  const flashOp = ci(frame, [169, 172], [0, 1]);
 
   const photo = (
     file: string | null | undefined,
@@ -42,7 +42,8 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
     z: number,
     width: number,
     top: number,
-    left: number
+    left: number,
+    aiGenerated = false
   ) => {
     const scale = interp(springVal, 0, 1, 3, 1);
     const rotate = interp(springVal, 0, 1, fromRotate, baseRotate);
@@ -64,12 +65,32 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
       >
         <div
           style={{
+            position: 'relative',
             border: '12px solid white',
             boxShadow: '0 24px 60px rgba(0,0,0,0.55)',
             borderRadius: 4,
           }}
         >
           <AssetImage file={file} label={label} tone="light" style={{ width: '100%', height: width * 1.2 }} />
+          {aiGenerated && (
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 10,
+                left: 10,
+                padding: '5px 10px',
+                borderRadius: 5,
+                backgroundColor: 'rgba(0,0,0,0.72)',
+                color: '#FFFFFF',
+                fontFamily: FONT.sans,
+                fontWeight: 700,
+                fontSize: 15,
+                letterSpacing: 0.5,
+              }}
+            >
+              CONTEÚDO GERADO POR IA
+            </div>
+          )}
         </div>
       </div>
     );
@@ -87,9 +108,9 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
           transform: `scale(${landingScale}) ${shake.transform}`,
         }}
       >
-        {photo(assets.arquivo?.[0], 'FOTO DE ARQUIVO 1', p1, -12, -25, -100, 620, 260, 90)}
-        {photo(assets.arquivo?.[1], 'PRINT DE NOTÍCIA 2', p2, 8, 20, -50, 640, 420, 220)}
-        {photo(assets.arquivo?.[2], 'FOTO DE ARQUIVO 3 (TOPO)', p3, -2, 15, 0, 700, 560, 190)}
+        {photo(assets.arquivo?.[0], 'MATERIAL OFICIAL DE CAMPANHA', p1, -12, -25, -100, 620, 260, 90)}
+        {photo(assets.arquivo?.[1], 'FOTO DE ARQUIVO (aguardando)', p2, 8, 20, -50, 640, 420, 220)}
+        {photo(assets.arquivo?.[2], 'ANA NA CÂMARA MUNICIPAL', p3, -2, 15, 0, 700, 560, 190, true)}
 
         {/* Círculo de caneta vermelha, desenhando sobre a foto do topo */}
         <svg
