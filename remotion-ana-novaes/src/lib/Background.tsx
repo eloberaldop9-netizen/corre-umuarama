@@ -121,6 +121,46 @@ export const DustParticles: React.FC<{ count?: number }> = ({ count = 28 }) => {
   );
 };
 
+/** Textura de meio-tom (halftone) — toque de revista/jornal impresso. */
+export const HalftoneOverlay: React.FC<{ opacity?: number; dark?: boolean }> = ({
+  opacity = 0.05,
+  dark = false,
+}) => (
+  <div
+    style={{
+      position: 'absolute',
+      inset: 0,
+      backgroundImage: `radial-gradient(${dark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'} 1px, transparent 1.4px)`,
+      backgroundSize: '6px 6px',
+      opacity,
+      mixBlendMode: dark ? 'overlay' : 'multiply',
+    }}
+  />
+);
+
+/** Fita adesiva (washi tape) — toque de colagem/recorte de revista. */
+export const TapeStrip: React.FC<{
+  top: number;
+  left: number;
+  width?: number;
+  rotate?: number;
+  color?: string;
+}> = ({ top, left, width = 120, rotate = -6, color = 'rgba(240,201,61,0.55)' }) => (
+  <div
+    style={{
+      position: 'absolute',
+      top,
+      left,
+      width,
+      height: 34,
+      background: color,
+      transform: `rotate(${rotate}deg)`,
+      boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+      zIndex: 50,
+    }}
+  />
+);
+
 /** Anel de radar pulsante — Cena 2, sobre o mapa. */
 export const RadarPulse: React.FC<{ frame: number; loopFrames?: number; color?: string }> = ({
   frame,

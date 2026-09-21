@@ -7,22 +7,20 @@ import { AnimatedText } from '../lib/AnimatedText';
 import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
-// Cena 4 — O Compromisso (A Rua e O Povo) | frames locais 0–192 (6.4s)
-// Timing real: "compromisso"@54 "com"@63 "a"@72 "cidade."@81 | "trabalha"@145 "de"@154 "verdade"@163
-// Câmera: Crane Up sutil — y: 60 → -60 em [0,192], Easing.inOut(cubic)
+// Cena 4 — O Compromisso (A Rua e O Povo) | frames locais 0–174 (5.8s)
+// Transcrição real: "compromisso"@59 "com"@68 "a"@73 "cidade."@86 | "trabalha"@133 "de"@138 "verdade"@142
+// Câmera: Crane Up sutil
 export const Scene4_Compromisso: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
 
-  // Crossfade de entrada — cobre suavemente a cauda da Cena 3
-  const bgFadeIn = ci(frame, [0, 22], [0, 1], Easing.out(Easing.quad));
+  // Crossfade de entrada lenta — a Cena 3 (número 1.621) segue visível por baixo mais tempo.
+  const bgFadeIn = ci(frame, [15, 55], [0, 1], Easing.out(Easing.quad));
 
-  const craneY = ci(frame, [0, 192], [60, -60], Easing.inOut(Easing.cubic));
-  const gridScale = ci(frame, [5, 30], [0.94, 1], Easing.out(Easing.cubic));
+  const craneY = ci(frame, [0, 174], [50, -50], Easing.inOut(Easing.cubic));
+  const gridScale = ci(frame, [20, 45], [0.94, 1], Easing.out(Easing.cubic));
 
-  // Saída — Burn / Derrete (172–192)
-  const exitText = ci(frame, [172, 192], [0, 1], Easing.in(Easing.exp));
-  const exitPhotos = ci(frame, [176, 192], [0, 1], Easing.in(Easing.cubic));
-  const exitLeaks = ci(frame, [178, 192], [0, 1]);
+  const exitText = ci(frame, [154, 174], [0, 1], Easing.in(Easing.exp));
+  const exitPhotos = ci(frame, [158, 174], [0, 1], Easing.in(Easing.cubic));
 
   const photos = [assets.rua?.[0], assets.rua?.[1], assets.rua?.[2]];
   const labels = ['ANA COM A COMUNIDADE', 'ANA EM REUNIÃO COM MORADORES', 'ANA ABRAÇANDO MORADORA'];
@@ -33,14 +31,14 @@ export const Scene4_Compromisso: React.FC<{ assets: AnaNovaesAssets }> = ({ asse
         <CinematicBackground />
       </AbsoluteFill>
 
-      <AbsoluteFill style={{ transform: `translateY(${craneY}px)`, opacity: 1 - exitLeaks * 0 }}>
+      <AbsoluteFill style={{ transform: `translateY(${craneY}px)` }}>
         <div
           style={{
             position: 'absolute',
             top: 220,
             left: 60,
             right: 60,
-            bottom: 620,
+            bottom: 760,
             display: 'flex',
             gap: 16,
             opacity: bgFadeIn,
@@ -73,9 +71,9 @@ export const Scene4_Compromisso: React.FC<{ assets: AnaNovaesAssets }> = ({ asse
         <div
           style={{
             position: 'absolute',
-            bottom: 260,
-            left: 60,
-            right: 60,
+            bottom: 480,
+            left: 50,
+            right: 50,
             textAlign: 'center',
             transform: `scale(${1 + exitText * 0.08})`,
             filter: `blur(${exitText * 26}px)`,
@@ -84,15 +82,15 @@ export const Scene4_Compromisso: React.FC<{ assets: AnaNovaesAssets }> = ({ asse
         >
           <AnimatedText
             text="COMPROMISSO COM A CIDADE"
-            wordDelays={[54, 63, 72, 81]}
+            wordDelays={[59, 68, 73, 86]}
             style={{ justifyContent: 'center' }}
-            wordStyle={{ fontFamily: FONT.sans, fontWeight: 400, fontSize: 38, letterSpacing: -1, color: COLOR.textLight }}
+            wordStyle={{ fontFamily: FONT.sans, fontWeight: 500, fontSize: 48, letterSpacing: -1, color: COLOR.textLight }}
           />
           <AnimatedText
             text="TRABALHA DE VERDADE"
-            wordDelays={[145, 154, 163]}
-            style={{ justifyContent: 'center', marginTop: 8 }}
-            wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 38, letterSpacing: -1, color: COLOR.gold }}
+            wordDelays={[133, 138, 142]}
+            style={{ justifyContent: 'center', marginTop: 10 }}
+            wordStyle={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 48, letterSpacing: -1, color: COLOR.gold }}
           />
         </div>
       </AbsoluteFill>

@@ -1,46 +1,42 @@
 import React from 'react';
 import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { ci, SPRING, countUp, formatPtBrInt, handheldShake } from '../lib/motion';
-import { PaperBackground, DustParticles } from '../lib/Background';
+import { PaperBackground, DustParticles, HalftoneOverlay, TapeStrip } from '../lib/Background';
 import { AssetImage } from '../lib/AssetImage';
-import { AnimatedText } from '../lib/AnimatedText';
 import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
-// Cena 3 — O Arquivo Investigativo | frames locais 0–230 (7.7s)
-// Beat 1 (0–165): fotos de arquivo entram, câmera com handheld, círculo marca a prova.
-// Beat 2 (168–230): fotos saem — número aparece sozinho, em fundo limpo, com contagem.
+// Cena 3 — O Arquivo Investigativo | frames locais 0–340 (11.3s)
+// Transcrição real (frase única e longa):
+// "Mas"@13 "essa"@29 "trajetória"@46 "começou"@70 "antes:"@90 "em"@118 "sua"@135
+// "estreia"@152 "na"@170 "política,"@187 "Ana"@211 "já"@224 "havia"@238
+// "conquistado"@251 "1.621"@264 "votos,"@278
 export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const landingScale = ci(frame, [0, 25], [1.18, 1], Easing.out(Easing.cubic));
-  const shake = handheldShake(frame, 0.55);
-
-  // Entrada suave do fundo — deixa a saída da Cena 2 visível por baixo.
   const bgFadeIn = ci(frame, [0, 20], [0, 1], Easing.out(Easing.quad));
+  const landingScale = ci(frame, [0, 25], [1.15, 1], Easing.out(Easing.cubic));
+  const shake = handheldShake(frame, 0.5);
 
   const p1 = spring({ frame, fps, config: SPRING.card, delay: 20 });
-  const p2 = spring({ frame, fps, config: SPRING.card, delay: 65 });
-  const p3 = spring({ frame, fps, config: SPRING.card, delay: 110 });
+  const p2 = spring({ frame, fps, config: SPRING.card, delay: 90 });
+  const p3 = spring({ frame, fps, config: SPRING.card, delay: 160 });
 
-  const circleP = ci(frame, [118, 145], [0, 1], Easing.out(Easing.cubic));
-  const circleFlicker = 0.85 + Math.sin(frame * 0.3) * 0.12;
+  // "estreia" — pequena legenda, sincronizada com a palavra real
+  const estreiaOp = ci(frame, [152, 168], [0, 1], Easing.out(Easing.cubic));
 
-  // Fotos saem de cena — abrem espaço para o número (140–165)
-  const photosExit = ci(frame, [140, 165], [0, 1], Easing.in(Easing.exp));
+  // Fotos saem — abrem espaço antes de "1.621 votos" ser dito
+  const photosExit = ci(frame, [235, 260], [0, 1], Easing.in(Easing.exp));
 
-  // Beat 2 — número em fundo limpo
-  const numberIn = ci(frame, [168, 184], [0, 1], Easing.out(Easing.cubic));
-  const numberValue = countUp(frame, 168, 26, 1621);
-  const captionDelays = [
-    { text: 'VOTOS', delay: 196 },
-    { text: 'NA', delay: 205 },
-    { text: 'ESTREIA', delay: 212 },
-  ];
+  // Número — contagem real, sincronizada com "1.621"
+  const numberOp = ci(frame, [264, 278], [0, 1], Easing.out(Easing.cubic));
+  const numberBlur = ci(frame, [264, 282], [10, 0], Easing.out(Easing.cubic));
+  const numberValue = countUp(frame, 264, 26, 1621);
+  const votosOp = ci(frame, [278, 294], [0, 1], Easing.out(Easing.cubic));
+  const votosY = ci(frame, [278, 294], [18, 0], Easing.out(Easing.cubic));
 
-  // Saída geral da cena (205–230) — cede lugar à Cena 4
-  const exitAll = ci(frame, [205, 230], [0, 1], Easing.in(Easing.exp));
+  const exitAll = ci(frame, [312, 340], [0, 1], Easing.in(Easing.exp));
 
   const photo = (
     file: string | null | undefined,
@@ -51,9 +47,10 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
     z: number,
     width: number,
     top: number,
-    left: number
+    left: number,
+    tape?: boolean
   ) => {
-    const scale = interp(springVal, 0, 1, 1.8, 1);
+    const scale = interp(springVal, 0, 1, 1.7, 1);
     const rotate = interp(springVal, 0, 1, fromRotate, baseRotate);
     const op = interp(springVal, 0, 1, 0, 1);
     const blur = ci(frame, [0, 18], [14, 0]);
@@ -73,8 +70,9 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
           transformOrigin: 'center center',
         }}
       >
-        <div style={{ border: '12px solid white', boxShadow: '0 24px 60px rgba(0,0,0,0.5)', borderRadius: 4 }}>
+        <div style={{ position: 'relative', border: '12px solid white', boxShadow: '0 24px 60px rgba(0,0,0,0.5)', borderRadius: 4 }}>
           <AssetImage file={file} label={label} tone="light" style={{ width: '100%', height: width * 1.2 }} />
+          {tape && <TapeStrip top={-16} left={width / 2 - 60} width={120} rotate={-4} />}
         </div>
       </div>
     );
@@ -84,54 +82,48 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
     <AbsoluteFill style={{ opacity: 1 - exitAll, filter: `blur(${exitAll * 20}px)` }}>
       <AbsoluteFill style={{ opacity: bgFadeIn }}>
         <PaperBackground dark />
+        <HalftoneOverlay opacity={0.04} dark />
         <div style={{ position: 'absolute', inset: 0, opacity: 0.6 }}>
           <DustParticles count={18} />
         </div>
       </AbsoluteFill>
 
       <AbsoluteFill style={{ transform: `scale(${landingScale}) ${shake.transform}` }}>
-        {photo(assets.arquivo?.[0], 'MATERIAL OFICIAL DE CAMPANHA', p1, -12, -25, -100, 620, 260, 90)}
+        {photo(assets.arquivo?.[0], 'MATERIAL OFICIAL DE CAMPANHA', p1, -12, -25, -100, 620, 260, 90, true)}
         {photo(assets.arquivo?.[1], 'NOITE DA VITÓRIA — 2020', p2, 8, 20, -50, 640, 420, 220)}
         {photo(assets.arquivo?.[2], 'ANA NA CÂMARA MUNICIPAL', p3, -2, 15, 0, 700, 560, 190)}
 
-        <svg
-          width={340}
-          height={340}
-          viewBox="0 0 340 340"
-          style={{
-            position: 'absolute',
-            top: 660,
-            left: 360,
-            zIndex: 30,
-            opacity: (1 - photosExit) * circleFlicker,
-            filter: `blur(${photosExit * 24}px)`,
-          }}
-        >
-          <circle
-            cx={170}
-            cy={170}
-            r={150}
-            fill="none"
-            stroke={COLOR.accent}
-            strokeWidth={10}
-            strokeLinecap="round"
-            strokeDasharray={2 * Math.PI * 150}
-            strokeDashoffset={(1 - circleP) * 2 * Math.PI * 150}
-            transform="rotate(-90 170 170)"
-          />
-        </svg>
-      </AbsoluteFill>
-
-      {/* Beat 2 — número isolado, fundo limpo (sem foto) */}
-      <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 200 }}>
         <div
           style={{
+            position: 'absolute',
+            top: 210,
+            left: 0,
+            right: 0,
             textAlign: 'center',
-            opacity: numberIn,
-            transform: `scale(${ci(numberIn, [0, 1], [0.85, 1])})`,
-            filter: `blur(${ci(numberIn, [0, 1], [10, 0])}px)`,
+            zIndex: 40,
+            opacity: estreiaOp * (1 - ci(frame, [225, 245], [0, 1])),
           }}
         >
+          <span
+            style={{
+              fontFamily: FONT.sans,
+              fontWeight: 700,
+              fontSize: 30,
+              letterSpacing: 6,
+              color: COLOR.accent,
+              backgroundColor: 'rgba(13,7,20,0.6)',
+              padding: '8px 18px',
+              borderRadius: 6,
+            }}
+          >
+            ESTREIA NA POLÍTICA
+          </span>
+        </div>
+      </AbsoluteFill>
+
+      {/* Número — em fundo limpo, sincronizado com a fala real */}
+      <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 160 }}>
+        <div style={{ textAlign: 'center' }}>
           <div
             style={{
               fontFamily: FONT.sans,
@@ -140,22 +132,26 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
               letterSpacing: -3,
               color: COLOR.accent,
               lineHeight: 1,
+              opacity: numberOp,
+              filter: `blur(${numberBlur}px)`,
             }}
           >
             {formatPtBrInt(numberValue)}
           </div>
-          <AnimatedText
-            text="VOTOS NA ESTREIA"
-            wordDelays={captionDelays.map((w) => w.delay)}
-            style={{ justifyContent: 'center', marginTop: 14 }}
-            wordStyle={{
+          <div
+            style={{
               fontFamily: FONT.sans,
               fontWeight: 700,
-              fontSize: 34,
+              fontSize: 38,
               letterSpacing: -1,
               color: COLOR.textLight,
+              marginTop: 12,
+              opacity: votosOp,
+              transform: `translateY(${votosY}px)`,
             }}
-          />
+          >
+            votos na estreia
+          </div>
         </div>
       </AbsoluteFill>
     </AbsoluteFill>

@@ -9,20 +9,20 @@ import { Scene5_Assinatura } from './scenes/Scene5_Assinatura';
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
 export const FPS = 30;
-export const TOTAL_FRAMES = 842; // 27.4s de narração + ~0.7s de silêncio/fade final
+export const TOTAL_FRAMES = 857; // ~28.6s
 
-// Timing derivado de análise real do áudio (ffmpeg silencedetect sobre
-// narracao.mp3): cada cena começa perto de onde sua fala correspondente
-// começa e segue até um pouco depois dela terminar, com overlap entre
-// cenas vizinhas para nunca haver frame vazio. As palavras animadas dentro
-// de cada cena (ver `wordDelays` nos componentes) usam os mesmos timestamps
-// reais, não uma distribuição proporcional estimada.
+// Timing derivado da TRANSCRIÇÃO REAL fornecida pelo usuário, alinhada aos
+// timestamps reais de fala (ffmpeg silencedetect sobre narracao.mp3, 10
+// pausas reais detectadas). A frase 3 é uma oração longa e contínua ("Mas
+// essa trajetória... 1.621 votos, mostrando... cidade.") por isso a Cena 3
+// e a Cena 4 dividem esse trecho: Cena 3 cobre até "1.621 votos," e a
+// Cena 4 assume em "mostrando desde o início..." (já span da Cena 4).
 export const SCENES = {
-  s1: { from: 0, duration: 192 }, // fala 1: "Em 2020... cidade." (0–172)
-  s2: { from: 172, duration: 181 }, // fala 2: "Foram 2.373 votos... bairro" (182–333)
-  s3: { from: 333, duration: 230 }, // fala 3: "Mas essa trajetória... política" (347–538)
-  s4: { from: 538, duration: 192 }, // fala 4: "mostrando... verdade" (546–710)
-  s5: { from: 710, duration: 132 }, // fala 5: "Essa é... Umuarama." (724–822)
+  s1: { from: 0, duration: 192 }, // "Em 2020... cidade." (0–172)
+  s2: { from: 172, duration: 182 }, // "Foram 2.373 votos... cada lar." (182–334)
+  s3: { from: 334, duration: 340 }, // "Mas essa trajetória... 1.621 votos," (347–612)
+  s4: { from: 615, duration: 174 }, // "mostrando...cidade. Essa é a marca... gente." (629–769)
+  s5: { from: 769, duration: 88 }, // "Essa é uma parte... Umuarama." (773–822)
 } as const;
 
 /**
@@ -61,7 +61,7 @@ export const ASSETS: AnaNovaesAssets = {
 export const VideoAnaNovaes: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: '#000000' }}>
-      {ASSETS.narracao ? <Audio src={staticFile(`assets/${ASSETS.narracao}`)} /> : null}
+      {ASSETS.narracao ? <Audio src={staticFile(`assets/${ASSETS.narracao}`)} volume={1} /> : null}
 
       <Sequence name="Cena 1 — A Manchete Histórica" from={SCENES.s1.from} durationInFrames={SCENES.s1.duration}>
         <Scene1_Manchete assets={ASSETS} />
@@ -80,7 +80,7 @@ export const VideoAnaNovaes: React.FC = () => {
       </Sequence>
 
       <Sequence name="Cena 5 — A Assinatura (Lockup Final)" from={SCENES.s5.from} durationInFrames={SCENES.s5.duration}>
-        <Scene5_Assinatura />
+        <Scene5_Assinatura assets={ASSETS} />
       </Sequence>
     </AbsoluteFill>
   );
