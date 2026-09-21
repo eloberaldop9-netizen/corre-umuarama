@@ -22,7 +22,7 @@ export const Scene4_Compromisso: React.FC<{ assets: AnaNovaesAssets }> = ({ asse
   const exitLeaks = ci(frame, [142, 154], [0, 1]);
 
   const photos = [assets.rua?.[0], assets.rua?.[1], assets.rua?.[2]];
-  const labels = ['ANA COM A COMUNIDADE', 'ANA EM REUNIÃO COM MORADORES', 'FOTO DE RUA (aguardando)'];
+  const labels = ['ANA COM A COMUNIDADE', 'ANA EM REUNIÃO COM MORADORES', 'ANA ABRAÇANDO MORADORA'];
 
   return (
     <AbsoluteFill>

@@ -109,8 +109,8 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
         }}
       >
         {photo(assets.arquivo?.[0], 'MATERIAL OFICIAL DE CAMPANHA', p1, -12, -25, -100, 620, 260, 90)}
-        {photo(assets.arquivo?.[1], 'FOTO DE ARQUIVO (aguardando)', p2, 8, 20, -50, 640, 420, 220)}
-        {photo(assets.arquivo?.[2], 'ANA NA CÂMARA MUNICIPAL', p3, -2, 15, 0, 700, 560, 190, true)}
+        {photo(assets.arquivo?.[1], 'NOITE DA VITÓRIA — 2020', p2, 8, 20, -50, 640, 420, 220)}
+        {photo(assets.arquivo?.[2], 'ANA NA CÂMARA MUNICIPAL', p3, -2, 15, 0, 700, 560, 190)}
 
         {/* Círculo de caneta vermelha, desenhando sobre a foto do topo */}
         <svg

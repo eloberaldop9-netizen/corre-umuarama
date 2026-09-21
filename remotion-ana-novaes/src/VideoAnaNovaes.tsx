@@ -47,17 +47,17 @@ export interface AnaNovaesAssets {
 }
 
 export const ASSETS: AnaNovaesAssets = {
-  retratoAna: 'retrato-ana.jpg', // recorte do banner oficial — baixa resolução, trocar por um headshot dedicado quando possível
+  retratoAna: 'retrato-ana.jpg', // recorte da foto real dela na Câmara Municipal
   mapaUmuarama: null, // segue no placeholder vetorial próprio (AbstractMap em Scene2_Eco.tsx)
   arquivo: [
     'arquivo-banner.jpg', // banner oficial de campanha (Podemos)
-    null, // aguardando foto/print de arquivo da estreia política
-    'arquivo-camara-ia.jpg', // frame do vídeo gerado por IA — selo "CONTEÚDO GERADO POR IA" aplicado na cena
+    'arquivo-vitoria.jpg', // noite da vitória em 2020 (arco de balões, bandeira)
+    'arquivo-camara-predio.jpg', // Ana em frente à Câmara Municipal de Umuarama
   ],
   rua: [
     'rua-1-abraco.jpg', // abraço em visita (cadeira de rodas)
     'rua-2-reuniao.jpg', // reunião com moradores
-    null, // aguardando 3ª foto de rua
+    'rua-3-abraco-idosa.jpg', // abraço com moradora na rua
   ],
   narracao: 'narracao.mp3',
 };
