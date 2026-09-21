@@ -29,7 +29,7 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
   const estreiaOp = ci(frame, [141, 157], [0, 1], Easing.out(Easing.cubic));
 
   // Fotos saem — abrem espaço antes de "1.621 votos" ser dito
-  const photosExit = ci(frame, [212, 236], [0, 1], Easing.in(Easing.exp));
+  const photosExit = ci(frame, [212, 240], [0, 1], Easing.inOut(Easing.cubic));
 
   // Número — contagem real, sincronizada com "1.621" (que leva ~1s pra ser
   // falado: "mil, seiscentos e vinte e um")

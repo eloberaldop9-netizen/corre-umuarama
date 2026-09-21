@@ -83,13 +83,14 @@ export const Scene4_Compromisso: React.FC<{ assets: AnaNovaesAssets }> = ({ asse
           <AnimatedText
             text="COMPROMISSO COM A CIDADE"
             wordDelays={[59, 75, 79, 83]}
-            style={{ justifyContent: 'center' }}
+            exitStart={104}
+            style={{ justifyContent: 'center', position: 'absolute', left: 0, right: 0, top: 0 }}
             wordStyle={{ fontFamily: FONT.sans, fontWeight: 500, fontSize: 48, letterSpacing: -1, color: COLOR.textLight }}
           />
           <AnimatedText
             text="TRABALHA DE VERDADE"
             wordDelays={[125, 131, 133]}
-            style={{ justifyContent: 'center', marginTop: 10 }}
+            style={{ justifyContent: 'center', position: 'absolute', left: 0, right: 0, top: 0 }}
             wordStyle={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 48, letterSpacing: -1, color: COLOR.gold }}
           />
         </div>
