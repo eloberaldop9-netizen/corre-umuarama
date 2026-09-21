@@ -49,7 +49,7 @@ export const ASSETS: AnaNovaesAssets = {
   mapaUmuarama: null, // segue no placeholder vetorial próprio (AbstractMap em Scene2_Eco.tsx)
   arquivo: [
     'arquivo-banner.jpg', // banner oficial de campanha (Podemos)
-    'arquivo-vitoria.jpg', // noite da vitória em 2020 (arco de balões, bandeira)
+    'arquivo-vitoria-ana.jpg', // noite da vitória em 2020, recortada só na Ana (arco de balões, bandeira)
     'arquivo-camara-predio.jpg', // Ana em frente à Câmara Municipal de Umuarama
   ],
   materiaJornal: 'arquivo-materia-jornal.jpg', // print da matéria do Umuarama Ilustrado
