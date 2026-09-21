@@ -22,6 +22,7 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
   const p1 = spring({ frame, fps, config: SPRING.card, delay: 20 });
   const p2 = spring({ frame, fps, config: SPRING.card, delay: 90 });
   const p3 = spring({ frame, fps, config: SPRING.card, delay: 160 });
+  const p4 = spring({ frame, fps, config: SPRING.card, delay: 190 });
 
   // "estreia" — pequena legenda, sincronizada com a palavra real
   const estreiaOp = ci(frame, [152, 168], [0, 1], Easing.out(Easing.cubic));
@@ -48,7 +49,8 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
     width: number,
     top: number,
     left: number,
-    tape?: boolean
+    tape?: boolean,
+    heightRatio = 1.2
   ) => {
     const scale = interp(springVal, 0, 1, 1.7, 1);
     const rotate = interp(springVal, 0, 1, fromRotate, baseRotate);
@@ -71,7 +73,7 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
         }}
       >
         <div style={{ position: 'relative', border: '12px solid white', boxShadow: '0 24px 60px rgba(0,0,0,0.5)', borderRadius: 4 }}>
-          <AssetImage file={file} label={label} tone="light" style={{ width: '100%', height: width * 1.2 }} />
+          <AssetImage file={file} label={label} tone="light" style={{ width: '100%', height: width * heightRatio }} />
           {tape && <TapeStrip top={-16} left={width / 2 - 60} width={120} rotate={-4} />}
         </div>
       </div>
@@ -92,6 +94,7 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
         {photo(assets.arquivo?.[0], 'MATERIAL OFICIAL DE CAMPANHA', p1, -12, -25, -100, 620, 260, 90, true)}
         {photo(assets.arquivo?.[1], 'NOITE DA VITÓRIA — 2020', p2, 8, 20, -50, 640, 420, 220)}
         {photo(assets.arquivo?.[2], 'ANA NA CÂMARA MUNICIPAL', p3, -2, 15, 0, 700, 560, 190)}
+        {photo(assets.materiaJornal, 'MATÉRIA — UMUARAMA ILUSTRADO', p4, 3, -18, 60, 660, 230, 210, true, 0.9)}
 
         <div
           style={{

@@ -38,6 +38,7 @@ export interface AnaNovaesAssets {
   retratoAna: string | null;
   mapaUmuarama: string | null;
   arquivo: [string | null, string | null, string | null];
+  materiaJornal: string | null;
   rua: [string | null, string | null, string | null];
   narracao: string | null;
 }
@@ -50,6 +51,7 @@ export const ASSETS: AnaNovaesAssets = {
     'arquivo-vitoria.jpg', // noite da vitória em 2020 (arco de balões, bandeira)
     'arquivo-camara-predio.jpg', // Ana em frente à Câmara Municipal de Umuarama
   ],
+  materiaJornal: 'arquivo-materia-jornal.jpg', // print da matéria do Umuarama Ilustrado
   rua: [
     'rua-1-abraco.jpg', // abraço em visita (cadeira de rodas)
     'rua-2-reuniao.jpg', // reunião com moradores
