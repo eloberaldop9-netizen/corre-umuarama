@@ -1,7 +1,7 @@
 import React from 'react';
 import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { ci, SPRING, countUp, formatPtBrInt, handheldShake } from '../lib/motion';
-import { PaperBackground, DustParticles, HalftoneOverlay, TapeStrip } from '../lib/Background';
+import { PaperBackground, DustParticles, HalftoneOverlay, TapeStrip, tornEdgeClipPath } from '../lib/Background';
 import { AssetImage } from '../lib/AssetImage';
 import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
@@ -74,7 +74,15 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
           transformOrigin: 'center center',
         }}
       >
-        <div style={{ position: 'relative', border: '12px solid white', boxShadow: '0 24px 60px rgba(0,0,0,0.5)', borderRadius: 4 }}>
+        <div
+          style={{
+            position: 'relative',
+            border: '12px solid white',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+            borderRadius: 2,
+            clipPath: tornEdgeClipPath(z, 'top'),
+          }}
+        >
           <AssetImage file={file} label={label} tone="light" style={{ width: '100%', height: width * heightRatio }} />
           {tape && <TapeStrip top={-16} left={width / 2 - 60} width={120} rotate={-4} />}
         </div>

@@ -33,6 +33,7 @@ export const VoidBackground: React.FC<{ glowOpacity?: number }> = ({ glowOpacity
       }}
     />
     <NoiseOverlay opacity={0.08} />
+    <HalftoneOverlay opacity={0.025} dark />
     <DustParticles />
   </AbsoluteFill>
 );
@@ -81,6 +82,7 @@ export const CinematicBackground: React.FC = () => {
         }}
       />
       <NoiseOverlay opacity={0.04} />
+      <HalftoneOverlay opacity={0.03} dark />
     </AbsoluteFill>
   );
 };
@@ -137,6 +139,27 @@ export const HalftoneOverlay: React.FC<{ opacity?: number; dark?: boolean }> = (
     }}
   />
 );
+
+/** Clip-path de borda rasgada (efeito "recorte de jornal") — determinístico por seed. */
+export const tornEdgeClipPath = (seed = 0, side: 'top' | 'bottom' = 'top'): string => {
+  const steps = 16;
+  const points: string[] = [];
+  const pseudo = (n: number) => {
+    const v = Math.sin(seed * 12.9898 + n * 78.233) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  for (let i = 0; i <= steps; i++) {
+    const x = (i / steps) * 100;
+    const y = 1.5 + pseudo(i) * 3.5;
+    points.push(`${x}% ${side === 'top' ? y : 100 - y}%`);
+  }
+  if (side === 'top') {
+    points.push('100% 100%', '0% 100%');
+  } else {
+    points.push('100% 0%', '0% 0%');
+  }
+  return `polygon(${points.join(', ')})`;
+};
 
 /** Fita adesiva (washi tape) — toque de colagem/recorte de revista. */
 export const TapeStrip: React.FC<{
