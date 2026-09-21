@@ -7,10 +7,11 @@ import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
 // Cena 3 — O Arquivo Investigativo | frames locais 0–340 (11.3s)
-// Transcrição real (frase única e longa):
-// "Mas"@13 "essa"@29 "trajetória"@46 "começou"@70 "antes:"@90 "em"@118 "sua"@135
-// "estreia"@152 "na"@170 "política,"@187 "Ana"@211 "já"@224 "havia"@238
-// "conquistado"@251 "1.621"@264 "votos,"@278
+// Transcrição real (frase única e longa, com peso silábico — "1.621" leva
+// bem mais tempo pra ser dito que uma palavra comum):
+// "Mas"@13 "essa"@19 "trajetória"@31 "começou"@70 "antes:"@94 "em"@118 "sua"@126
+// "estreia"@141 "na"@165 "política,"@173 "Ana"@211 "já"@219 "havia"@222
+// "conquistado"@234 "1.621"@249 "votos,"@283
 export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -20,24 +21,25 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
   const shake = handheldShake(frame, 0.5);
 
   const p1 = spring({ frame, fps, config: SPRING.card, delay: 20 });
-  const p2 = spring({ frame, fps, config: SPRING.card, delay: 90 });
-  const p3 = spring({ frame, fps, config: SPRING.card, delay: 160 });
-  const p4 = spring({ frame, fps, config: SPRING.card, delay: 190 });
+  const p2 = spring({ frame, fps, config: SPRING.card, delay: 75 });
+  const p3 = spring({ frame, fps, config: SPRING.card, delay: 130 });
+  const p4 = spring({ frame, fps, config: SPRING.card, delay: 178 });
 
   // "estreia" — pequena legenda, sincronizada com a palavra real
-  const estreiaOp = ci(frame, [152, 168], [0, 1], Easing.out(Easing.cubic));
+  const estreiaOp = ci(frame, [141, 157], [0, 1], Easing.out(Easing.cubic));
 
   // Fotos saem — abrem espaço antes de "1.621 votos" ser dito
-  const photosExit = ci(frame, [235, 260], [0, 1], Easing.in(Easing.exp));
+  const photosExit = ci(frame, [212, 236], [0, 1], Easing.in(Easing.exp));
 
-  // Número — contagem real, sincronizada com "1.621"
-  const numberOp = ci(frame, [264, 278], [0, 1], Easing.out(Easing.cubic));
-  const numberBlur = ci(frame, [264, 282], [10, 0], Easing.out(Easing.cubic));
-  const numberValue = countUp(frame, 264, 26, 1621);
-  const votosOp = ci(frame, [278, 294], [0, 1], Easing.out(Easing.cubic));
-  const votosY = ci(frame, [278, 294], [18, 0], Easing.out(Easing.cubic));
+  // Número — contagem real, sincronizada com "1.621" (que leva ~1s pra ser
+  // falado: "mil, seiscentos e vinte e um")
+  const numberOp = ci(frame, [249, 263], [0, 1], Easing.out(Easing.cubic));
+  const numberBlur = ci(frame, [249, 267], [10, 0], Easing.out(Easing.cubic));
+  const numberValue = countUp(frame, 249, 32, 1621);
+  const votosOp = ci(frame, [283, 298], [0, 1], Easing.out(Easing.cubic));
+  const votosY = ci(frame, [283, 298], [18, 0], Easing.out(Easing.cubic));
 
-  const exitAll = ci(frame, [312, 340], [0, 1], Easing.in(Easing.exp));
+  const exitAll = ci(frame, [308, 336], [0, 1], Easing.in(Easing.exp));
 
   const photo = (
     file: string | null | undefined,
@@ -104,7 +106,7 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
             right: 0,
             textAlign: 'center',
             zIndex: 40,
-            opacity: estreiaOp * (1 - ci(frame, [225, 245], [0, 1])),
+            opacity: estreiaOp * (1 - ci(frame, [206, 222], [0, 1])),
           }}
         >
           <span

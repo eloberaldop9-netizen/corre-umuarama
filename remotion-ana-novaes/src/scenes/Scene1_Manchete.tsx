@@ -7,8 +7,8 @@ import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
 // Cena 1 — A Manchete Histórica | frames locais 0–192 (6.4s)
-// Transcrição real: "Em"@7 "2020,"@22 "Ana"@46 "Novais"@54 "fez"@63 "história"@71
-//                    "mais"@138 "votada"@147
+// Transcrição real (peso silábico): "Em"@7 "2020,"@12 "Ana"@46 "Novais"@54 "fez"@62 "história"@66
+//                    "mais"@140 "votada"@144
 // Composição centralizada — retrato e nome no centro do quadro.
 export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
@@ -30,26 +30,26 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
   const novaisY = ci(novaisSp, [0, 1], [26, 0]);
   const novaisBl = ci(frame - 54, [0, 14], [10, 0]);
 
-  const fezSp = spring({ frame, fps, config: { damping: 14, mass: 0.85 }, delay: 63 });
+  const fezSp = spring({ frame, fps, config: { damping: 14, mass: 0.85 }, delay: 62 });
   const fezScale = ci(fezSp, [0, 1], [1.15, 1]);
-  const fezBl = ci(frame - 63, [0, 14], [10, 0]);
+  const fezBl = ci(frame - 62, [0, 14], [10, 0]);
 
-  const historiaSp = spring({ frame, fps, config: { damping: 13, mass: 0.95 }, delay: 71 });
+  const historiaSp = spring({ frame, fps, config: { damping: 13, mass: 0.95 }, delay: 66 });
   const historiaScale = ci(historiaSp, [0, 1], [1.25, 1]);
-  const historiaBl = ci(frame - 71, [0, 16], [14, 0]);
-  const historiaOp = ci(frame, [71, 85], [0, 1]);
+  const historiaBl = ci(frame - 66, [0, 16], [14, 0]);
+  const historiaOp = ci(frame, [66, 80], [0, 1]);
 
   const historiaGlow = 0.15 + Math.max(0, Math.sin(frame * 0.04)) * 0.3;
 
   // "Em 2020," — abertura, sincronizada com as primeiras palavras reais
   const emOp = ci(frame, [7, 21], [0, 1], Easing.out(Easing.cubic));
-  const em2020Op = ci(frame, [22, 36], [0, 1], Easing.out(Easing.cubic));
+  const em2020Op = ci(frame, [12, 26], [0, 1], Easing.out(Easing.cubic));
 
   // "mais votada" — legenda secundária, sincronizada
-  const maisOp = ci(frame, [138, 152], [0, 1], Easing.out(Easing.cubic));
-  const maisY = ci(frame, [138, 152], [16, 0], Easing.out(Easing.cubic));
-  const votadaOp = ci(frame, [147, 161], [0, 1], Easing.out(Easing.cubic));
-  const votadaY = ci(frame, [147, 161], [16, 0], Easing.out(Easing.cubic));
+  const maisOp = ci(frame, [140, 154], [0, 1], Easing.out(Easing.cubic));
+  const maisY = ci(frame, [140, 154], [16, 0], Easing.out(Easing.cubic));
+  const votadaOp = ci(frame, [144, 158], [0, 1], Easing.out(Easing.cubic));
+  const votadaY = ci(frame, [144, 158], [16, 0], Easing.out(Easing.cubic));
 
   // ── Saída (165–192) — RASGA E ENGOLE ────────────────────
   const exitPortrait = ci(frame, [165, 187], [0, 1], Easing.in(Easing.exp));
@@ -193,7 +193,7 @@ export const Scene1_Manchete: React.FC<{ assets: AnaNovaesAssets }> = ({ assets 
               color: COLOR.textLight,
               transform: `scale(${fezScale}) translateX(${exitFez * -1200}px)`,
               filter: `blur(${fezBl + exitFez * 18}px)`,
-              opacity: (1 - exitFez) * ci(frame, [63, 77], [0, 1]),
+              opacity: (1 - exitFez) * ci(frame, [62, 76], [0, 1]),
             }}
           >
             FEZ

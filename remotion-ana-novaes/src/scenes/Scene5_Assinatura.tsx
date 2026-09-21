@@ -7,7 +7,7 @@ import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
 // Cena 5 — A Assinatura (Lockup Final) | frames locais 0–88 (2.9s)
-// Transcrição real: "Ana"@37 "Novais"@41 "Umuarama."@49
+// Transcrição real (peso silábico): "Ana"@33 "Novais"@37 "Umuarama."@43
 export const Scene5_Assinatura: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
 
@@ -15,20 +15,20 @@ export const Scene5_Assinatura: React.FC<{ assets: AnaNovaesAssets }> = ({ asset
   const bgFadeIn = ci(frame, [0, 22], [0, 1], Easing.out(Easing.quad));
   const photoOp = ci(frame, [0, 24], [0, 0.32], Easing.out(Easing.quad));
 
-  const anaOp = ci(frame, [37, 53], [0, 1], Easing.out(Easing.cubic));
-  const anaY = ci(frame, [37, 53], [16, 0], Easing.out(Easing.cubic));
-  const anaBl = ci(frame, [37, 53], [12, 0], Easing.out(Easing.cubic));
+  const anaOp = ci(frame, [33, 49], [0, 1], Easing.out(Easing.cubic));
+  const anaY = ci(frame, [33, 49], [16, 0], Easing.out(Easing.cubic));
+  const anaBl = ci(frame, [33, 49], [12, 0], Easing.out(Easing.cubic));
 
-  const novaisOp = ci(frame, [41, 57], [0, 1], Easing.out(Easing.cubic));
-  const novaisY = ci(frame, [41, 57], [16, 0], Easing.out(Easing.cubic));
-  const novaisBl = ci(frame, [41, 57], [12, 0], Easing.out(Easing.cubic));
+  const novaisOp = ci(frame, [37, 53], [0, 1], Easing.out(Easing.cubic));
+  const novaisY = ci(frame, [37, 53], [16, 0], Easing.out(Easing.cubic));
+  const novaisBl = ci(frame, [37, 53], [12, 0], Easing.out(Easing.cubic));
 
-  const lineScale = ci(frame, [50, 60], [0, 1], Easing.inOut(Easing.cubic));
+  const lineScale = ci(frame, [46, 56], [0, 1], Easing.inOut(Easing.cubic));
 
-  const marcaOp = ci(frame, [53, 65], [0, 1], Easing.out(Easing.cubic));
-  const umuaramaOp = ci(frame, [49, 61], [0, 1], Easing.out(Easing.cubic));
+  const marcaOp = ci(frame, [47, 59], [0, 1], Easing.out(Easing.cubic));
+  const umuaramaOp = ci(frame, [43, 55], [0, 1], Easing.out(Easing.cubic));
 
-  const finalFade = ci(frame, [68, 88], [1, 0]);
+  const finalFade = ci(frame, [62, 82], [1, 0]);
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#000000', opacity: bgFadeIn }}>

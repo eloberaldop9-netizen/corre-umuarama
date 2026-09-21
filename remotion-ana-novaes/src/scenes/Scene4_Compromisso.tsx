@@ -8,7 +8,7 @@ import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
 // Cena 4 — O Compromisso (A Rua e O Povo) | frames locais 0–174 (5.8s)
-// Transcrição real: "compromisso"@59 "com"@68 "a"@73 "cidade."@86 | "trabalha"@133 "de"@138 "verdade"@142
+// Transcrição real (peso silábico): "compromisso"@59 "com"@75 "a"@79 "cidade."@83 | "trabalha"@125 "de"@131 "verdade"@133
 // Câmera: Crane Up sutil
 export const Scene4_Compromisso: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
@@ -82,13 +82,13 @@ export const Scene4_Compromisso: React.FC<{ assets: AnaNovaesAssets }> = ({ asse
         >
           <AnimatedText
             text="COMPROMISSO COM A CIDADE"
-            wordDelays={[59, 68, 73, 86]}
+            wordDelays={[59, 75, 79, 83]}
             style={{ justifyContent: 'center' }}
             wordStyle={{ fontFamily: FONT.sans, fontWeight: 500, fontSize: 48, letterSpacing: -1, color: COLOR.textLight }}
           />
           <AnimatedText
             text="TRABALHA DE VERDADE"
-            wordDelays={[133, 138, 142]}
+            wordDelays={[125, 131, 133]}
             style={{ justifyContent: 'center', marginTop: 10 }}
             wordStyle={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 48, letterSpacing: -1, color: COLOR.gold }}
           />
