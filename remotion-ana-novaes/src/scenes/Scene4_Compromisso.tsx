@@ -7,26 +7,31 @@ import { AnimatedText } from '../lib/AnimatedText';
 import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
-// Cena 4 — O Compromisso (A Rua e O Povo) | frames locais 0–154 (5.1s, ajustado à narração)
-// Câmera: Crane Up — y: -400 → +200 em [0,154], Easing.inOut(cubic)
+// Cena 4 — O Compromisso (A Rua e O Povo) | frames locais 0–192 (6.4s)
+// Timing real: "compromisso"@54 "com"@63 "a"@72 "cidade."@81 | "trabalha"@145 "de"@154 "verdade"@163
+// Câmera: Crane Up sutil — y: 60 → -60 em [0,192], Easing.inOut(cubic)
 export const Scene4_Compromisso: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
 
-  const craneY = ci(frame, [0, 154], [90, -90], Easing.inOut(Easing.cubic));
+  // Crossfade de entrada — cobre suavemente a cauda da Cena 3
+  const bgFadeIn = ci(frame, [0, 22], [0, 1], Easing.out(Easing.quad));
 
-  const gridScale = ci(frame, [5, 30], [0.9, 1], Easing.out(Easing.cubic));
+  const craneY = ci(frame, [0, 192], [60, -60], Easing.inOut(Easing.cubic));
+  const gridScale = ci(frame, [5, 30], [0.94, 1], Easing.out(Easing.cubic));
 
-  // Saída — Burn / Derrete (132–154)
-  const exitText = ci(frame, [132, 154], [0, 1], Easing.in(Easing.exp));
-  const exitPhotos = ci(frame, [137, 154], [0, 1], Easing.in(Easing.cubic));
-  const exitLeaks = ci(frame, [142, 154], [0, 1]);
+  // Saída — Burn / Derrete (172–192)
+  const exitText = ci(frame, [172, 192], [0, 1], Easing.in(Easing.exp));
+  const exitPhotos = ci(frame, [176, 192], [0, 1], Easing.in(Easing.cubic));
+  const exitLeaks = ci(frame, [178, 192], [0, 1]);
 
   const photos = [assets.rua?.[0], assets.rua?.[1], assets.rua?.[2]];
   const labels = ['ANA COM A COMUNIDADE', 'ANA EM REUNIÃO COM MORADORES', 'ANA ABRAÇANDO MORADORA'];
 
   return (
     <AbsoluteFill>
-      <CinematicBackground />
+      <AbsoluteFill style={{ opacity: bgFadeIn }}>
+        <CinematicBackground />
+      </AbsoluteFill>
 
       <AbsoluteFill style={{ transform: `translateY(${craneY}px)`, opacity: 1 - exitLeaks * 0 }}>
         <div
@@ -38,34 +43,26 @@ export const Scene4_Compromisso: React.FC<{ assets: AnaNovaesAssets }> = ({ asse
             bottom: 620,
             display: 'flex',
             gap: 16,
+            opacity: bgFadeIn,
             transform: `scale(${gridScale * (1 - exitPhotos * 0.05)})`,
-            filter: `blur(${exitPhotos * 50}px) brightness(${1 - exitPhotos})`,
+            filter: `blur(${exitPhotos * 46}px) brightness(${1 - exitPhotos})`,
           }}
         >
           {photos.map((p, i) => (
             <div
               key={i}
-              style={{
-                flex: 1,
-                position: 'relative',
-                border: '1px solid rgba(255,255,255,0.15)',
-                overflow: 'hidden',
-              }}
+              style={{ flex: 1, position: 'relative', border: '1px solid rgba(255,255,255,0.15)', overflow: 'hidden' }}
             >
               <AssetImage
                 file={p}
                 label={labels[i]}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  filter: 'grayscale(1) contrast(1.25)',
-                }}
+                style={{ width: '100%', height: '100%', filter: 'grayscale(1) contrast(1.2)' }}
               />
               <div
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  background: `linear-gradient(${i * 60}deg, ${COLOR.leak}55, transparent 60%)`,
+                  background: `linear-gradient(${i * 60}deg, ${COLOR.leak}4D, transparent 60%)`,
                   mixBlendMode: 'screen',
                 }}
               />
@@ -80,26 +77,22 @@ export const Scene4_Compromisso: React.FC<{ assets: AnaNovaesAssets }> = ({ asse
             left: 60,
             right: 60,
             textAlign: 'center',
-            transform: `scale(${1 + exitText * 0.1})`,
-            filter: `blur(${exitText * 30}px)`,
+            transform: `scale(${1 + exitText * 0.08})`,
+            filter: `blur(${exitText * 26}px)`,
             opacity: 1 - exitText,
           }}
         >
           <AnimatedText
             text="COMPROMISSO COM A CIDADE"
-            delay={20}
-            stagger={4}
-            wordDur={22}
+            wordDelays={[54, 63, 72, 81]}
             style={{ justifyContent: 'center' }}
-            wordStyle={{ fontFamily: FONT.sans, fontWeight: 300, fontSize: 42, color: COLOR.textLight, letterSpacing: 2 }}
+            wordStyle={{ fontFamily: FONT.sans, fontWeight: 400, fontSize: 38, letterSpacing: -1, color: COLOR.textLight }}
           />
           <AnimatedText
             text="TRABALHA DE VERDADE"
-            delay={32}
-            stagger={4}
-            wordDur={22}
+            wordDelays={[145, 154, 163]}
             style={{ justifyContent: 'center', marginTop: 8 }}
-            wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 42, color: COLOR.gold, letterSpacing: 2 }}
+            wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 38, letterSpacing: -1, color: COLOR.gold }}
           />
         </div>
       </AbsoluteFill>

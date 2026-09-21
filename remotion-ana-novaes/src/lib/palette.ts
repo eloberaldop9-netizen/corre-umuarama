@@ -14,7 +14,8 @@ export const COLOR = {
 } as const;
 
 export const FONT = {
-  sans: "'Inter', 'Helvetica Neue', Arial, sans-serif",
-  serif: "'Playfair Display', Georgia, serif",
-  marker: "'Permanent Marker', 'Segoe Script', cursive",
+  sans: "'Montserrat', 'Helvetica Neue', Arial, sans-serif",
 } as const;
+
+/** Tracking padrão pedido para títulos: -1px, sofisticado e sem serifa. */
+export const TRACKING_TIGHT = -1;

@@ -239,6 +239,19 @@ export const mergeStyles = (...styles: CSSProperties[]): CSSProperties => {
   };
 };
 
+/** Contagem numérica 0 → valor final, com easing de desaceleração (estilo contador/odômetro). */
+export const countUp = (
+  frame: number,
+  start: number,
+  dur: number,
+  finalValue: number
+): number => {
+  const p = ci(frame, [start, start + dur], [0, 1], Easing.out(Easing.cubic));
+  return Math.round(p * finalValue);
+};
+
+export const formatPtBrInt = (n: number): string => n.toLocaleString('pt-BR');
+
 // ─────────────────────────────────────────────────────────────────────────
 // HANDHELD SHAKE — determinístico (sin/cos), nunca Math.random (Mandamento p/ renders reprodutíveis)
 // ─────────────────────────────────────────────────────────────────────────

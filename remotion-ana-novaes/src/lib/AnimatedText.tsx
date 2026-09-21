@@ -6,7 +6,10 @@ import type { Direction } from './motion';
 
 interface AnimatedTextProps {
   text: string;
+  /** Frame global de início da entrada (ignorado se wordDelays for passado). */
   delay?: number;
+  /** Delay individual por palavra (frames locais da cena) — usado para sincronia real com o áudio. Tem prioridade sobre `delay`/`stagger`. */
+  wordDelays?: number[];
   exitStart?: number;
   exitDirection?: Direction;
   style?: React.CSSProperties;
@@ -22,14 +25,15 @@ interface AnimatedTextProps {
 export const AnimatedText: React.FC<AnimatedTextProps> = ({
   text,
   delay = 0,
+  wordDelays,
   exitStart = 999999,
   exitDirection = 'left',
   style,
   wordStyle,
   highlightWords = [],
-  highlightColor = '#D92D20',
+  highlightColor,
   stagger = 3,
-  wordDur = 22,
+  wordDur = 18,
   exitDistance = 1200,
 }) => {
   const frame = useCurrentFrame();
@@ -40,17 +44,17 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', ...style }}>
       {words.map((word, i) => {
-        const ws = delay + i * stagger;
+        const ws = wordDelays ? wordDelays[i] ?? delay : delay + i * stagger;
         const entryP = ci(frame, [ws, ws + wordDur], [0, 1], Easing.out(Easing.cubic));
-        const entryY = ci(frame, [ws, ws + wordDur], [40, 0], Easing.out(Easing.cubic));
-        const entryBl = ci(frame, [ws, ws + wordDur * 0.55], [12, 0]);
+        const entryY = ci(frame, [ws, ws + wordDur], [26, 0], Easing.out(Easing.cubic));
+        const entryBl = ci(frame, [ws, ws + wordDur * 0.55], [10, 0]);
 
         const es = exitStart + i * 2;
         const exitP = ci(frame, [es, es + 14], [0, 1], Easing.in(Easing.exp));
         const exitPos = ci(exitP, [0, 1], [0, exitDistance * sign]);
-        const exitBl = ci(exitP, [0, 1], [0, 20]);
+        const exitBl = ci(exitP, [0, 1], [0, 16]);
         const exitOp = ci(exitP, [0.2, 0.8], [1, 0]);
-        const exitSc = ci(exitP, [0, 1], [1, 0.95]);
+        const exitSc = ci(exitP, [0, 1], [1, 0.96]);
 
         return (
           <span

@@ -9,24 +9,20 @@ import { Scene5_Assinatura } from './scenes/Scene5_Assinatura';
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
 export const FPS = 30;
-export const TOTAL_FRAMES = 822; // 27.4s — casado com a duração real do áudio de narração
+export const TOTAL_FRAMES = 842; // 27.4s de narração + ~0.7s de silêncio/fade final
 
-// Overlap padrão de 7 frames entre cenas — mesma fórmula da decupagem:
-// from[N] = from[N-1] + duration[N-1] - OVERLAP
-//
-// Durações estendidas em relação à decupagem original (720f/24s) para caber
-// a narração gravada (27.4s = 822f). O tempo extra (+102f) foi distribuído
-// proporcionalmente ao tamanho de cada trecho falado, como HOLD adicional
-// (as entradas/saídas de cada cena mantêm o timing original — só o "respiro"
-// do meio cresceu). Ajuste fino ainda pode ser necessário ouvindo o áudio.
-const OVERLAP = 7;
-
+// Timing derivado de análise real do áudio (ffmpeg silencedetect sobre
+// narracao.mp3): cada cena começa perto de onde sua fala correspondente
+// começa e segue até um pouco depois dela terminar, com overlap entre
+// cenas vizinhas para nunca haver frame vazio. As palavras animadas dentro
+// de cada cena (ver `wordDelays` nos componentes) usam os mesmos timestamps
+// reais, não uma distribuição proporcional estimada.
 export const SCENES = {
-  s1: { from: 0, duration: 207 },
-  s2: { from: 0 + 207 - OVERLAP, duration: 172 }, // 200
-  s3: { from: 200 + 172 - OVERLAP, duration: 172 }, // 365
-  s4: { from: 365 + 172 - OVERLAP, duration: 154 }, // 530
-  s5: { from: 530 + 154 - OVERLAP, duration: 145 }, // 677 -> ends 822
+  s1: { from: 0, duration: 192 }, // fala 1: "Em 2020... cidade." (0–172)
+  s2: { from: 172, duration: 181 }, // fala 2: "Foram 2.373 votos... bairro" (182–333)
+  s3: { from: 333, duration: 230 }, // fala 3: "Mas essa trajetória... política" (347–538)
+  s4: { from: 538, duration: 192 }, // fala 4: "mostrando... verdade" (546–710)
+  s5: { from: 710, duration: 132 }, // fala 5: "Essa é... Umuarama." (724–822)
 } as const;
 
 /**

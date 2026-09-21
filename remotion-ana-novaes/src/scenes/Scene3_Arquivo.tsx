@@ -1,37 +1,46 @@
 import React from 'react';
 import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { ci, SPRING, handheldShake } from '../lib/motion';
+import { ci, SPRING, countUp, formatPtBrInt, handheldShake } from '../lib/motion';
 import { PaperBackground, DustParticles } from '../lib/Background';
 import { AssetImage } from '../lib/AssetImage';
 import { AnimatedText } from '../lib/AnimatedText';
 import { COLOR, FONT } from '../lib/palette';
 import type { AnaNovaesAssets } from '../VideoAnaNovaes';
 
-// Cena 3 — O Arquivo Investigativo | frames locais 0–172 (5.7s, ajustado à narração)
-// Câmera: Handheld contínuo + Z-Dive de aterrissagem (z: 500 → 0 em [0,25])
+// Cena 3 — O Arquivo Investigativo | frames locais 0–230 (7.7s)
+// Beat 1 (0–165): fotos de arquivo entram, câmera com handheld, círculo marca a prova.
+// Beat 2 (168–230): fotos saem — número aparece sozinho, em fundo limpo, com contagem.
 export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const landingScale = ci(frame, [0, 25], [1.35, 1], Easing.out(Easing.cubic));
-  const shake = handheldShake(frame, 1);
+  const landingScale = ci(frame, [0, 25], [1.18, 1], Easing.out(Easing.cubic));
+  const shake = handheldShake(frame, 0.55);
 
-  // Entradas das 3 provas
-  const p1 = spring({ frame, fps, config: SPRING.card, delay: 8 });
-  const p2 = spring({ frame, fps, config: SPRING.card, delay: 16 });
-  const p3 = spring({ frame, fps, config: SPRING.card, delay: 24 });
+  // Entrada suave do fundo — deixa a saída da Cena 2 visível por baixo.
+  const bgFadeIn = ci(frame, [0, 20], [0, 1], Easing.out(Easing.quad));
 
-  const circleP = ci(frame, [40, 66], [0, 1], Easing.out(Easing.cubic));
-  const numSp = spring({ frame, fps, config: SPRING.text, delay: 50 });
-  const numScale = ci(numSp, [0, 1], [0.7, 1]);
-  const numOp = ci(frame, [50, 62], [0, 1]);
+  const p1 = spring({ frame, fps, config: SPRING.card, delay: 20 });
+  const p2 = spring({ frame, fps, config: SPRING.card, delay: 65 });
+  const p3 = spring({ frame, fps, config: SPRING.card, delay: 110 });
 
-  const circleFlicker = 0.85 + Math.sin(frame * 0.4) * 0.15;
+  const circleP = ci(frame, [118, 145], [0, 1], Easing.out(Easing.cubic));
+  const circleFlicker = 0.85 + Math.sin(frame * 0.3) * 0.12;
 
-  // Saída — FLIP 3D CORTINA (150–172)
-  const exitText = ci(frame, [150, 172], [0, 1], Easing.in(Easing.exp));
-  const exitStack = ci(frame, [153, 172], [0, 1], Easing.in(Easing.exp));
-  const flashOp = ci(frame, [169, 172], [0, 1]);
+  // Fotos saem de cena — abrem espaço para o número (140–165)
+  const photosExit = ci(frame, [140, 165], [0, 1], Easing.in(Easing.exp));
+
+  // Beat 2 — número em fundo limpo
+  const numberIn = ci(frame, [168, 184], [0, 1], Easing.out(Easing.cubic));
+  const numberValue = countUp(frame, 168, 26, 1621);
+  const captionDelays = [
+    { text: 'VOTOS', delay: 196 },
+    { text: 'NA', delay: 205 },
+    { text: 'ESTREIA', delay: 212 },
+  ];
+
+  // Saída geral da cena (205–230) — cede lugar à Cena 4
+  const exitAll = ci(frame, [205, 230], [0, 1], Easing.in(Easing.exp));
 
   const photo = (
     file: string | null | undefined,
@@ -42,13 +51,14 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
     z: number,
     width: number,
     top: number,
-    left: number,
-    aiGenerated = false
+    left: number
   ) => {
-    const scale = interp(springVal, 0, 1, 3, 1);
+    const scale = interp(springVal, 0, 1, 1.8, 1);
     const rotate = interp(springVal, 0, 1, fromRotate, baseRotate);
     const op = interp(springVal, 0, 1, 0, 1);
-    const blur = ci(frame, [0, 20], [20, 0]);
+    const blur = ci(frame, [0, 18], [14, 0]);
+    const exitY = photosExit * 900;
+    const exitBlur = photosExit * 30;
     return (
       <div
         style={{
@@ -57,62 +67,33 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
           left,
           width,
           zIndex: 10 + z,
-          opacity: op * (1 - exitStack),
-          transform: `rotateZ(${rotate}deg) scale(${scale}) rotateX(${exitStack * 90}deg) translateY(${exitStack * 1200}px)`,
-          filter: `blur(${blur + exitStack * 40}px)`,
+          opacity: op * (1 - photosExit),
+          transform: `rotateZ(${rotate}deg) scale(${scale}) translateY(${exitY}px)`,
+          filter: `blur(${blur + exitBlur}px)`,
           transformOrigin: 'center center',
         }}
       >
-        <div
-          style={{
-            position: 'relative',
-            border: '12px solid white',
-            boxShadow: '0 24px 60px rgba(0,0,0,0.55)',
-            borderRadius: 4,
-          }}
-        >
+        <div style={{ border: '12px solid white', boxShadow: '0 24px 60px rgba(0,0,0,0.5)', borderRadius: 4 }}>
           <AssetImage file={file} label={label} tone="light" style={{ width: '100%', height: width * 1.2 }} />
-          {aiGenerated && (
-            <div
-              style={{
-                position: 'absolute',
-                bottom: 10,
-                left: 10,
-                padding: '5px 10px',
-                borderRadius: 5,
-                backgroundColor: 'rgba(0,0,0,0.72)',
-                color: '#FFFFFF',
-                fontFamily: FONT.sans,
-                fontWeight: 700,
-                fontSize: 15,
-                letterSpacing: 0.5,
-              }}
-            >
-              CONTEÚDO GERADO POR IA
-            </div>
-          )}
         </div>
       </div>
     );
   };
 
   return (
-    <AbsoluteFill>
-      <PaperBackground dark />
-      <div style={{ position: 'absolute', inset: 0, opacity: 0.6 }}>
-        <DustParticles count={18} />
-      </div>
+    <AbsoluteFill style={{ opacity: 1 - exitAll, filter: `blur(${exitAll * 20}px)` }}>
+      <AbsoluteFill style={{ opacity: bgFadeIn }}>
+        <PaperBackground dark />
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.6 }}>
+          <DustParticles count={18} />
+        </div>
+      </AbsoluteFill>
 
-      <AbsoluteFill
-        style={{
-          transform: `scale(${landingScale}) ${shake.transform}`,
-        }}
-      >
+      <AbsoluteFill style={{ transform: `scale(${landingScale}) ${shake.transform}` }}>
         {photo(assets.arquivo?.[0], 'MATERIAL OFICIAL DE CAMPANHA', p1, -12, -25, -100, 620, 260, 90)}
         {photo(assets.arquivo?.[1], 'NOITE DA VITÓRIA — 2020', p2, 8, 20, -50, 640, 420, 220)}
         {photo(assets.arquivo?.[2], 'ANA NA CÂMARA MUNICIPAL', p3, -2, 15, 0, 700, 560, 190)}
 
-        {/* Círculo de caneta vermelha, desenhando sobre a foto do topo */}
         <svg
           width={340}
           height={340}
@@ -122,8 +103,8 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
             top: 660,
             left: 360,
             zIndex: 30,
-            opacity: (1 - exitText) * circleFlicker,
-            filter: `blur(${exitText * 30}px)`,
+            opacity: (1 - photosExit) * circleFlicker,
+            filter: `blur(${photosExit * 24}px)`,
           }}
         >
           <circle
@@ -139,50 +120,44 @@ export const Scene3_Arquivo: React.FC<{ assets: AnaNovaesAssets }> = ({ assets }
             transform="rotate(-90 170 170)"
           />
         </svg>
+      </AbsoluteFill>
 
+      {/* Beat 2 — número isolado, fundo limpo (sem foto) */}
+      <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 200 }}>
         <div
           style={{
-            position: 'absolute',
-            top: 900,
-            left: 0,
-            right: 0,
             textAlign: 'center',
-            zIndex: 35,
-            opacity: numOp * (1 - exitText),
-            transform: `scale(${numScale * (1 - exitText * 0.3)}) translateZ(0) translateY(${-exitText * 200}px)`,
-            filter: `blur(${exitText * 30}px)`,
+            opacity: numberIn,
+            transform: `scale(${ci(numberIn, [0, 1], [0.85, 1])})`,
+            filter: `blur(${ci(numberIn, [0, 1], [10, 0])}px)`,
           }}
         >
           <div
             style={{
-              fontFamily: FONT.marker,
-              fontWeight: 400,
-              fontSize: 180,
+              fontFamily: FONT.sans,
+              fontWeight: 900,
+              fontSize: 168,
+              letterSpacing: -3,
               color: COLOR.accent,
               lineHeight: 1,
             }}
           >
-            1.621
+            {formatPtBrInt(numberValue)}
           </div>
           <AnimatedText
             text="VOTOS NA ESTREIA"
-            delay={55}
-            stagger={3}
-            wordDur={18}
-            style={{ justifyContent: 'center', marginTop: 10 }}
+            wordDelays={captionDelays.map((w) => w.delay)}
+            style={{ justifyContent: 'center', marginTop: 14 }}
             wordStyle={{
               fontFamily: FONT.sans,
               fontWeight: 700,
-              fontSize: 32,
+              fontSize: 34,
+              letterSpacing: -1,
               color: COLOR.textLight,
-              letterSpacing: 1,
             }}
           />
         </div>
       </AbsoluteFill>
-
-      {/* Flash de câmera fotográfica ao final — transição para a Cena 4 */}
-      <AbsoluteFill style={{ backgroundColor: '#FFFFFF', opacity: flashOp }} />
     </AbsoluteFill>
   );
 };
