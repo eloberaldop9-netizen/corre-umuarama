@@ -1,6 +1,6 @@
 import React from 'react';
-import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { ci, SPRING } from '../lib/motion';
+import { AbsoluteFill, Easing, useCurrentFrame } from 'remotion';
+import { ci } from '../lib/motion';
 import { NoiseOverlay } from '../lib/Background';
 import { AssetImage } from '../lib/AssetImage';
 import { COLOR_COMBATE } from '../lib/palette-combate';
@@ -16,27 +16,28 @@ import type { CombateAssets } from '../VideoAnaNovaisCombate';
 // pílula/nome.
 export const Combate5_Lockup: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
 
   const microZoom = ci(frame, [0, 150], [1, 1.03], Easing.inOut(Easing.quad));
-  // Entrada comprimida — a Cena4 já entrega tudo roxo (dissolve), então aqui
-  // a pílula começa a formar já no frame 0, sem hold morto em roxo chapado.
   const photoOp = ci(frame, [0, 12], [0, 1]);
 
-  const pillScale = ci(frame, [0, 18], [0, 1], Easing.out(Easing.cubic));
-  const pillOp = ci(frame, [0, 10], [0, 1]);
+  // Entrada em bloco único — stagger de apenas 3 frames entre elementos,
+  // sem spring/bounce: só translateY + blur + opacity, Easing.out(cubic).
+  const pillP = ci(frame, [0, 24], [0, 1], Easing.out(Easing.cubic));
+  const pillOp = ci(frame, [0, 14], [0, 1]);
 
-  const nameY = ci(frame, [10, 30], [20, 0], Easing.out(Easing.cubic));
-  const nameBlur = ci(frame, [10, 30], [15, 0], Easing.out(Easing.cubic));
-  const nameOp = ci(frame, [10, 25], [0, 1]);
+  const nameP = ci(frame, [3, 27], [0, 1], Easing.out(Easing.cubic));
+  const nameY = ci(nameP, [0, 1], [20, 0]);
+  const nameBlur = ci(nameP, [0, 1], [15, 0]);
+  const nameOp = ci(frame, [3, 18], [0, 1]);
 
-  const baseY = ci(frame, [22, 44], [220, 0], Easing.out(Easing.cubic));
-  const baseOp = ci(frame, [22, 34], [0, 1]);
+  const baseP = ci(frame, [6, 30], [0, 1], Easing.out(Easing.cubic));
+  const baseY = ci(baseP, [0, 1], [220, 0]);
+  const baseOp = ci(frame, [6, 20], [0, 1]);
 
-  const numSp = spring({ frame, fps, config: { damping: 12, mass: 1 }, delay: 32 });
-  const numScale = ci(numSp, [0, 1], [0.8, 1]);
-  const numBlur = ci(frame - 32, [0, 20], [20, 0]);
-  const numOp = ci(frame, [32, 44], [0, 1]);
+  const numP = ci(frame, [9, 33], [0, 1], Easing.out(Easing.cubic));
+  const numScale = ci(numP, [0, 1], [0.9, 1]);
+  const numBlur = ci(numP, [0, 1], [15, 0]);
+  const numOp = ci(frame, [9, 24], [0, 1]);
 
   // Fade final — últimos 20 frames da cena (fim real do vídeo)
   const finalFade = ci(frame, [130, 150], [1, 0]);
@@ -68,7 +69,7 @@ export const Combate5_Lockup: React.FC<{ assets: CombateAssets }> = ({ assets })
               borderRadius: 999,
               padding: '16px 44px',
               opacity: pillOp,
-              transform: `scaleX(${pillScale})`,
+              transform: `scaleX(${pillP})`,
               boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
             }}
           >

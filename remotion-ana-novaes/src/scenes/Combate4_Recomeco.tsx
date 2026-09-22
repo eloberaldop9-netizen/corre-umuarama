@@ -106,41 +106,69 @@ export const Combate4_Recomeco: React.FC<{ assets: CombateAssets }> = ({ assets 
             />
           </div>
 
-          <div style={{ position: 'absolute', top: 950, left: 70, right: 70, height: 150 }}>
-            <div style={{ position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center' }}>
-              <AnimatedText
-                text="INCENTIVAR EMPREGO"
-                wordDelays={[80, 84]}
-                exitStart={95}
-                style={{ justifyContent: 'center' }}
-                wordStyle={{ fontFamily: FONT.sans, fontWeight: 400, fontSize: 42, letterSpacing: 3, color: COLOR_COMBATE.voidDeep }}
-              />
-            </div>
-            <div style={{ position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center' }}>
-              <AnimatedText
-                text="CAPACITAÇÃO PROFISSIONAL"
-                wordDelays={[86, 111]}
-                exitStart={128}
-                style={{ justifyContent: 'center', flexWrap: 'wrap' }}
-                wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 44, letterSpacing: -0.5, color: COLOR_COMBATE.voidDeep }}
-              />
-            </div>
-            <div style={{ position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center' }}>
-              <div
-                style={{
-                  opacity: ci(frame, [132, 148], [0, 1], Easing.out(Easing.cubic)),
-                  transform: `translateY(${ci(frame, [132, 148], [24, 0], Easing.out(Easing.cubic)) - ci(frame, [175, 191], [0, 40], Easing.in(Easing.exp))}px) scale(${1 - ci(frame, [175, 191], [0, 0.9], Easing.in(Easing.exp))})`,
-                  filter: `blur(${ci(frame, [175, 191], [0, 20], Easing.in(Easing.exp))}px)`,
-                  display: 'inline-block',
-                  backgroundColor: COLOR_COMBATE.voidDeep,
-                  padding: '10px 26px',
-                }}
-              >
-                <span style={{ fontFamily: FONT.sans, fontWeight: 900, fontSize: 44, letterSpacing: -1, color: COLOR_COMBATE.yellow }}>
-                  EMPREENDEDORISMO
-                </span>
-              </div>
-            </div>
+          {/* Lista editorial — as 3 propostas empilham, sem uma sumir pra
+              dar lugar à próxima. Entrada só por blur+translateY+opacity,
+              nunca com bounce. */}
+          <div style={{ position: 'absolute', top: 900, left: 70, right: 70, textAlign: 'center' }}>
+            {(() => {
+              const empregoP = ci(frame, [84, 118], [0, 1], Easing.out(Easing.cubic));
+              return (
+                <div
+                  style={{
+                    opacity: empregoP,
+                    transform: `translateY(${ci(empregoP, [0, 1], [20, 0])}px)`,
+                    filter: `blur(${ci(empregoP, [0, 1], [10, 0])}px)`,
+                    fontFamily: FONT.sans,
+                    fontWeight: 400,
+                    fontSize: 46,
+                    letterSpacing: 2,
+                    color: COLOR_COMBATE.voidDeep,
+                  }}
+                >
+                  EMPREGO
+                </div>
+              );
+            })()}
+            {(() => {
+              const capacitacaoP = ci(frame, [86, 120], [0, 1], Easing.out(Easing.cubic));
+              return (
+                <div
+                  style={{
+                    marginTop: 14,
+                    opacity: capacitacaoP,
+                    transform: `translateY(${ci(capacitacaoP, [0, 1], [20, 0])}px)`,
+                    filter: `blur(${ci(capacitacaoP, [0, 1], [10, 0])}px)`,
+                    fontFamily: FONT.sans,
+                    fontWeight: 700,
+                    fontSize: 50,
+                    letterSpacing: -0.5,
+                    color: COLOR_COMBATE.voidDeep,
+                  }}
+                >
+                  CAPACITAÇÃO
+                </div>
+              );
+            })()}
+            {(() => {
+              const empreendP = ci(frame, [132, 166], [0, 1], Easing.out(Easing.cubic));
+              return (
+                <div
+                  style={{
+                    marginTop: 20,
+                    opacity: empreendP,
+                    transform: `translateY(${ci(empreendP, [0, 1], [20, 0])}px)`,
+                    filter: `blur(${ci(empreendP, [0, 1], [10, 0])}px)`,
+                    display: 'inline-block',
+                    backgroundColor: COLOR_COMBATE.yellow,
+                    padding: '10px 28px',
+                  }}
+                >
+                  <span style={{ fontFamily: FONT.sans, fontWeight: 900, fontSize: 46, letterSpacing: -1, color: COLOR_COMBATE.voidDeep }}>
+                    EMPREENDEDORISMO
+                  </span>
+                </div>
+              );
+            })()}
           </div>
         </AbsoluteFill>
 

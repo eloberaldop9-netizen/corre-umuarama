@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Easing, useCurrentFrame } from 'remotion';
 import { ci } from '../lib/motion';
 import { NoiseOverlay, RadarPulse } from '../lib/Background';
 import { AnimatedText } from '../lib/AnimatedText';
@@ -14,14 +14,12 @@ import type { CombateAssets } from '../VideoAnaNovaisCombate';
 // contínuo, sonar em loop, glow do botão respirando — nunca estático.
 export const Combate3_Panico: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
 
   const bgOp = ci(frame, [0, 10], [0, 1], Easing.out(Easing.quad));
   const zPush = ci(frame, [0, 79], [1, 1.25], Easing.inOut(Easing.cubic));
   const uiBlur = ci(frame, [0, 14], [20, 4], Easing.out(Easing.cubic));
 
-  const buttonSp = spring({ frame, fps, config: { damping: 10, mass: 0.8 }, delay: 10 });
-  const buttonScale = ci(buttonSp, [0, 1], [0, 1]);
+  const buttonScale = ci(frame, [10, 32], [0, 1], Easing.out(Easing.cubic));
 
   // Glow respirando — contínuo, acelerado (coração acelerado)
   const buttonGlow = 12 + Math.max(0, Math.sin(frame * 0.35)) * 28;
