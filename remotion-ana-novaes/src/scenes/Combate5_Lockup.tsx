@@ -7,18 +7,18 @@ import { COLOR_COMBATE } from '../lib/palette-combate';
 import { FONT } from '../lib/palette';
 import type { CombateAssets } from '../VideoAnaNovaisCombate';
 
-// Cena 5 — Lockup Institucional | frames locais 0–180 (6.0s)
-// A fala real segue fora de quadro de legenda (trecho final da narração não
-// está na diretriz textual) — por isso esta cena não tem legenda cravada
-// palavra a palavra: é o lockup fixo da campanha (igual ao material oficial),
-// que sobe do roxo da Cena 4 e sustenta o áudio até o fim real (25,39s) mais
-// o fade final. O retrato institucional da Ana entra como fundo, com o
-// degradê da marca por cima (scrim) garantindo legibilidade da pílula/nome.
+// Cena 5 — Lockup Institucional | frames locais 0–150 (5.0s)
+// v2: com a transcrição corrigida, a narração inteira agora está legendada
+// nas Cenas 1–4 (termina em "violência!", frame global 761) — esta cena é
+// puramente o fechamento institucional silencioso, sem depender de fala.
+// Sobe do roxo da Cena 4. O retrato institucional da Ana entra como fundo,
+// com o degradê da marca por cima (scrim) garantindo legibilidade da
+// pílula/nome.
 export const Combate5_Lockup: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const microZoom = ci(frame, [0, 180], [1, 1.03], Easing.inOut(Easing.quad));
+  const microZoom = ci(frame, [0, 150], [1, 1.03], Easing.inOut(Easing.quad));
   const photoOp = ci(frame, [0, 20], [0, 1]);
 
   const pillScale = ci(frame, [15, 33], [0, 1], Easing.out(Easing.cubic));
@@ -36,8 +36,8 @@ export const Combate5_Lockup: React.FC<{ assets: CombateAssets }> = ({ assets })
   const numBlur = ci(frame - 50, [0, 20], [20, 0]);
   const numOp = ci(frame, [50, 62], [0, 1]);
 
-  // Fade final — últimos 20 frames globais (cena termina no fim real do vídeo)
-  const finalFade = ci(frame, [160, 180], [1, 0]);
+  // Fade final — últimos 20 frames da cena (fim real do vídeo)
+  const finalFade = ci(frame, [130, 150], [1, 0]);
 
   return (
     <AbsoluteFill style={{ opacity: finalFade }}>

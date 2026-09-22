@@ -9,22 +9,22 @@ import { Combate5_Lockup } from './scenes/Combate5_Lockup';
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
 export const FPS = 30;
-export const TOTAL_FRAMES = 839; // ~28.0s (narração real 25.4s + fade final)
+export const TOTAL_FRAMES = 919; // ~30.6s (narração real 25.4s + fade final)
 
-// Timing derivado de FORÇA DE ALINHAMENTO REAL (aeneas + espeak-ng, DTW por
-// oração, ancorado nas pausas reais detectadas via ffmpeg silencedetect em
-// narracao-combate.mp3) — mesmo método validado nos vídeos "A Marca" e "A
-// Causa". O mapa de cenas da diretriz original assumia ~23s; a narração real
-// tem 25,39s e as pausas entre orações são bem mais curtas que o previsto,
-// então os overlaps de 7 frames (padrão pedido na diretriz) caem exatamente
-// nas pausas reais entre frases — não é estimativa, é onde o silêncio real
-// está.
+// Timing v2 — recalculado com a TRANSCRIÇÃO CORRETA E COMPLETA fornecida pela
+// usuária (a v1 tinha ~20 palavras inteiras faltando no meio da Cena 2, o que
+// desalinhou tudo a partir dali). Força de alinhamento real (aeneas +
+// espeak-ng, DTW por oração — a Cena 2 precisou ser sub-dividida em 3 blocos
+// menores pois uma oração de 20 palavras contínuas quebrava o DTW de uma vez
+// só), ancorado nas pausas reais via ffmpeg silencedetect em
+// narracao-combate.mp3. As pausas entre orações são curtas (7-9 frames), por
+// isso todo overlap entre cenas é o padrão de 7 frames.
 export const COMBATE_SCENES = {
-  c1: { from: 0, duration: 122 }, // "Ana Novais quer... as mulheres" (0–115)
-  c2: { from: 115, duration: 250 }, // "Como deputada federal... Patrulhas Maria da Penha" (122–356)
-  c3: { from: 358, duration: 160 }, // "e maior acesso... botão do pânico" (365–510)
-  c4: { from: 511, duration: 155 }, // "Por isso... capacitação profissional" (518–626)
-  c5: { from: 659, duration: 180 }, // Lockup final — fala continua fora de quadro de legenda
+  c1: { from: 0, duration: 122 }, // "Ana Novais quer... as mulheres" (6–115)
+  c2: { from: 115, duration: 324 }, // "Como deputada federal... mecanismos de proteção," (122–438)
+  c3: { from: 432, duration: 79 }, // "como o botão do pânico!" (446–510)
+  c4: { from: 504, duration: 272 }, // "Por isso... em situação de violência!" (518–761)
+  c5: { from: 769, duration: 150 }, // Lockup final — sem fala (narração termina em 761)
 } as const;
 
 export interface CombateAssets {

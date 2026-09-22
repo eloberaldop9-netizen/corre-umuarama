@@ -8,22 +8,25 @@ import { COLOR_COMBATE } from '../lib/palette-combate';
 import { FONT } from '../lib/palette';
 import type { CombateAssets } from '../VideoAnaNovaisCombate';
 
-// Cena 3 — O Mecanismo (Botão do Pânico) | frames locais 0–160 (5.3s)
-// Transcrição real: "e"@7 "maior"@11 "acesso"@22 "a"@43 "mecanismos"@52 "de"@70
-// "proteção,"@71 "como"@88 "o"@97 "botão"@112 "do"@133 "pânico!"@136 (fala termina ~152)
+// Cena 3 — O Mecanismo (Botão do Pânico) | frames locais 0–79 (2.6s)
+// v2: agora cobre só "como o botão do pânico!" — o resto da frase
+// ("e maior acesso a mecanismos de proteção,") passou pra Cena 2, que ficou
+// bem maior na transcrição corrigida. Transcrição real (offset de from=432):
+// "como"@14 "o"@23 "botão"@38 "do"@59 "pânico!"@62 (fala termina ~78)
 export const Combate3_Panico: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
 
-  const bgOp = ci(frame, [0, 15], [0, 1], Easing.out(Easing.quad));
-  const zPush = ci(frame, [0, 160], [1.02, 1.18], Easing.inOut(Easing.quad));
+  const bgOp = ci(frame, [0, 12], [0, 1], Easing.out(Easing.quad));
+  const zPush = ci(frame, [0, 79], [1.05, 1.16], Easing.inOut(Easing.quad));
 
   const panicoGlow = 0.25 + Math.max(0, Math.sin(frame * 0.22)) * 0.55;
 
-  // Saída (140–160) — SUCÇÃO: tudo é sugado pro centro (buraco negro)
-  const collapseP = ci(frame, [140, 160], [0, 1], Easing.in(Easing.exp));
+  // Saída (64–79) — SUCÇÃO: tudo é sugado pro centro (buraco negro), bem
+  // rápida pois a próxima fala ("Por isso...") começa 7 frames depois.
+  const collapseP = ci(frame, [64, 79], [0, 1], Easing.in(Easing.exp));
   const collapseScale = ci(collapseP, [0, 1], [1, 0]);
   const collapseBlur = ci(collapseP, [0, 1], [0, 30]);
-  const collapseOp = ci(frame, [140, 160], [1, 0]);
+  const collapseOp = ci(frame, [64, 79], [1, 0]);
 
   return (
     <AbsoluteFill style={{ opacity: bgOp * collapseOp, backgroundColor: '#0A0509' }}>
@@ -67,25 +70,10 @@ export const Combate3_Panico: React.FC<{ assets: CombateAssets }> = ({ assets })
       <NoiseOverlay opacity={0.05} />
 
       <AbsoluteFill style={{ transform: `scale(${collapseScale})`, opacity: collapseOp }}>
-        <div style={{ position: 'absolute', top: 150, left: 40, right: 40, textAlign: 'center' }}>
-          <AnimatedText
-            text="e maior acesso a"
-            wordDelays={[7, 11, 22, 43]}
-            style={{ justifyContent: 'center' }}
-            wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 46, letterSpacing: -0.5, color: COLOR_COMBATE.textLight }}
-          />
-          <AnimatedText
-            text="mecanismos de proteção,"
-            wordDelays={[52, 70, 71]}
-            style={{ justifyContent: 'center', marginTop: 6 }}
-            wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 46, letterSpacing: -0.5, color: COLOR_COMBATE.textLight }}
-          />
-        </div>
-
-        <div style={{ position: 'absolute', bottom: 220, left: 0, right: 0, textAlign: 'center' }}>
+        <div style={{ position: 'absolute', bottom: 260, left: 0, right: 0, textAlign: 'center' }}>
           <AnimatedText
             text="como o BOTÃO DO PÂNICO"
-            wordDelays={[88, 97, 112, 133, 136]}
+            wordDelays={[14, 23, 38, 59, 62]}
             style={{ justifyContent: 'center', flexWrap: 'wrap', padding: '0 50px' }}
             wordStyle={{
               fontFamily: FONT.sans,

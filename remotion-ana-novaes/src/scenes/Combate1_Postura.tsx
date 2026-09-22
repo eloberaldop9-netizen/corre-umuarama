@@ -14,6 +14,9 @@ import type { CombateAssets } from '../VideoAnaNovaisCombate';
 // A pausa real até "Como" (início da Cena 2) é de só 7 frames — por isso a
 // saída (RASGA) é rápida e "morde" a própria palavra "mulheres", igual ao
 // verbo de saída pedido na diretriz (Z-DIVE).
+// v2: composição recentralizada — retrato e textos formam um único bloco
+// vertical centralizado (470–1490px de 1920), respeitando margem de
+// segurança do Instagram Reels (topo/base livres, nada colado nem espalhado).
 export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -62,7 +65,7 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
 
       <AbsoluteFill style={{ transform: `scale(${dollyScale})` }}>
         {/* "FORTALECER" — sobe atrás/acima do retrato */}
-        <div style={{ position: 'absolute', top: 210, left: 0, right: 0, textAlign: 'center' }}>
+        <div style={{ position: 'absolute', top: 320, left: 0, right: 0, textAlign: 'center' }}>
           <span
             style={{
               display: 'inline-block',
@@ -85,11 +88,11 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
         <div
           style={{
             position: 'absolute',
-            bottom: -40,
+            top: 470,
             left: '50%',
-            width: 860,
-            height: 1120,
-            marginLeft: -430,
+            width: 680,
+            height: 860,
+            marginLeft: -340,
             opacity: portraitOp * portraitExitOp,
             filter: `blur(${portraitBlur + portraitExitBlur}px)`,
             transform: `scale(${portraitScale}) skewX(${portraitExitSkew}deg) translateX(${portraitExitX}px)`,
@@ -140,14 +143,14 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
         </div>
 
         {/* "O COMBATE" — hero amarelo, cruza a foto (colagem editorial) */}
-        <div style={{ position: 'absolute', top: 760, left: 0, right: 0, textAlign: 'center', zIndex: 20 }}>
+        <div style={{ position: 'absolute', top: 1040, left: 60, right: 60, textAlign: 'center', zIndex: 20 }}>
           <span
             style={{
               display: 'inline-block',
               fontFamily: FONT.sans,
               fontWeight: 900,
-              fontSize: 128,
-              letterSpacing: -4,
+              fontSize: 104,
+              letterSpacing: -3,
               lineHeight: 0.95,
               color: COLOR_COMBATE.yellow,
               transform: `scale(${ci(combateSp, [0, 1], [2, 1]) * combateExitScale})`,
@@ -160,8 +163,8 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
           </span>
         </div>
 
-        {/* "À VIOLÊNCIA" — abaixo do retrato, hero inferior */}
-        <div style={{ position: 'absolute', bottom: 130, left: 0, right: 0, textAlign: 'center' }}>
+        {/* "À VIOLÊNCIA" — abaixo do retrato, hero inferior (dentro da margem segura) */}
+        <div style={{ position: 'absolute', top: 1400, left: 0, right: 0, textAlign: 'center' }}>
           <span
             style={{
               display: 'inline-block',
