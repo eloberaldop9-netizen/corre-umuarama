@@ -1,4 +1,4 @@
-// Timing do vídeo "Ana Novais — O Dossiê da Proteção" (Vídeo 04).
+// Timing do vídeo "Ana Novais — Proteção à Infância" (Vídeo 04).
 //
 // ⚠️ ESTIMATIVA PROVISÓRIA: o mp3 da narração ainda não chegou. Os frames
 // abaixo foram calculados por peso silábico (≈5,4 sílabas/s, pausa extra em
@@ -78,44 +78,16 @@ export const WORDS: Word[] = [
 /** Frame global de uma palavra pelo índice. */
 export const wf = (i: number): number => WORDS[i].f;
 
-// Mapa de cenas — overlap de 7 frames entre todas (Mandamento 7).
+// Mapa de cenas — mesma gramática do vídeo aprovado "A Causa" (v7):
+// 4 cenas, sem lockup final, fade pro preto no fim.
 export const PROTECAO_SCENES = {
-  c1: { from: 0, duration: 188 }, // fala 6–173
-  c2: { from: 181, duration: 309 }, // fala 183–476
-  c3: { from: 483, duration: 148 }, // fala 486–624
-  c4: { from: 624, duration: 246 }, // fala 634–849
-  c5: { from: 863, duration: 120 }, // lockup
+  c1: { from: 0, duration: 196 }, // fala 6–173
+  c2: { from: 176, duration: 310 }, // fala 183–476
+  c3: { from: 478, duration: 160 }, // fala 486–624
+  c4: { from: 620, duration: 270 }, // fala 634–849 + fade
 } as const;
 
-export const PROTECAO_TOTAL_FRAMES = PROTECAO_SCENES.c5.from + PROTECAO_SCENES.c5.duration;
+export const PROTECAO_TOTAL_FRAMES = PROTECAO_SCENES.c4.from + PROTECAO_SCENES.c4.duration;
 
-/**
- * Páginas de legenda (grupos de índices de WORDS). Cada página aparece
- * palavra por palavra no frame exato da fala e sai quando a próxima página
- * começa — NENHUMA palavra falada fica sem legenda.
- */
-export const CAPTION_PAGES = {
-  c1: [
-    [0, 1, 2, 3],
-    [4, 5, 6, 7],
-    [8, 9, 10, 11],
-  ],
-  c2: [
-    [12, 13, 14],
-    [15, 16, 17, 18],
-    [19, 20, 21],
-    [22, 23, 24, 25],
-    [26, 27, 28, 29, 30],
-  ],
-  c3: [
-    [31, 32, 33, 34],
-    [35, 36, 37],
-    [38, 39, 40, 41],
-  ],
-  c4: [
-    [42, 43, 44, 45, 46],
-    [47, 48],
-    [49, 50, 51],
-    [52, 53, 54],
-  ],
-} as const;
+/** Frame LOCAL de uma palavra dentro de uma cena. */
+export const lf = (i: number, scene: { from: number }): number => WORDS[i].f - scene.from;

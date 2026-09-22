@@ -7,7 +7,3 @@ import '@fontsource/montserrat/500.css';
 import '@fontsource/montserrat/700.css';
 import '@fontsource/montserrat/800.css';
 import '@fontsource/montserrat/900.css';
-// Vídeo 04 (Dossiê da Proteção) — serifa editorial + máquina de escrever para a colagem.
-import '@fontsource/playfair-display/900.css';
-import '@fontsource/playfair-display/900-italic.css';
-import '@fontsource/special-elite/400.css';
