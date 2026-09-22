@@ -9,11 +9,14 @@
     "build": "remotion render src/index.ts AnaNovaes-AMarca out/ana-novaes-a-marca.mp4",
     "still": "remotion still src/index.ts AnaNovaes-AMarca out/still.png",
     "upgrade": "remotion upgrade",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "build:protecao": "remotion render src/index.ts AnaNovais-Protecao out/ana-novais-protecao.mp4"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
     "@fontsource/montserrat": "^5.3.0",
+    "@fontsource/playfair-display": "^5.3.0",
+    "@fontsource/special-elite": "^5.3.0",
     "@remotion/cli": "4.0.526",
     "react": "18.3.1",
     "react-dom": "18.3.1",
