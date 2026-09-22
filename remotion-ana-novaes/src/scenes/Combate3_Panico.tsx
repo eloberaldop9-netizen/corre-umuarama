@@ -73,11 +73,11 @@ export const Combate3_Panico: React.FC<{ assets: CombateAssets }> = ({ assets })
           <AnimatedText
             text="O BOTÃO DO PÂNICO!"
             wordDelays={[23, 38, 59, 62]}
-            style={{ justifyContent: 'center', flexWrap: 'wrap', padding: '0 50px' }}
+            style={{ justifyContent: 'center', flexWrap: 'wrap', padding: '0 80px' }}
             wordStyle={{
               fontFamily: FONT.sans,
               fontWeight: 900,
-              fontSize: 58,
+              fontSize: 50,
               letterSpacing: -1,
               color: COLOR_COMBATE.yellow,
               textShadow: `0 6px 26px rgba(0,0,0,0.75), 0 0 ${18 + panicoGlow * 20}px rgba(230,57,70,0.5)`,

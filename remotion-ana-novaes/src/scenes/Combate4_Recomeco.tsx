@@ -111,10 +111,10 @@ export const Combate4_Recomeco: React.FC<{ assets: CombateAssets }> = ({ assets 
             />
           </div>
 
-          <div style={{ position: 'absolute', top: 950, left: 50, right: 50, textAlign: 'center' }}>
-            {frame < 136 && hero(frame, 'INCENTIVAR EMPREGO', [80, 84], 106, COLOR_COMBATE.voidDeep, 60)}
-            {frame >= 70 && frame < 180 && hero(frame, 'CAPACITAÇÃO PROFISSIONAL', [86, 111], 160, COLOR_COMBATE.voidDeep, 60)}
-            {frame >= 120 && frame < 205 && hero(frame, 'EMPREENDEDORISMO', [132], 185, COLOR_COMBATE.brandCore, 54)}
+          <div style={{ position: 'absolute', top: 950, left: 70, right: 70, textAlign: 'center' }}>
+            {frame < 136 && hero(frame, 'INCENTIVAR EMPREGO', [80, 84], 106, COLOR_COMBATE.voidDeep, 52)}
+            {frame >= 70 && frame < 180 && hero(frame, 'CAPACITAÇÃO PROFISSIONAL', [86, 111], 160, COLOR_COMBATE.voidDeep, 48)}
+            {frame >= 120 && frame < 205 && hero(frame, 'EMPREENDEDORISMO', [132], 185, COLOR_COMBATE.brandCore, 44)}
           </div>
         </AbsoluteFill>
 

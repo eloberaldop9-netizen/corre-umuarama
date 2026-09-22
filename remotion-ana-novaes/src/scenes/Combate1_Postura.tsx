@@ -41,8 +41,12 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
   const portraitExitBlur = ci(frame, [exitStart, 122], [0, 24], Easing.in(Easing.exp));
   const portraitExitOp = ci(frame, [exitStart + 6, 122], [1, 0]);
 
-  const heroExitScale = ci(frame, [exitStart + 7, 122], [1, 18], Easing.in(Easing.exp));
-  const heroExitOp = ci(frame, [exitStart + 7, 118], [1, 0]);
+  // v4: nada de escala explosiva aqui — isso empurrava o texto pra fora da
+  // tela antes do amarelo cobrir tudo. Saída contida (blur + opacity +
+  // leve encolhimento), o rasgo amarelo por cima é que cobre a transição.
+  const heroExitScale = ci(frame, [exitStart + 7, 122], [1, 0.9], Easing.in(Easing.exp));
+  const heroExitBlur = ci(frame, [exitStart + 7, 118], [0, 18]);
+  const heroExitOp = ci(frame, [exitStart + 7, 116], [1, 0]);
 
   const yellowWipeOp = ci(frame, [exitStart + 5, 122], [0, 1], Easing.in(Easing.exp));
 
@@ -137,10 +141,11 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
           style={{
             position: 'absolute',
             top: 1360,
-            left: 50,
-            right: 50,
+            left: 70,
+            right: 70,
             textAlign: 'center',
             transform: `scale(${heroExitScale})`,
+            filter: `blur(${heroExitBlur}px)`,
             opacity: heroExitOp,
           }}
         >
@@ -151,8 +156,8 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
             wordStyle={{
               fontFamily: FONT.sans,
               fontWeight: 900,
-              fontSize: 78,
-              letterSpacing: -2,
+              fontSize: 62,
+              letterSpacing: -1.5,
               color: COLOR_COMBATE.yellow,
               textShadow: '0 8px 30px rgba(0,0,0,0.7)',
             }}
@@ -164,8 +169,8 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
             wordStyle={{
               fontFamily: FONT.sans,
               fontWeight: 900,
-              fontSize: 78,
-              letterSpacing: -2,
+              fontSize: 62,
+              letterSpacing: -1.5,
               color: COLOR_COMBATE.textLight,
               textShadow: '0 8px 30px rgba(0,0,0,0.7)',
             }}

@@ -102,7 +102,7 @@ export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) =
           wordStyle={{
             fontFamily: FONT.sans,
             fontWeight: 900,
-            fontSize: 64,
+            fontSize: 54,
             letterSpacing: -2,
             color: COLOR_COMBATE.yellow,
             textShadow: '0 8px 30px rgba(0,0,0,0.6)',
@@ -144,7 +144,7 @@ export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) =
 
       <AbsoluteFill style={{ transform: shake.transform }}>
         {/* Slot único de hero — centralizado, uma frase de cada vez */}
-        <div style={{ position: 'absolute', top: 640, left: 60, right: 60, textAlign: 'center' }}>
+        <div style={{ position: 'absolute', top: 640, left: 80, right: 80, textAlign: 'center' }}>
           {frame < 168 && hero('DEFENDER MAIS RECURSOS E POLÍTICAS PÚBLICAS', [61, 72, 83, 97, 100, 113], 150)}
           {frame >= 140 && frame < 218 && hero('COM ATENDIMENTO ESPECIALIZADO', [161, 165, 168], 195)}
           {frame >= 175 && frame < 253 && hero('ACOLHIMENTO SEGURO', [184, 186], 235)}
