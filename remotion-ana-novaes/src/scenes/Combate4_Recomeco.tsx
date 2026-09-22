@@ -13,42 +13,11 @@ import type { CombateAssets } from '../VideoAnaNovaisCombate';
 // "capacitação"@86 "profissional"@111 ... "empreendedorismo"@132 ...
 // "em"@209 "situação"@220 "de"@237 "violência!"@240 (fim ~257)
 //
-// v3: Beat A só com os LETTRINGS EM DESTAQUE pedidos — "INCENTIVAR EMPREGO"
-// → "CAPACITAÇÃO PROFISSIONAL" → "EMPREENDEDORISMO" — um de cada vez, sem
-// legenda corrida, sem letra-por-letra (padrão já aprovado: AnimatedText
-// word-by-word + spring). Beat B (a única coisa elogiada) fica exatamente
-// como estava.
-const hero = (
-  frame: number,
-  text: string,
-  wordDelays: number[],
-  holdUntil: number,
-  color: string,
-  fontSize = 64
-) => {
-  const lastWordEnd = wordDelays[wordDelays.length - 1] + 22;
-  const exitStart = Math.max(holdUntil, lastWordEnd + 10);
-  const exitDur = 16;
-  const op = ci(frame, [exitStart, exitStart + exitDur], [1, 0], Easing.in(Easing.exp));
-  const blur = ci(frame, [exitStart, exitStart + exitDur], [0, 14], Easing.in(Easing.exp));
-  const y = ci(frame, [exitStart, exitStart + exitDur], [0, -36], Easing.in(Easing.exp));
-  return (
-    <div style={{ opacity: op, filter: `blur(${blur}px)`, transform: `translateY(${y}px)` }}>
-      <AnimatedText
-        text={text}
-        wordDelays={wordDelays}
-        style={{ justifyContent: 'center', flexWrap: 'wrap' }}
-        wordStyle={{
-          fontFamily: FONT.sans,
-          fontWeight: 900,
-          fontSize,
-          letterSpacing: -2,
-          color,
-        }}
-      />
-    </div>
-  );
-};
+// v4: reconstruída sobre o esqueleto do Scene4_Compromisso.tsx (vídeo "A
+// Marca", aprovado) — Beat A empilha os 3 lettrings na MESMA caixa
+// (position:absolute,inset compartilhado), cada um com seu próprio
+// wordDelays + exitStart do AnimatedText cuidando da troca sozinho — sem
+// gate manual por frame. Beat B (a única coisa elogiada) fica como estava.
 
 export const Combate4_Recomeco: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
@@ -111,10 +80,34 @@ export const Combate4_Recomeco: React.FC<{ assets: CombateAssets }> = ({ assets 
             />
           </div>
 
-          <div style={{ position: 'absolute', top: 950, left: 70, right: 70, textAlign: 'center' }}>
-            {frame < 136 && hero(frame, 'INCENTIVAR EMPREGO', [80, 84], 106, COLOR_COMBATE.voidDeep, 52)}
-            {frame >= 70 && frame < 180 && hero(frame, 'CAPACITAÇÃO PROFISSIONAL', [86, 111], 160, COLOR_COMBATE.voidDeep, 48)}
-            {frame >= 120 && frame < 205 && hero(frame, 'EMPREENDEDORISMO', [132], 185, COLOR_COMBATE.brandCore, 44)}
+          <div style={{ position: 'absolute', top: 950, left: 70, right: 70, height: 140 }}>
+            <div style={{ position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center' }}>
+              <AnimatedText
+                text="INCENTIVAR EMPREGO"
+                wordDelays={[80, 84]}
+                exitStart={95}
+                style={{ justifyContent: 'center' }}
+                wordStyle={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 46, letterSpacing: -1, color: COLOR_COMBATE.voidDeep }}
+              />
+            </div>
+            <div style={{ position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center' }}>
+              <AnimatedText
+                text="CAPACITAÇÃO PROFISSIONAL"
+                wordDelays={[86, 111]}
+                exitStart={145}
+                style={{ justifyContent: 'center', flexWrap: 'wrap' }}
+                wordStyle={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 44, letterSpacing: -1, color: COLOR_COMBATE.voidDeep }}
+              />
+            </div>
+            <div style={{ position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center' }}>
+              <AnimatedText
+                text="EMPREENDEDORISMO"
+                wordDelays={[132]}
+                exitStart={175}
+                style={{ justifyContent: 'center' }}
+                wordStyle={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 42, letterSpacing: -1, color: COLOR_COMBATE.brandCore }}
+              />
+            </div>
           </div>
         </AbsoluteFill>
 

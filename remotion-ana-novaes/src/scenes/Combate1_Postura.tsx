@@ -9,46 +9,37 @@ import { FONT } from '../lib/palette';
 import type { CombateAssets } from '../VideoAnaNovaisCombate';
 
 // Cena 1 — A Postura (O Combate) | frames locais 0–122 (4.1s)
-// Transcrição real (forced alignment real sobre narracao-combate.mp3):
-// "Ana"@6 "Novais"@12 "quer"@28 "fortalecer"@38 "o"@56 "combate"@60 "à"@66
-// "violência"@72 "contra"@87 "as"@96 "mulheres"@103 (fala termina ~115)
-// v3: só os LETTRINGS EM DESTAQUE pedidos — "Ana Novais" e "combate à
-// violência contra as mulheres" — nada mais. Sem headline solta, sem texto
-// cruzando a foto: um único bloco conectado (nome em cima, foto no meio,
-// frase-hero embaixo), igual ao padrão já aprovado (spring + word-by-word,
-// nunca letra-por-letra).
+// Transcrição real: "Ana"@6 "Novais"@12 ... "combate"@60 "à"@66 "violência"@72
+// "contra"@87 "as"@96 "mulheres"@103 (fala termina ~115)
+// v4: reconstruída sobre o MESMO esqueleto do Scene1_Manchete.tsx (vídeo "A
+// Marca", já aprovado) — flex column centralizado (nada de `top` fixo em
+// pixel espalhado), textos curtos, e saída com escala/opacidade presas à
+// MESMA variável de progresso (nunca janelas separadas — foi isso que
+// causou o texto vazando a margem antes).
 export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   const bgOp = ci(frame, [0, 15], [0, 1]);
-
-  const dollyScale = ci(frame, [0, 122], [0.9, 1.06], Easing.out(Easing.cubic));
+  const dollyScale = ci(frame, [0, 122], [0.94, 1.03], Easing.out(Easing.cubic));
 
   const portraitOp = ci(frame, [0, 24], [0, 1]);
-  const portraitBlur = ci(frame, [0, 24], [20, 0], Easing.out(Easing.cubic));
-  const portraitScale = ci(frame, [0, 24], [1.1, 1], Easing.out(Easing.cubic));
+  const portraitBlur = ci(frame, [0, 24], [18, 0], Easing.out(Easing.cubic));
   const symbolGlow = 0.3 + Math.max(0, Math.sin(frame * 0.15)) * 0.5;
 
-  const nameSp = spring({ frame, fps, config: SPRING.text, delay: 6 });
+  const anaSp = spring({ frame, fps, config: SPRING.text, delay: 6 });
+  const novaisSp = spring({ frame, fps, config: SPRING.text, delay: 12 });
 
-  // Saída (100–122) — Z-DIVE RASGA: a foto rasga pra esquerda, o hero
-  // explode em Z até o amarelo cobrir tudo.
-  const exitStart = 100;
-  const exitP = ci(frame, [exitStart, 122], [0, 1], Easing.in(Easing.exp));
-  const portraitExitSkew = ci(frame, [exitStart, 122], [0, -15], Easing.in(Easing.exp));
-  const portraitExitX = ci(frame, [exitStart, 122], [0, -1300], Easing.in(Easing.exp));
-  const portraitExitBlur = ci(frame, [exitStart, 122], [0, 24], Easing.in(Easing.exp));
-  const portraitExitOp = ci(frame, [exitStart + 6, 122], [1, 0]);
+  // Saída (98–122) — mesmo verbo do Scene1: retrato desliza pra esquerda,
+  // nome e hero saem em escala+blur+opacidade presos à MESMA variável.
+  const exitP = ci(frame, [98, 122], [0, 1], Easing.in(Easing.exp));
+  const portraitTX = exitP * -1100;
+  const portraitExitBlur = exitP * 16;
 
-  // v4: nada de escala explosiva aqui — isso empurrava o texto pra fora da
-  // tela antes do amarelo cobrir tudo. Saída contida (blur + opacity +
-  // leve encolhimento), o rasgo amarelo por cima é que cobre a transição.
-  const heroExitScale = ci(frame, [exitStart + 7, 122], [1, 0.9], Easing.in(Easing.exp));
-  const heroExitBlur = ci(frame, [exitStart + 7, 118], [0, 18]);
-  const heroExitOp = ci(frame, [exitStart + 7, 116], [1, 0]);
+  const exitName = ci(frame, [100, 120], [0, 1], Easing.in(Easing.exp));
+  const exitHero = ci(frame, [104, 122], [0, 1], Easing.in(Easing.exp));
 
-  const yellowWipeOp = ci(frame, [exitStart + 5, 122], [0, 1], Easing.in(Easing.exp));
+  const flashOp = ci(frame, [108, 122], [0, 0.9]);
 
   return (
     <AbsoluteFill style={{ opacity: bgOp, backgroundColor: COLOR_COMBATE.voidDeep }}>
@@ -62,72 +53,84 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
       <NoiseOverlay opacity={0.07} />
       <DustParticles count={22} />
 
-      <AbsoluteFill style={{ transform: `scale(${dollyScale})` }}>
-        {/* "Ana Novais" — tag de nome, conectado ao bloco (topo) */}
-        <div style={{ position: 'absolute', top: 380, left: 0, right: 0, textAlign: 'center' }}>
+      <AbsoluteFill
+        style={{
+          transform: `scale(${dollyScale})`,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        {/* Nome */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 14,
+            marginBottom: 22,
+            transform: `translateX(${exitName * -1200}px) scale(${1 - exitName * 0.06})`,
+            filter: `blur(${exitName * 16}px)`,
+            opacity: 1 - exitName,
+          }}
+        >
           <span
             style={{
-              display: 'inline-block',
               fontFamily: FONT.sans,
-              fontWeight: 600,
-              fontSize: 44,
-              letterSpacing: 6,
+              fontWeight: 700,
+              fontSize: 46,
+              letterSpacing: 4,
               color: COLOR_COMBATE.textLight,
-              transform: `translateY(${ci(nameSp, [0, 1], [30, 0])}px)`,
+              transform: `translateY(${ci(anaSp, [0, 1], [24, 0])}px)`,
               filter: `blur(${ci(frame - 6, [0, 14], [10, 0])}px)`,
-              opacity: ci(frame, [6, 20], [0, 1]) * portraitExitOp,
-              textShadow: '0 6px 24px rgba(0,0,0,0.7)',
+              opacity: ci(frame, [6, 18], [0, 1]),
             }}
           >
-            ANA NOVAIS
+            ANA
+          </span>
+          <span
+            style={{
+              fontFamily: FONT.sans,
+              fontWeight: 700,
+              fontSize: 46,
+              letterSpacing: 4,
+              color: COLOR_COMBATE.textLight,
+              transform: `translateY(${ci(novaisSp, [0, 1], [24, 0])}px)`,
+              filter: `blur(${ci(frame - 12, [0, 14], [10, 0])}px)`,
+              opacity: ci(frame, [12, 24], [0, 1]),
+            }}
+          >
+            NOVAIS
           </span>
         </div>
 
-        {/* Retrato — Ana, jaqueta vermelha, mão com X (emergindo das sombras), sem texto por cima */}
+        {/* Retrato — Ana, jaqueta vermelha, mão com X */}
         <div
           style={{
-            position: 'absolute',
-            top: 490,
-            left: '50%',
-            width: 640,
-            height: 800,
-            marginLeft: -320,
-            opacity: portraitOp * portraitExitOp,
+            position: 'relative',
+            width: 620,
+            height: 780,
+            opacity: portraitOp,
             filter: `blur(${portraitBlur + portraitExitBlur}px)`,
-            transform: `scale(${portraitScale}) skewX(${portraitExitSkew}deg) translateX(${portraitExitX}px)`,
-            transformOrigin: 'bottom center',
+            transform: `translateX(${portraitTX}px)`,
+            boxShadow: '0 20px 90px rgba(0,0,0,0.85)',
+            borderRadius: 8,
+            overflow: 'hidden',
           }}
         >
           <AssetImage
             file={assets.retratoStopX}
-            label="RETRATO — ANA NOVAIS (jaqueta vermelha, mão com X) — aguardando envio"
+            label="RETRATO — ANA NOVAIS (jaqueta vermelha, mão com X)"
             style={{ width: '100%', height: '100%', filter: 'saturate(1.05) contrast(1.05)' }}
             objectFit="cover"
           />
           <div
             style={{
               position: 'absolute',
-              inset: 0,
-              background: `radial-gradient(ellipse 58% 62% at 50% 40%, transparent 26%, ${COLOR_COMBATE.voidDeep} 76%)`,
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: `linear-gradient(180deg, ${COLOR_COMBATE.voidDeep} 0%, transparent 18%, transparent 78%, ${COLOR_COMBATE.voidDeep} 100%)`,
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              top: '52%',
-              left: '26%',
-              width: 240,
-              height: 240,
-              marginLeft: -120,
-              marginTop: -120,
-              opacity: 0.55,
+              top: '38%',
+              left: '22%',
+              width: 220,
+              height: 220,
+              marginLeft: -110,
+              marginTop: -110,
+              opacity: 0.5,
               background: `radial-gradient(circle, rgba(230,57,70,${symbolGlow}) 0%, transparent 70%)`,
               filter: 'blur(20px)',
               pointerEvents: 'none',
@@ -136,17 +139,14 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
           />
         </div>
 
-        {/* "COMBATE À VIOLÊNCIA CONTRA AS MULHERES" — hero único, conectado, embaixo da foto */}
+        {/* "COMBATE À VIOLÊNCIA CONTRA AS MULHERES" — hero curto, duas linhas */}
         <div
           style={{
-            position: 'absolute',
-            top: 1360,
-            left: 70,
-            right: 70,
+            marginTop: 30,
             textAlign: 'center',
-            transform: `scale(${heroExitScale})`,
-            filter: `blur(${heroExitBlur}px)`,
-            opacity: heroExitOp,
+            transform: `scale(${1 + exitHero * 0.1})`,
+            filter: `blur(${exitHero * 24}px)`,
+            opacity: 1 - exitHero,
           }}
         >
           <AnimatedText
@@ -155,11 +155,10 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
             style={{ justifyContent: 'center' }}
             wordStyle={{
               fontFamily: FONT.sans,
-              fontWeight: 900,
-              fontSize: 62,
-              letterSpacing: -1.5,
+              fontWeight: 800,
+              fontSize: 48,
+              letterSpacing: -1,
               color: COLOR_COMBATE.yellow,
-              textShadow: '0 8px 30px rgba(0,0,0,0.7)',
             }}
           />
           <AnimatedText
@@ -168,18 +167,17 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
             style={{ justifyContent: 'center', marginTop: 4 }}
             wordStyle={{
               fontFamily: FONT.sans,
-              fontWeight: 900,
-              fontSize: 62,
-              letterSpacing: -1.5,
+              fontWeight: 800,
+              fontSize: 48,
+              letterSpacing: -1,
               color: COLOR_COMBATE.textLight,
-              textShadow: '0 8px 30px rgba(0,0,0,0.7)',
             }}
           />
         </div>
       </AbsoluteFill>
 
-      {/* Rasgo amarelo — cobre a tela inteira ao final, entrega a bandeira pra Cena 2 */}
-      <AbsoluteFill style={{ backgroundColor: COLOR_COMBATE.yellow, opacity: yellowWipeOp * exitP }} />
+      {/* Flash amarelo — transição ótica para a Cena 2, igual ao padrão aprovado */}
+      <AbsoluteFill style={{ backgroundColor: COLOR_COMBATE.yellow, opacity: flashOp }} />
     </AbsoluteFill>
   );
 };

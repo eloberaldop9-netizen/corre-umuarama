@@ -15,12 +15,14 @@ import type { CombateAssets } from '../VideoAnaNovaisCombate';
 // "acolhimento"@184 "seguro"@186 "Patrulhas"@202 "Maria"@223 "da"@233
 // "Penha"@239 ... "botão"@470-115=355 (na Cena 3)
 //
-// v3: só os LETTRINGS EM DESTAQUE pedidos, um de cada vez, no MESMO padrão
-// já aprovado (AnimatedText word-by-word + spring, nunca letra-por-letra,
-// nunca vários textos simultâneos brigando pela atenção). Nada de legenda
+// v4: reconstruída sobre o esqueleto do Scene4_Compromisso.tsx (vídeo "A
+// Marca", aprovado) — os 4 lettrings em destaque ficam empilhados na MESMA
+// caixa (position:absolute,inset compartilhado), cada um com seu próprio
+// wordDelays + exitStart do AnimatedText cuidando da troca sozinho (sem
+// gate manual por frame, que foi fonte de bug antes). Nada de legenda
 // corrida cobrindo a fala inteira — só: "DEFENDER MAIS RECURSOS E POLÍTICAS
 // PÚBLICAS" → "COM ATENDIMENTO ESPECIALIZADO" → "ACOLHIMENTO SEGURO" →
-// "PATRULHAS MARIA DA PENHA", cada um sumindo antes do próximo entrar.
+// "PATRULHAS MARIA DA PENHA".
 const CARD_SPRING = { damping: 12, mass: 1 };
 
 export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
@@ -85,32 +87,14 @@ export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) =
     );
   };
 
-  // Um único slot de "hero" central — as 4 frases se revezam nele, nunca
-  // duas ao mesmo tempo (padrão aprovado: entra, segura, sai, próxima entra).
-  const hero = (text: string, wordDelays: number[], holdUntil: number, exitDur = 16) => {
-    const lastWordEnd = wordDelays[wordDelays.length - 1] + 22;
-    const exitStart = Math.max(holdUntil, lastWordEnd + 10);
-    const op = ci(frame, [exitStart, exitStart + exitDur], [1, 0], Easing.in(Easing.exp));
-    const blur = ci(frame, [exitStart, exitStart + exitDur], [0, 14], Easing.in(Easing.exp));
-    const y = ci(frame, [exitStart, exitStart + exitDur], [0, -36], Easing.in(Easing.exp));
-    return (
-      <div style={{ opacity: op, filter: `blur(${blur}px)`, transform: `translateY(${y}px)` }}>
-        <AnimatedText
-          text={text}
-          wordDelays={wordDelays}
-          style={{ justifyContent: 'center', flexWrap: 'wrap' }}
-          wordStyle={{
-            fontFamily: FONT.sans,
-            fontWeight: 900,
-            fontSize: 54,
-            letterSpacing: -2,
-            color: COLOR_COMBATE.yellow,
-            textShadow: '0 8px 30px rgba(0,0,0,0.6)',
-          }}
-        />
-      </div>
-    );
-  };
+  const heroWordStyle = {
+    fontFamily: FONT.sans,
+    fontWeight: 800,
+    fontSize: 46,
+    letterSpacing: -1,
+    color: COLOR_COMBATE.yellow,
+    textShadow: '0 8px 30px rgba(0,0,0,0.6)',
+  } as const;
 
   return (
     <AbsoluteFill style={{ opacity: bgOp }}>
@@ -143,12 +127,53 @@ export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) =
       </div>
 
       <AbsoluteFill style={{ transform: shake.transform }}>
-        {/* Slot único de hero — centralizado, uma frase de cada vez */}
-        <div style={{ position: 'absolute', top: 640, left: 80, right: 80, textAlign: 'center' }}>
-          {frame < 168 && hero('DEFENDER MAIS RECURSOS E POLÍTICAS PÚBLICAS', [61, 72, 83, 97, 100, 113], 150)}
-          {frame >= 140 && frame < 218 && hero('COM ATENDIMENTO ESPECIALIZADO', [161, 165, 168], 195)}
-          {frame >= 175 && frame < 253 && hero('ACOLHIMENTO SEGURO', [184, 186], 235)}
-          {frame >= 190 && frame < 303 && hero('PATRULHAS MARIA DA PENHA', [202, 223, 233, 239], 285)}
+        {/* Slot único de hero — 4 frases empilhadas na MESMA caixa, cada
+            uma com seu próprio wordDelays + exitStart (padrão do
+            Scene4_Compromisso.tsx aprovado — sem gate manual por frame). */}
+        <div style={{ position: 'absolute', top: 640, left: 80, right: 80, height: 160 }}>
+          <div style={{ position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center' }}>
+            <AnimatedText
+              text="DEFENDER MAIS RECURSOS"
+              wordDelays={[61, 72, 83]}
+              exitStart={140}
+              style={{ justifyContent: 'center' }}
+              wordStyle={heroWordStyle}
+            />
+            <AnimatedText
+              text="E POLÍTICAS PÚBLICAS"
+              wordDelays={[97, 100, 113]}
+              exitStart={140}
+              style={{ justifyContent: 'center', marginTop: 4 }}
+              wordStyle={heroWordStyle}
+            />
+          </div>
+          <div style={{ position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center' }}>
+            <AnimatedText
+              text="COM ATENDIMENTO ESPECIALIZADO"
+              wordDelays={[161, 165, 168]}
+              exitStart={177}
+              style={{ justifyContent: 'center', flexWrap: 'wrap' }}
+              wordStyle={heroWordStyle}
+            />
+          </div>
+          <div style={{ position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center' }}>
+            <AnimatedText
+              text="ACOLHIMENTO SEGURO"
+              wordDelays={[184, 186]}
+              exitStart={195}
+              style={{ justifyContent: 'center' }}
+              wordStyle={heroWordStyle}
+            />
+          </div>
+          <div style={{ position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center' }}>
+            <AnimatedText
+              text="PATRULHAS MARIA DA PENHA"
+              wordDelays={[202, 223, 233, 239]}
+              exitStart={270}
+              style={{ justifyContent: 'center', flexWrap: 'wrap' }}
+              wordStyle={heroWordStyle}
+            />
+          </div>
         </div>
 
         {card(assets.fotoAcolhimento, 'ACOLHIMENTO SEGURO', cardAcolhimento, -4, 80, 1060)}
