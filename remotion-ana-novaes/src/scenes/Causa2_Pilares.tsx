@@ -2,13 +2,15 @@ import React from 'react';
 import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { ci, handheldShake } from '../lib/motion';
 import { NoiseOverlay, HalftoneOverlay } from '../lib/Background';
+import { AnimatedText } from '../lib/AnimatedText';
 import { AssetImage } from '../lib/AssetImage';
 import { COLOR_CAUSA } from '../lib/palette-causa';
 import { FONT } from '../lib/palette';
 import type { CausaAssets } from '../VideoAnaNovaisCausa';
 
-// Cena 2 — Os 4 Pilares (A Mesa de Trabalho) | frames locais 0–280 (9.3s)
-// Transcrição real (forced alignment real): "Como"@3(~181 global) ...
+// Cena 2 — Os 4 Pilares (A Mesa de Trabalho) | frames locais 0–310 (10.3s)
+// Transcrição real (forced alignment real): "Como"@3 "deputada"@14 "federal,"@27
+// "pretende"@42 "trabalhar"@55 "para"@68 "ampliar"@74 "o"@83 "acesso"@85 "ao"@99
 // "diagnóstico"@102 "atendimento"@145 "inclusão"@194 "apoio"@250 (às famílias.@250-254)
 const CARD_SPRING = { damping: 12, mass: 1 };
 
@@ -19,18 +21,16 @@ export const Causa2_Pilares: React.FC<{ assets: CausaAssets }> = ({ assets }) =>
   const bgFadeIn = ci(frame, [15, 45], [0, 1], Easing.out(Easing.quad));
   const shake = handheldShake(frame, 0.55);
 
-  const captionOp = ci(frame, [20, 40], [0, 1], Easing.out(Easing.cubic));
-  const captionY = ci(frame, [20, 40], [20, 0], Easing.out(Easing.cubic));
-
   const p1 = spring({ frame, fps, config: CARD_SPRING, delay: 102 });
   const p2 = spring({ frame, fps, config: CARD_SPRING, delay: 145 });
   const p3 = spring({ frame, fps, config: CARD_SPRING, delay: 194 });
   const p4 = spring({ frame, fps, config: CARD_SPRING, delay: 250 });
 
-  // Saída (264–280) — TARJA VERMELHA + ATROPELAMENTO
-  const wipeP = ci(frame, [264, 280], [0, 1], Easing.in(Easing.exp));
+  // Saída (290–310) — TARJA VERMELHA + ATROPELAMENTO — só depois do card 4
+  // ter um bom tempo de leitura (250 -> ~290, 40 frames de hold)
+  const wipeP = ci(frame, [290, 310], [0, 1], Easing.in(Easing.exp));
   const wipeX = interp(wipeP, -1400, 1400);
-  const cardsExitP = ci(frame, [267, 280], [0, 1], Easing.in(Easing.exp));
+  const cardsExitP = ci(frame, [293, 310], [0, 1], Easing.in(Easing.exp));
 
   const card = (
     file: string | null | undefined,
@@ -75,19 +75,19 @@ export const Causa2_Pilares: React.FC<{ assets: CausaAssets }> = ({ assets }) =>
           <div
             style={{
               position: 'absolute',
-              top: -22,
+              top: -26,
               left: '50%',
               transform: `translateX(-50%) rotate(${baseRotate > 0 ? -4 : 4}deg)`,
-              backgroundColor: 'rgba(242,240,233,0.92)',
-              padding: '8px 18px',
+              backgroundColor: 'rgba(242,240,233,0.95)',
+              padding: '10px 22px',
               boxShadow: '0 4px 10px rgba(0,0,0,0.25)',
             }}
           >
             <span
               style={{
                 fontFamily: FONT.sans,
-                fontWeight: 800,
-                fontSize: 22,
+                fontWeight: 900,
+                fontSize: 30,
                 letterSpacing: 1,
                 color: tapeColor,
                 whiteSpace: 'nowrap',
@@ -118,37 +118,19 @@ export const Causa2_Pilares: React.FC<{ assets: CausaAssets }> = ({ assets }) =>
       <HalftoneOverlay opacity={0.03} />
 
       <AbsoluteFill style={{ transform: shake.transform }}>
-        <div
-          style={{
-            position: 'absolute',
-            top: 150,
-            left: 60,
-            right: 60,
-            textAlign: 'center',
-            opacity: captionOp,
-            transform: `translateY(${captionY}px)`,
-          }}
-        >
-          <span
-            style={{
-              fontFamily: FONT.sans,
-              fontWeight: 700,
-              fontSize: 34,
-              lineHeight: 1.3,
-              letterSpacing: -0.5,
-              color: COLOR_CAUSA.textDark,
-            }}
-          >
-            Como deputada federal, pretende trabalhar
-            <br />
-            para ampliar o acesso a:
-          </span>
+        <div style={{ position: 'absolute', top: 140, left: 60, right: 60, textAlign: 'center' }}>
+          <AnimatedText
+            text="Como deputada federal, pretende trabalhar para ampliar o acesso a:"
+            wordDelays={[3, 14, 27, 42, 55, 68, 74, 83, 85, 99]}
+            style={{ justifyContent: 'center', flexWrap: 'wrap' }}
+            wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 34, letterSpacing: -0.5, color: COLOR_CAUSA.textDark }}
+          />
         </div>
 
-        {card(assets.cardFrontal, 'ANA — DIAGNÓSTICO', 'DIAGNÓSTICO', COLOR_CAUSA.accent, p1, -5, 60, 520)}
+        {card(assets.cardFrontal, 'DIAGNÓSTICO', 'DIAGNÓSTICO', COLOR_CAUSA.accent, p1, -5, 60, 520)}
         {card(assets.teaMente, 'ATENDIMENTO ESPECIALIZADO', 'ATENDIMENTO', COLOR_CAUSA.tea, p2, 8, 580, 520)}
         {card(assets.teaGlobo, 'INCLUSÃO', 'INCLUSÃO', COLOR_CAUSA.tea, p3, -2, 60, 1020)}
-        {card(assets.cardPerfil, 'ANA — APOIO ÀS FAMÍLIAS', 'APOIO FAMÍLIAS', COLOR_CAUSA.accent, p4, 4, 580, 1020)}
+        {card(assets.cardPerfil, 'APOIO ÀS FAMÍLIAS', 'APOIO FAMÍLIAS', COLOR_CAUSA.accent, p4, 4, 580, 1020)}
       </AbsoluteFill>
 
       {/* Tarja vermelha diagonal — transição pra Cena 3 */}
