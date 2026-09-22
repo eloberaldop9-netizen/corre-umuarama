@@ -24,10 +24,10 @@ export const VideoAnaNovaisCombate: React.FC = () => {
       <Sequence name="Cena 1 — A Postura" from={S.c1.from} durationInFrames={S.c1.duration}>
         <Combate1_Postura assets={A} />
       </Sequence>
-      <Sequence name="Cena 2 — A Rede" from={S.c2.from} durationInFrames={S.c2.duration}>
-        <Combate2_Rede assets={A} />
+      <Sequence name="Cena 2 — A Trincheira de Recursos" from={S.c2.from} durationInFrames={S.c2.duration}>
+        <Combate2_Rede />
       </Sequence>
-      <Sequence name="Cena 3 — O Mecanismo" from={S.c3.from} durationInFrames={S.c3.duration}>
+      <Sequence name="Cena 3 — A Colagem" from={S.c3.from} durationInFrames={S.c3.duration}>
         <Combate3_Panico assets={A} />
       </Sequence>
       <Sequence name="Cena 4 — O Recomeço" from={S.c4.from} durationInFrames={S.c4.duration}>

@@ -6,14 +6,14 @@ import { ED, edIn, outP } from '../lib/editorial';
 import { COMBATE_SCENES, WORD } from '../combate-timing';
 import type { CombateAssets } from '../combate-timing';
 
-// Cena 1 — A Postura | frames 0–140
+// Cena 1 — A Postura | frames 0–122
 // Capa de revista: roxo profundo, a Ana recortada emergindo da sombra.
 // "ANA NOVAIS" delicado no topo quando ela diz o nome; "COMBATE" colossal
 // em amarelo POR TRÁS dela e "À VIOLÊNCIA" em branco NA FRENTE — o
 // lettering fatia a profundidade. Saída Z-DIVE RASGA (stagger 0/3/6/10f).
 const S = COMBATE_SCENES.c1;
 const L = (f: number) => f - S.from;
-const EXIT = 115;
+const EXIT = 97;
 
 export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();

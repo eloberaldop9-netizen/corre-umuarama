@@ -13,26 +13,28 @@ export const WORD = {
   combate: 60,
   violencia: 72,
   mulheres: 103,
+  como: 122,
+  mais: 187,
   recursos: 198,
   atendimento: 215,
   acolhimento: 265,
   patrulhas: 317,
   penha: 354,
+  mecanismos: 410,
   botao: 470,
   panico: 494,
   emprego: 594,
   capacitacao: 602,
   empreendedorismo: 636, // estimado (primeira palavra após a pausa 20,86–21,13s)
-  situacao: 720, // estimado (fim da frase, ~24,0s)
 } as const;
 
-// Mapa de cenas (decupagem "Corte Editorial High-End"), esticado para caber
-// a narração real de 25,4s — overlap de 7 frames entre todas.
+// Mapa de cenas v5 (Corte Editorial Puro), esticado para a narração real de
+// 25,4s — overlap de 7 frames entre todas.
 export const COMBATE_SCENES = {
-  c1: { from: 0, duration: 140 }, // "Ana Novais ... contra as mulheres" (6–115)
-  c2: { from: 133, duration: 262 }, // "Como deputada ... Patrulhas Maria da Penha" (122–356)
-  c3: { from: 388, duration: 145 }, // "... mecanismos de proteção, como o botão do pânico!" (–510)
-  c4: { from: 526, duration: 240 }, // "Por isso ... emprego, capacitação ... empreendedorismo ..." (518–762)
+  c1: { from: 0, duration: 122 }, // "Ana Novais ... contra as mulheres" (6–115)
+  c2: { from: 115, duration: 115 }, // "Como deputada federal, pretende defender mais recursos" (122–210)
+  c3: { from: 223, duration: 300 }, // atendimento → acolhimento → patrulhas → botão do pânico (215–510)
+  c4: { from: 516, duration: 250 }, // "Por isso ... emprego, capacitação ... empreendedorismo ..." (518–762)
   c5: { from: 759, duration: 140 }, // selo + fade
 } as const;
 
@@ -40,7 +42,8 @@ export const TOTAL_FRAMES = COMBATE_SCENES.c5.from + COMBATE_SCENES.c5.duration;
 
 export interface CombateAssets {
   retratoStopX: string; // recorte PNG (fundo removido)
-  fotoAcolhimento: string;
+  fotoAcolhimento: string; // escritório, mão no ombro — ATENDIMENTO
+  fotoAbraco: string; // abraço no banco (Adobe Stock) — ACOLHIMENTO
   fotoPatrulha: string;
   fotoPanico: string;
   fotoCapacitacao: string;
@@ -50,6 +53,7 @@ export interface CombateAssets {
 export const COMBATE_ASSETS: CombateAssets = {
   retratoStopX: 'combate-stopx-cutout.png',
   fotoAcolhimento: 'combate-acolhimento.jpg',
+  fotoAbraco: 'stock-acolhimento-abraco.jpg',
   fotoPatrulha: 'combate-patrulha.jpg',
   fotoPanico: 'combate-panico.jpg',
   fotoCapacitacao: 'combate-capacitacao.jpg',
