@@ -85,13 +85,13 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
         <div
           style={{
             position: 'absolute',
-            bottom: 0,
+            bottom: -40,
             left: '50%',
-            width: 900,
-            height: 1300,
-            marginLeft: -450,
+            width: 860,
+            height: 1120,
+            marginLeft: -430,
             opacity: portraitOp * portraitExitOp,
-            filter: `blur(${portraitBlur + portraitExitBlur}px) drop-shadow(0 30px 90px rgba(0,0,0,0.85))`,
+            filter: `blur(${portraitBlur + portraitExitBlur}px)`,
             transform: `scale(${portraitScale}) skewX(${portraitExitSkew}deg) translateX(${portraitExitX}px)`,
             transformOrigin: 'bottom center',
           }}
@@ -99,26 +99,45 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
           <AssetImage
             file={assets.retratoStopX}
             label="RETRATO — ANA NOVAIS (jaqueta vermelha, mão com X) — aguardando envio"
-            style={{ width: '100%', height: '100%' }}
-            objectFit="contain"
+            style={{ width: '100%', height: '100%', filter: 'saturate(1.05) contrast(1.05)' }}
+            objectFit="cover"
+          />
+          {/* Vinheta sólida — pinta as bordas da foto com a própria cor do fundo
+              (em vez de só reduzir opacidade, o que revelaria o fundo claro da
+              rua por trás), fazendo ela "emergir das sombras" de verdade */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: `radial-gradient(ellipse 58% 62% at 50% 40%, transparent 26%, ${COLOR_COMBATE.voidDeep} 76%)`,
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: `linear-gradient(180deg, ${COLOR_COMBATE.voidDeep} 0%, transparent 18%, transparent 78%, ${COLOR_COMBATE.voidDeep} 100%)`,
+            }}
+          />
+          {/* Glow vermelho pulsante — reforça o X na mão (asset já traz o X desenhado),
+              posicionado em % sobre a própria foto (mão erguida à esquerda, meio-baixo) */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '52%',
+              left: '26%',
+              width: 260,
+              height: 260,
+              marginLeft: -130,
+              marginTop: -130,
+              opacity: 0.55,
+              background: `radial-gradient(circle, rgba(230,57,70,${symbolGlow}) 0%, transparent 70%)`,
+              filter: 'blur(20px)',
+              pointerEvents: 'none',
+              mixBlendMode: 'screen',
+            }}
           />
         </div>
-
-        {/* Glow vermelho pulsante — reforça o X na mão (asset já traz o X desenhado) */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 480,
-            left: '50%',
-            width: 260,
-            height: 260,
-            marginLeft: 40,
-            opacity: portraitOp * 0.5 * portraitExitOp,
-            background: `radial-gradient(circle, rgba(230,57,70,${symbolGlow}) 0%, transparent 70%)`,
-            filter: 'blur(20px)',
-            pointerEvents: 'none',
-          }}
-        />
 
         {/* "O COMBATE" — hero amarelo, cruza a foto (colagem editorial) */}
         <div style={{ position: 'absolute', top: 760, left: 0, right: 0, textAlign: 'center', zIndex: 20 }}>

@@ -28,16 +28,18 @@ export const COMBATE_SCENES = {
 } as const;
 
 export interface CombateAssets {
-  retratoStopX: string | null; // Ana, jaqueta vermelha, mão com X — Cena 1 (aguardando envio)
+  retratoStopX: string | null; // Ana, jaqueta vermelha, mão com X — Cena 1
   fotoPatrulha: string | null; // Patrulha Maria da Penha — Cena 2
   fotoAcolhimento: string | null; // acolhimento / atendimento institucional — Cena 2
   fotoPanico: string | null; // celular com app "Botão do Pânico" — Cena 3
   fotoCapacitacao: string | null; // sala de aula / capacitação profissional — Cena 4
+  retratoOficial: string | null; // retrato institucional (câmara ao fundo) — Cena 5, fundo do lockup
   narracao: string | null;
 }
 
 export const COMBATE_ASSETS: CombateAssets = {
-  retratoStopX: null,
+  retratoStopX: 'combate-stopx.jpg',
+  retratoOficial: 'combate-retrato-oficial.jpg',
   fotoPatrulha: 'combate-patrulha.jpg',
   fotoAcolhimento: 'combate-acolhimento.jpg',
   fotoPanico: 'combate-panico.jpg',

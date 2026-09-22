@@ -2,6 +2,7 @@ import React from 'react';
 import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { ci, SPRING } from '../lib/motion';
 import { NoiseOverlay } from '../lib/Background';
+import { AssetImage } from '../lib/AssetImage';
 import { COLOR_COMBATE } from '../lib/palette-combate';
 import { FONT } from '../lib/palette';
 import type { CombateAssets } from '../VideoAnaNovaisCombate';
@@ -11,12 +12,14 @@ import type { CombateAssets } from '../VideoAnaNovaisCombate';
 // está na diretriz textual) — por isso esta cena não tem legenda cravada
 // palavra a palavra: é o lockup fixo da campanha (igual ao material oficial),
 // que sobe do roxo da Cena 4 e sustenta o áudio até o fim real (25,39s) mais
-// o fade final.
+// o fade final. O retrato institucional da Ana entra como fundo, com o
+// degradê da marca por cima (scrim) garantindo legibilidade da pílula/nome.
 export const Combate5_Lockup: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   const microZoom = ci(frame, [0, 180], [1, 1.03], Easing.inOut(Easing.quad));
+  const photoOp = ci(frame, [0, 20], [0, 1]);
 
   const pillScale = ci(frame, [15, 33], [0, 1], Easing.out(Easing.cubic));
   const pillOp = ci(frame, [15, 25], [0, 1]);
@@ -38,9 +41,17 @@ export const Combate5_Lockup: React.FC<{ assets: CombateAssets }> = ({ assets })
 
   return (
     <AbsoluteFill style={{ opacity: finalFade }}>
+      <AbsoluteFill style={{ backgroundColor: COLOR_COMBATE.brandCore }} />
+      <AbsoluteFill style={{ transform: `scale(${microZoom * 1.04})`, opacity: photoOp }}>
+        <AssetImage
+          file={assets.retratoOficial}
+          label="RETRATO INSTITUCIONAL — ANA NOVAIS"
+          style={{ width: '100%', height: '100%', objectPosition: '50% 22%' }}
+        />
+      </AbsoluteFill>
       <AbsoluteFill
         style={{
-          background: `linear-gradient(175deg, ${COLOR_COMBATE.lilacLight} 0%, #9868B0 45%, ${COLOR_COMBATE.brandCore} 100%)`,
+          background: `linear-gradient(175deg, ${COLOR_COMBATE.lilacLight}E6 0%, #9868B0E6 45%, ${COLOR_COMBATE.brandCore}F2 100%)`,
           transform: `scale(${microZoom})`,
         }}
       />
