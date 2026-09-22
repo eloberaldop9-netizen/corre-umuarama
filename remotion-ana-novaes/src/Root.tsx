@@ -1,6 +1,7 @@
 import React from 'react';
 import { Composition } from 'remotion';
 import { VideoAnaNovaes, TOTAL_FRAMES, FPS, WIDTH, HEIGHT } from './VideoAnaNovaes';
+import { VideoAnaNovaisCausa, TOTAL_FRAMES as CAUSA_TOTAL_FRAMES } from './VideoAnaNovaisCausa';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -9,6 +10,14 @@ export const RemotionRoot: React.FC = () => {
         id="AnaNovaes-AMarca"
         component={VideoAnaNovaes}
         durationInFrames={TOTAL_FRAMES}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+      />
+      <Composition
+        id="AnaNovais-ACausa"
+        component={VideoAnaNovaisCausa}
+        durationInFrames={CAUSA_TOTAL_FRAMES}
         fps={FPS}
         width={WIDTH}
         height={HEIGHT}
