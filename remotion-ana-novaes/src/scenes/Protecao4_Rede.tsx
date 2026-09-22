@@ -25,10 +25,10 @@ const ITEMS = [
 
 export const Protecao4_Rede: React.FC<{ assets: ProtecaoAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
-  const small: React.CSSProperties = { fontFamily: J.sans, fontWeight: 800, fontSize: 30, letterSpacing: J.track, color: J.purple };
+  const small: React.CSSProperties = { fontFamily: J.sans, fontWeight: 800, fontSize: 46, letterSpacing: J.track, color: J.purple };
   const head: React.CSSProperties = { fontFamily: J.serif, fontWeight: 900, fontSize: 112, letterSpacing: J.track, color: J.ink, lineHeight: 1 };
-  const fade = ci(frame, [S.duration - 25, S.duration], [1, 0]);
-  const signAt = W(54) + 20;
+  const fade = ci(frame, [S.duration - 30, S.duration], [1, 0]);
+  const signAt = W(54) + 24;
 
   return (
     <AbsoluteFill style={{ opacity: fade }}>
@@ -38,7 +38,7 @@ export const Protecao4_Rede: React.FC<{ assets: ProtecaoAssets }> = ({ assets })
         <Rule frame={frame} at={0} thick={4} />
         <div style={{ display: 'flex', gap: 10, paddingTop: 16 }}>
           <WordIn at={W(42)} style={small}>E</WordIn>
-          <WordIn at={W(43)} style={small}>DA</WordIn>
+          <WordIn at={W(43) + 3} style={small}>DA</WordIn>
         </div>
       </div>
 
@@ -47,7 +47,7 @@ export const Protecao4_Rede: React.FC<{ assets: ProtecaoAssets }> = ({ assets })
       </div>
 
       <div style={{ position: 'absolute', top: 810, left: 80, right: 80 }}>
-        <WordIn at={W(44)} style={head}>Atuação</WordIn>
+        <WordIn at={W(44) + 5} style={head}>Atuação</WordIn>
         <div style={{ marginTop: 6 }}>
           <WordIn at={W(45)} style={head}>
             <Marked frame={frame} at={W(45) + 6}>integrada</Marked>
@@ -84,14 +84,14 @@ export const Protecao4_Rede: React.FC<{ assets: ProtecaoAssets }> = ({ assets })
       </div>
 
       {/* Assinatura */}
-      <div style={{ position: 'absolute', bottom: 110, left: 80, right: 80, textAlign: 'center' }}>
+      <div style={{ position: 'absolute', bottom: 90, left: 80, right: 80, textAlign: 'center' }}>
         <Rule frame={frame} at={signAt} thick={3} origin="center" />
         <div style={{ paddingTop: 16 }}>
-          <WordIn at={signAt + 4} style={{ fontFamily: J.serif, fontWeight: 900, fontSize: 52, letterSpacing: J.track, color: J.ink }}>
+          <WordIn at={signAt + 4} style={{ fontFamily: J.serif, fontWeight: 900, fontSize: 76, letterSpacing: J.track, color: J.ink }}>
             Ana Novais
           </WordIn>
         </div>
-        <WordIn at={signAt + 10} style={{ fontFamily: J.sans, fontWeight: 700, fontSize: 24, letterSpacing: J.track, color: J.purple }}>
+        <WordIn at={signAt + 10} style={{ fontFamily: J.sans, fontWeight: 700, fontSize: 36, letterSpacing: J.track, color: J.purple }}>
           DEPUTADA FEDERAL
         </WordIn>
       </div>

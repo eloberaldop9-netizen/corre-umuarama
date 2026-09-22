@@ -12,11 +12,11 @@ import type { ProtecaoAssets } from '../VideoAnaNovaisProtecao';
 // embaixo, nota menor com a foto do telefone e "canais de denúncia".
 const S = PROTECAO_SCENES.c3;
 const W = (i: number) => lf(i, S);
-const EXIT = 138;
+const EXIT = 98;
 
 export const Protecao3_Leis: React.FC<{ assets: ProtecaoAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
-  const small: React.CSSProperties = { fontFamily: J.sans, fontWeight: 800, fontSize: 30, letterSpacing: J.track, color: J.purple };
+  const small: React.CSSProperties = { fontFamily: J.sans, fontWeight: 800, fontSize: 46, letterSpacing: J.track, color: J.purple };
   const deck: React.CSSProperties = { fontFamily: J.sans, fontWeight: 700, fontSize: 42, letterSpacing: J.track, color: J.ink };
 
   return (
@@ -27,18 +27,18 @@ export const Protecao3_Leis: React.FC<{ assets: ProtecaoAssets }> = ({ assets })
         <Rule frame={frame} at={0} thick={4} />
         <div style={{ display: 'flex', gap: 10, paddingTop: 16 }}>
           {[31, 32, 33, 34].map((i) => (
-            <WordIn key={i} at={W(i)} style={small}>
+            <WordIn key={i} at={Math.max(W(i), 3 + (i - 31) * 3)} style={small}>
               {['TAMBÉM', 'QUER', 'TRABALHAR', 'PELO'][i - 31]}
             </WordIn>
           ))}
         </div>
       </div>
 
-      <div style={{ position: 'absolute', top: 250, left: 80, ...mergeStyles(clipIn(frame, W(35) - 8, 1), outUp(frame, EXIT + 3)) }}>
+      <div style={{ position: 'absolute', top: 280, left: 80, ...mergeStyles(clipIn(frame, W(35) - 8, 1), outUp(frame, EXIT + 3)) }}>
         <Clipping file={assets.fotoLeis} width={920} height={560} objectPosition="70% 50%" />
       </div>
 
-      <div style={{ position: 'absolute', top: 870, left: 80, right: 80, ...outUp(frame, EXIT + 5) }}>
+      <div style={{ position: 'absolute', top: 900, left: 80, right: 80, ...outUp(frame, EXIT + 5) }}>
         <div style={{ display: 'flex', gap: 16 }}>
           <WordIn at={W(35)} style={{ fontFamily: J.serif, fontStyle: 'italic', fontWeight: 700, fontSize: 70, letterSpacing: J.track, color: J.purple }}>
             fortalecimento

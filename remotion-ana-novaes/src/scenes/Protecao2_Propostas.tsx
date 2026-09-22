@@ -15,12 +15,12 @@ import type { ProtecaoAssets } from '../VideoAnaNovaisProtecao';
 const S = PROTECAO_SCENES.c2;
 const W = (i: number) => lf(i, S);
 const A_OUT = W(22) - 2; // "e ampliação" — a batida A sai
-const EXIT = 292;
+const EXIT = 220;
 
 export const Protecao2_Propostas: React.FC<{ assets: ProtecaoAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const label: React.CSSProperties = { fontFamily: J.serif, fontWeight: 900, fontSize: 76, letterSpacing: J.track, color: J.ink, lineHeight: 1 };
-  const small: React.CSSProperties = { fontFamily: J.sans, fontWeight: 800, fontSize: 30, letterSpacing: J.track, color: J.purple };
+  const small: React.CSSProperties = { fontFamily: J.sans, fontWeight: 800, fontSize: 48, letterSpacing: J.track, color: J.purple };
   const head: React.CSSProperties = { fontFamily: J.serif, fontWeight: 900, fontSize: 112, letterSpacing: J.track, color: J.ink, lineHeight: 1 };
   const deck: React.CSSProperties = { fontFamily: J.sans, fontWeight: 700, fontSize: 46, letterSpacing: J.track, color: J.ink };
 
@@ -36,9 +36,9 @@ export const Protecao2_Propostas: React.FC<{ assets: ProtecaoAssets }> = ({ asse
           <WordIn at={W(13)} style={small}>DEPUTADA</WordIn>
           <WordIn at={W(14)} style={small}>FEDERAL</WordIn>
         </div>
-        <div style={{ display: 'flex', gap: 14, paddingTop: 10, ...outUp(frame, A_OUT) }}>
+        <div style={{ display: 'flex', gap: 16, paddingTop: 12 }}>
           {[15, 16, 17].map((i) => (
-            <WordIn key={i} at={W(i)} style={{ fontFamily: J.serif, fontStyle: 'italic', fontWeight: 700, fontSize: 60, letterSpacing: J.track, color: J.inkSoft }}>
+            <WordIn key={i} at={W(i)} style={{ fontFamily: J.serif, fontStyle: 'italic', fontWeight: 700, fontSize: 80, letterSpacing: J.track, color: J.inkSoft }}>
               {['pretende', 'defender', 'mais'][i - 15]}
             </WordIn>
           ))}
@@ -87,12 +87,12 @@ export const Protecao2_Propostas: React.FC<{ assets: ProtecaoAssets }> = ({ asse
             </WordIn>
           ))}
         </div>
-      </div>
-      <div style={{ position: 'absolute', top: 1560, left: 80, right: 80, display: 'flex', gap: 14, ...outUp(frame, EXIT + 9) }}>
-        <WordIn at={W(29)} style={deck}>às</WordIn>
-        <WordIn at={W(30)} style={deck}>
-          <Marked frame={frame} at={W(30) + 4}>vítimas</Marked>
-        </WordIn>
+        <div style={{ display: 'flex', gap: 16, marginTop: 22 }}>
+          <WordIn at={W(29)} style={{ ...deck, fontSize: 60 }}>às</WordIn>
+          <WordIn at={W(30)} style={{ ...deck, fontSize: 60 }}>
+            <Marked frame={frame} at={W(30) + 4}>vítimas</Marked>
+          </WordIn>
+        </div>
       </div>
     </AbsoluteFill>
   );

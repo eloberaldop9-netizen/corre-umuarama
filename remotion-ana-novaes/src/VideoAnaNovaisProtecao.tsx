@@ -21,7 +21,6 @@ export interface ProtecaoAssets {
   fotoLeis: string; // Cena 3 — martelo da Justiça e livros (leis)
   fotoDenuncia: string; // Cena 3 — dedo discando no celular (canais de denúncia)
   fotoRede: string; // Cena 4 — mãos protegendo a roda de pessoas (rede integrada)
-  /** null até o mp3 da narração chegar. */
   narracao: string | null;
 }
 
@@ -34,7 +33,7 @@ export const PROTECAO_ASSETS: ProtecaoAssets = {
   fotoLeis: 'stock-leis.jpg',
   fotoDenuncia: 'stock-denuncia.jpg',
   fotoRede: 'stock-rede.jpg',
-  narracao: null,
+  narracao: 'narracao-protecao.mp3',
 };
 
 export const VideoAnaNovaisProtecao: React.FC = () => {

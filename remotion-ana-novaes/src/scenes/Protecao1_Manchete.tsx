@@ -13,7 +13,7 @@ import type { ProtecaoAssets } from '../VideoAnaNovaisProtecao';
 // violência" ganha marca-texto. Só palavras-chave, muito respiro.
 const S = PROTECAO_SCENES.c1;
 const W = (i: number) => lf(i, S);
-const EXIT = 172;
+const EXIT = 122;
 
 export const Protecao1_Manchete: React.FC<{ assets: ProtecaoAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
@@ -33,7 +33,7 @@ export const Protecao1_Manchete: React.FC<{ assets: ProtecaoAssets }> = ({ asset
         </div>
         <Rule frame={frame} at={8} thick={2} origin="right" />
         <div style={{ textAlign: 'center', paddingTop: 12 }}>
-          <WordIn at={W(1) + 6} style={{ fontFamily: J.sans, fontWeight: 700, fontSize: 24, letterSpacing: J.track, color: J.purple }}>
+          <WordIn at={W(1) + 6} style={{ fontFamily: J.sans, fontWeight: 700, fontSize: 36, letterSpacing: J.track, color: J.purple }}>
             DEPUTADA FEDERAL · PROPOSTAS
           </WordIn>
         </div>
@@ -45,8 +45,8 @@ export const Protecao1_Manchete: React.FC<{ assets: ProtecaoAssets }> = ({ asset
       </div>
 
       {/* Manchete */}
-      <div style={{ position: 'absolute', top: 1230, left: 80, right: 80, ...outUp(frame, EXIT + 6) }}>
-        <WordIn at={W(3)} style={{ fontFamily: J.sans, fontWeight: 800, fontSize: 30, letterSpacing: J.track, color: J.purple }}>
+      <div style={{ position: 'absolute', top: 1220, left: 80, right: 80, ...outUp(frame, EXIT + 6) }}>
+        <WordIn at={W(3)} style={{ fontFamily: J.sans, fontWeight: 800, fontSize: 48, letterSpacing: J.track, color: J.purple }}>
           FORTALECER O
         </WordIn>
         <div style={{ marginTop: 14, display: 'flex', gap: 28 }}>
@@ -61,7 +61,7 @@ export const Protecao1_Manchete: React.FC<{ assets: ProtecaoAssets }> = ({ asset
       </div>
 
       {/* Linha fina */}
-      <div style={{ position: 'absolute', top: 1590, left: 80, right: 80, ...outUp(frame, EXIT + 9) }}>
+      <div style={{ position: 'absolute', top: 1610, left: 80, right: 80, ...outUp(frame, EXIT + 9) }}>
         <div style={{ width: 90, height: 6, background: J.purple, marginBottom: 22, transform: `scaleX(${ci(frame, [W(8), W(8) + 14], [0, 1])})`, transformOrigin: 'left' }} />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
           <WordIn at={W(8)} style={deck}>contra</WordIn>
