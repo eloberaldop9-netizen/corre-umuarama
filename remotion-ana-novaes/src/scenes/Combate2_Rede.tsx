@@ -1,166 +1,104 @@
 import React from 'react';
-import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { ci, handheldShake, SPRING } from '../lib/motion';
+import { AbsoluteFill, Easing, Img, staticFile, useCurrentFrame } from 'remotion';
+import { ci } from '../lib/motion';
 import { NoiseOverlay } from '../lib/Background';
-import { AnimatedText } from '../lib/AnimatedText';
-import { AssetImage } from '../lib/AssetImage';
-import { COLOR_COMBATE } from '../lib/palette-combate';
-import { FONT } from '../lib/palette';
-import type { CombateAssets } from '../VideoAnaNovaisCombate';
+import { ED, edIn, HEAVY_SHADOW, landIn, outP } from '../lib/editorial';
+import { COMBATE_SCENES, WORD } from '../combate-timing';
+import type { CombateAssets } from '../combate-timing';
 
-// Cena 2 — A Rede de Proteção (Mesa de Investigação) | frames locais 0–250 (8.3s)
-// Transcrição real: "Como"@7 "deputada"@13 "federal,"@25 "pretende"@48 "defender"@61
-// "mais"@72 "recursos"@83 "atendimento"@100 "especializado"@121 "acolhimento"@150
-// "seguro,"@187 "Patrulhas"@202 "Maria"@223 "da"@233 "Penha"@239 (fala termina ~241)
-const CARD_SPRING = { damping: 12, mass: 1 };
+// Cena 2 — A Rede | frames locais 0–250
+// Mesa editorial roxa. Só três peças caem na mesa, no frame em que são
+// faladas: MAIS RECURSOS, ACOLHIMENTO e PATRULHA. Sombras de 80px fazem os
+// cards flutuarem sobre o papel. Pan horizontal contínuo (parallax: mesa
+// mais lenta que os cards). Saída: bloco roxo varre tudo pra esquerda.
+const S = COMBATE_SCENES.c2;
+const L = (f: number) => f - S.from;
+const EXIT = 226;
+
+const Tape: React.FC<{ children: React.ReactNode; rot: number; frame: number; at: number; style?: React.CSSProperties }> = ({ children, rot, frame, at, style }) => (
+  <div
+    style={{
+      position: 'absolute', background: ED.yellow, padding: '14px 30px 10px', transform: `rotate(${rot}deg)`,
+      boxShadow: '0 8px 18px rgba(0,0,0,0.25)', ...style,
+    }}
+  >
+    <span style={{ display: 'inline-block', fontFamily: ED.sans, fontWeight: 900, fontSize: 44, color: ED.textDark, ...edIn(frame, at, { y: 8, blur: 10 }) }}>
+      {children}
+    </span>
+  </div>
+);
 
 export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const flash = ci(frame, [0, 12], [1, 0], Easing.out(Easing.cubic));
+  const pan = ci(frame, [0, S.duration], [-80, 80], Easing.inOut(Easing.sin));
+  const xo = outP(frame, EXIT + 4, 20);
+  const wipe = ci(frame, [EXIT, S.duration], [1500, 0], Easing.in(Easing.exp));
 
-  const bgOp = ci(frame, [0, 15], [0, 1], Easing.out(Easing.quad));
-  const shake = handheldShake(frame, 0.6);
+  const photo = (file: string, w: number, h: number, pos = '50% 50%') => (
+    <div style={{ width: w, height: h, background: '#FFFFFF', padding: 16, paddingBottom: 56, boxShadow: HEAVY_SHADOW, boxSizing: 'border-box' }}>
+      <Img src={staticFile(`assets/${file}`)} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: pos }} />
+    </div>
+  );
 
-  const tapeRecursosOp = ci(frame, [78, 95], [0, 1], Easing.out(Easing.cubic));
-  const cardAcolhimento = spring({ frame, fps, config: CARD_SPRING, delay: 150 });
-  const cardPatrulha = spring({ frame, fps, config: CARD_SPRING, delay: 202 });
-
-  // Saída (225–250) — WIPE DIAGONAL: tarja roxa varre a mesa, cards voam pra esquerda
-  const wipeP = ci(frame, [225, 250], [0, 1], Easing.in(Easing.exp));
-  const wipeX = interp(wipeP, -1400, 1400);
-  const exitP = ci(frame, [222, 250], [0, 1], Easing.in(Easing.exp));
-
-  const card = (
-    file: string | null | undefined,
-    label: string,
-    tapeText: string,
-    springVal: number,
-    baseRotate: number,
-    left: number,
-    top: number
-  ) => {
-    const scale = interp(springVal, 2.2, 1);
-    const rotate = interp(springVal, baseRotate * 4, baseRotate);
-    const op = ci(springVal, [0, 0.15], [0, 1]);
-    const blur = ci(springVal, [0, 1], [10, 0]);
-    const exitX = exitP * 1500;
-    const exitRotate = exitP * 30;
-    return (
-      <div
-        style={{
-          position: 'absolute',
-          left,
-          top,
-          width: 480,
-          height: 480,
-          opacity: op,
-          transform: `rotateZ(${rotate + exitRotate}deg) scale(${scale}) translateX(${exitX}px)`,
-          filter: `blur(${blur}px)`,
-          transformOrigin: 'center center',
-        }}
-      >
-        <div
-          style={{
-            position: 'relative',
-            width: '100%',
-            height: '100%',
-            border: '15px solid white',
-            boxShadow: `0 ${30 + op * 30}px 70px rgba(0,0,0,0.55)`,
-          }}
-        >
-          <AssetImage file={file} label={label} tone="light" style={{ width: '100%', height: '100%' }} />
-          <div
-            style={{
-              position: 'absolute',
-              top: -26,
-              left: '50%',
-              transform: `translateX(-50%) rotate(${baseRotate > 0 ? -4 : 4}deg)`,
-              backgroundColor: 'rgba(252,227,0,0.92)',
-              padding: '10px 24px',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-            }}
-          >
-            <span
-              style={{
-                fontFamily: FONT.sans,
-                fontWeight: 900,
-                fontSize: 30,
-                letterSpacing: 1,
-                color: COLOR_COMBATE.textDark,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {tapeText}
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const aR = L(WORD.recursos) - 6;
+  const aA = L(WORD.acolhimento) - 6;
+  const aP = L(WORD.patrulhas) - 6;
 
   return (
-    <AbsoluteFill style={{ opacity: bgOp }}>
-      <AbsoluteFill style={{ backgroundColor: '#3A1254' }} />
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: `repeating-linear-gradient(115deg, rgba(0,0,0,0.06) 0px, transparent 2px, transparent 6px),
-            repeating-linear-gradient(25deg, rgba(0,0,0,0.045) 0px, transparent 3px, transparent 9px)`,
-          mixBlendMode: 'multiply',
-          opacity: 0.5,
-        }}
-      />
-      <NoiseOverlay opacity={0.06} />
+    <AbsoluteFill style={{ backgroundColor: ED.deskPurple, overflow: 'hidden' }}>
+      {/* Mesa: papel amassado (parallax lento) */}
+      <AbsoluteFill style={{ transform: `translateX(${pan * 0.35}px) scale(1.1)` }}>
+        <div
+          style={{
+            position: 'absolute', inset: 0, mixBlendMode: 'multiply', opacity: 0.55,
+            backgroundImage: `radial-gradient(ellipse at 20% 30%, rgba(255,255,255,0.18), transparent 40%),
+              radial-gradient(ellipse at 80% 70%, rgba(0,0,0,0.35), transparent 45%),
+              repeating-linear-gradient(118deg, rgba(0,0,0,0.10) 0 2px, transparent 2px 38px),
+              repeating-linear-gradient(28deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 54px)`,
+          }}
+        />
+        <AbsoluteFill style={{ background: 'radial-gradient(ellipse at 50% 45%, rgba(176,132,193,0.25), transparent 70%)' }} />
+      </AbsoluteFill>
+      <NoiseOverlay opacity={0.07} />
 
-      <AbsoluteFill style={{ transform: shake.transform }}>
-        <div style={{ position: 'absolute', top: 190, left: 40, right: 40, textAlign: 'center' }}>
-          <AnimatedText
-            text="Como deputada federal,"
-            wordDelays={[7, 13, 25]}
-            style={{ justifyContent: 'center' }}
-            wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 52, letterSpacing: -0.5, color: COLOR_COMBATE.textLight }}
-          />
-          <AnimatedText
-            text="pretende defender"
-            wordDelays={[48, 61]}
-            style={{ justifyContent: 'center', marginTop: 8 }}
-            wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 52, letterSpacing: -0.5, color: COLOR_COMBATE.textLight }}
-          />
-        </div>
-
-        {/* Tarja "MAIS RECURSOS" — bate quando ela diz "recursos" */}
-        <div style={{ position: 'absolute', top: 400, left: 0, right: 0, textAlign: 'center' }}>
+      {/* Cards (parallax rápido) */}
+      <AbsoluteFill style={{ transform: `translateX(${pan + -1500 * xo}px)`, filter: `blur(${20 * xo}px)` }}>
+        {/* Card 1 — MAIS RECURSOS */}
+        <div style={{ position: 'absolute', top: 210, left: 90, ...landIn(frame, aR, -4) }}>
           <div
             style={{
-              display: 'inline-block',
-              backgroundColor: COLOR_COMBATE.yellow,
-              padding: '14px 40px',
-              opacity: tapeRecursosOp,
-              transform: `scaleX(${ci(frame, [78, 92], [0, 1], Easing.out(Easing.cubic))})`,
-              boxShadow: '0 8px 20px rgba(0,0,0,0.35)',
+              width: 600, height: 340, background: ED.paper, boxShadow: HEAVY_SHADOW, display: 'flex',
+              alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
             }}
           >
-            <span style={{ fontFamily: FONT.sans, fontWeight: 900, fontSize: 44, letterSpacing: -1, color: COLOR_COMBATE.textDark }}>
-              MAIS RECURSOS
+            <span style={{ fontFamily: ED.serif, fontWeight: 700, fontStyle: 'italic', fontSize: 44, color: ED.brandCore, ...edIn(frame, aR + 8, { y: 6 }) }}>
+              defender
+            </span>
+            <span style={{ fontFamily: ED.serif, fontWeight: 900, fontSize: 104, color: ED.textDark, lineHeight: 1.05, ...edIn(frame, aR + 12) }}>
+              Mais
             </span>
           </div>
+          <Tape frame={frame} at={aR + 16} rot={3} style={{ bottom: -30, left: 40 }}>RECURSOS</Tape>
         </div>
 
-        {card(assets.fotoAcolhimento, 'ACOLHIMENTO SEGURO', 'ACOLHIMENTO', cardAcolhimento, -5, 70, 700)}
-        {card(assets.fotoPatrulha, 'PATRULHA MARIA DA PENHA', 'PATRULHA', cardPatrulha, 6, 530, 1160)}
+        {/* Card 2 — ACOLHIMENTO */}
+        <div style={{ position: 'absolute', top: 600, left: 410, ...landIn(frame, aA, 3) }}>
+          {photo(assets.fotoAcolhimento, 520, 640, '50% 55%')}
+          <Tape frame={frame} at={aA + 14} rot={-3} style={{ bottom: 20, right: 30 }}>ACOLHIMENTO</Tape>
+        </div>
+
+        {/* Card 3 — PATRULHA */}
+        <div style={{ position: 'absolute', top: 1140, left: 80, ...landIn(frame, aP, -6) }}>
+          {photo(assets.fotoPatrulha, 500, 620, '55% 40%')}
+          <Tape frame={frame} at={aP + 14} rot={4} style={{ bottom: 24, left: 150, whiteSpace: 'nowrap' }}>PATRULHA</Tape>
+        </div>
       </AbsoluteFill>
 
-      {/* Tarja roxa diagonal — transição pra Cena 3 */}
-      <AbsoluteFill
-        style={{
-          opacity: wipeP > 0 ? 1 : 0,
-          transform: `translateX(${wipeX}px) skewX(-20deg)`,
-          backgroundColor: COLOR_COMBATE.brandCore,
-        }}
-      />
+      {/* WIPE VARRE — bloco roxo */}
+      <div style={{ position: 'absolute', top: -100, bottom: -100, left: -200, width: 1600, background: ED.void, transform: `translateX(${wipe}px) skewX(-8deg)` }} />
+
+      <AbsoluteFill style={{ backgroundColor: ED.yellow, opacity: flash }} />
     </AbsoluteFill>
   );
 };
-
-const interp = (v: number, from: number, to: number) => from + (to - from) * v;
