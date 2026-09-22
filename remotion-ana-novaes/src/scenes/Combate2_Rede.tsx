@@ -1,44 +1,58 @@
 import React from 'react';
 import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { ci, handheldShake, SPRING } from '../lib/motion';
-import { NoiseOverlay, tornEdgeClipPath } from '../lib/Background';
+import { ci, handheldShake } from '../lib/motion';
+import { NoiseOverlay } from '../lib/Background';
 import { AnimatedText } from '../lib/AnimatedText';
 import { AssetImage } from '../lib/AssetImage';
 import { COLOR_COMBATE } from '../lib/palette-combate';
 import { FONT } from '../lib/palette';
 import type { CombateAssets } from '../VideoAnaNovaisCombate';
 
-// Cena 2 — A Rede de Proteção (Mesa de Investigação, estilo jornal) | frames
-// locais 0–324 (10.8s). Transcrição real (offset de from=115):
-// "pretende"@48 "defender"@61 "mais"@72 "recursos"@83 "e"@97 "políticas"@97
-// "públicas"@113 ... "com"@161 "atendimento"@165 "especializado"@168
-// "acolhimento"@184 "seguro"@186 "Patrulhas"@202 "Maria"@223 "da"@233
-// "Penha"@239 ... "botão"@470-115=355 (na Cena 3)
-//
-// v4: reconstruída sobre o esqueleto do Scene4_Compromisso.tsx (vídeo "A
-// Marca", aprovado) — os 4 lettrings em destaque ficam empilhados na MESMA
-// caixa (position:absolute,inset compartilhado), cada um com seu próprio
-// wordDelays + exitStart do AnimatedText cuidando da troca sozinho (sem
-// gate manual por frame, que foi fonte de bug antes). Nada de legenda
-// corrida cobrindo a fala inteira — só: "DEFENDER MAIS RECURSOS E POLÍTICAS
-// PÚBLICAS" → "COM ATENDIMENTO ESPECIALIZADO" → "ACOLHIMENTO SEGURO" →
-// "PATRULHAS MARIA DA PENHA".
+// Cena 2 — A Rede de Proteção (Colagem/Mesa) | frames locais 0–324 (10.8s)
+// VERBO v5.0. Transcrição real (offset from=115) — oração gigante (39
+// palavras), por isso a cena é bem mais longa que a diretriz original
+// assumia: "pretende"@48 "defender"@61 "mais"@72 "recursos"@83 "e"@97
+// "políticas"@97 "públicas"@113 ... "acolhimento"@184 "seguro"@186
+// "Patrulhas"@202 "Maria"@223 "da"@233 "Penha"@239 ... "proteção,"@314
+// Câmera handheld contínua (nunca parada), luz pendente piscando, cards
+// tipo polaroide (borda branca grossa) com fita amarela, batendo na mesa
+// exatamente quando a palavra correspondente é dita.
 const CARD_SPRING = { damping: 12, mass: 1 };
+
+const heroWordStyle = {
+  fontFamily: FONT.sans,
+  fontWeight: 800,
+  fontSize: 46,
+  letterSpacing: -1,
+  color: COLOR_COMBATE.yellow,
+  textShadow: '0 8px 30px rgba(0,0,0,0.6)',
+} as const;
 
 export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   const bgOp = ci(frame, [0, 15], [0, 1], Easing.out(Easing.quad));
-  const shake = handheldShake(frame, 0.3);
+  const shake = handheldShake(frame, 0.4);
+  const panX = ci(frame, [0, 324], [-20, 30], Easing.inOut(Easing.quad));
+
+  // Luz pendente — flicker contínuo estilo lâmpada de arquivo
+  const lampFlicker = 0.35 + Math.sin(frame * 0.08) * 0.05 + Math.sin(frame * 0.23) * 0.03;
 
   const cardAcolhimento = spring({ frame, fps, config: CARD_SPRING, delay: 184 });
   const cardPatrulha = spring({ frame, fps, config: CARD_SPRING, delay: 202 });
 
-  // Saída (300–324) — WIPE DIAGONAL: tarja roxa varre a mesa, cards voam pra esquerda
-  const wipeP = ci(frame, [300, 324], [0, 1], Easing.in(Easing.exp));
+  const tapeRecursosOp = ci(frame, [83, 96], [0, 1], Easing.out(Easing.cubic));
+  const tapeRecursosScale = ci(frame, [83, 94], [0, 1], Easing.out(Easing.cubic));
+  const tapePatrulhaOp = ci(frame, [202, 215], [0, 1], Easing.out(Easing.cubic));
+  const tapePatrulhaScale = ci(frame, [202, 213], [0, 1], Easing.out(Easing.cubic));
+
+  // Saída (290–318) — WIPE VARRE: bloco roxo atropela os cards pra fora
+  // exatamente quando o texto some (~290), varrendo até o handoff com a
+  // Cena 3 (overlap de 7 frames, local 317) — sem hold morto no meio.
+  const wipeP = ci(frame, [292, 318], [0, 1], Easing.in(Easing.exp));
   const wipeX = interp(wipeP, -1400, 1400);
-  const exitP = ci(frame, [297, 324], [0, 1], Easing.in(Easing.exp));
+  const exitP = ci(frame, [290, 316], [0, 1], Easing.in(Easing.exp));
 
   const card = (
     file: string | null | undefined,
@@ -48,12 +62,12 @@ export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) =
     left: number,
     top: number
   ) => {
-    const scale = interp(springVal, 1.8, 1);
-    const rotate = interp(springVal, baseRotate * 4, baseRotate);
+    const scale = interp(springVal, 2.2, 1);
+    const rotate = interp(springVal, baseRotate * 3, baseRotate);
     const op = ci(springVal, [0, 0.15], [0, 1]);
-    const blur = ci(springVal, [0, 1], [10, 0]);
+    const blur = ci(springVal, [0, 1], [16, 0]);
     const exitX = exitP * 1500;
-    const exitRotate = exitP * 30;
+    const exitRotate = exitP * (baseRotate < 0 ? -35 : 25);
     return (
       <div
         style={{
@@ -61,10 +75,10 @@ export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) =
           left,
           top,
           width: 440,
-          height: 420,
+          height: 440,
           opacity: op,
           transform: `rotateZ(${rotate + exitRotate}deg) scale(${scale}) translateX(${exitX}px)`,
-          filter: `blur(${blur}px)`,
+          filter: `blur(${blur + exitP * 20}px)`,
           transformOrigin: 'center center',
         }}
       >
@@ -73,32 +87,41 @@ export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) =
             position: 'relative',
             width: '100%',
             height: '100%',
-            backgroundColor: '#fff',
-            padding: 14,
-            boxShadow: `0 ${26 + op * 28}px 60px rgba(0,0,0,0.5)`,
-            clipPath: tornEdgeClipPath(baseRotate + left, 'top'),
+            border: '16px solid #fff',
+            boxShadow: `0 ${30 + op * 30}px 60px rgba(0,0,0,0.8)`,
+            overflow: 'hidden',
           }}
         >
-          <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
-            <AssetImage file={file} label={label} tone="light" style={{ width: '100%', height: '100%', filter: 'grayscale(0.15) contrast(1.05)' }} />
-          </div>
+          <AssetImage file={file} label={label} tone="light" style={{ width: '100%', height: '100%', filter: 'contrast(1.05)' }} />
         </div>
       </div>
     );
   };
 
-  const heroWordStyle = {
-    fontFamily: FONT.sans,
-    fontWeight: 800,
-    fontSize: 46,
-    letterSpacing: -1,
-    color: COLOR_COMBATE.yellow,
-    textShadow: '0 8px 30px rgba(0,0,0,0.6)',
-  } as const;
+  const tape = (text: string, op: number, scale: number, left: number, top: number, rotate: number) => (
+    <div
+      style={{
+        position: 'absolute',
+        left,
+        top,
+        opacity: op,
+        transform: `scaleX(${scale}) rotate(${rotate}deg)`,
+        transformOrigin: 'left center',
+        backgroundColor: 'rgba(252,227,0,0.95)',
+        padding: '10px 28px',
+        boxShadow: '0 6px 16px rgba(0,0,0,0.4)',
+        zIndex: 10,
+      }}
+    >
+      <span style={{ fontFamily: FONT.sans, fontWeight: 800, fontSize: 34, letterSpacing: 1, color: COLOR_COMBATE.voidDeep, whiteSpace: 'nowrap' }}>
+        {text}
+      </span>
+    </div>
+  );
 
   return (
     <AbsoluteFill style={{ opacity: bgOp }}>
-      <AbsoluteFill style={{ backgroundColor: '#2A0F45' }} />
+      <AbsoluteFill style={{ backgroundColor: '#3A1254' }} />
       <div
         style={{
           position: 'absolute',
@@ -106,7 +129,21 @@ export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) =
           backgroundImage: `repeating-linear-gradient(115deg, rgba(0,0,0,0.09) 0px, transparent 2px, transparent 5px),
             repeating-linear-gradient(25deg, rgba(0,0,0,0.07) 0px, transparent 3px, transparent 8px)`,
           mixBlendMode: 'multiply',
-          opacity: 0.6,
+          opacity: 0.55,
+        }}
+      />
+      {/* Luz pendente — circulo de luz que acompanha a câmera, sempre viva */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '30%',
+          left: '50%',
+          width: 900,
+          height: 900,
+          marginLeft: -450,
+          marginTop: -450,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, rgba(255,235,180,${lampFlicker}) 0%, transparent 65%)`,
         }}
       />
       <NoiseOverlay opacity={0.06} />
@@ -126,10 +163,9 @@ export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) =
         </span>
       </div>
 
-      <AbsoluteFill style={{ transform: shake.transform }}>
-        {/* Slot único de hero — 4 frases empilhadas na MESMA caixa, cada
-            uma com seu próprio wordDelays + exitStart (padrão do
-            Scene4_Compromisso.tsx aprovado — sem gate manual por frame). */}
+      <AbsoluteFill style={{ transform: `${shake.transform} translateX(${panX}px)` }}>
+        {/* Slot de hero — 4 frases empilhadas na mesma caixa, cada uma com
+            seu próprio wordDelays + exitStart (handoff automático). */}
         <div style={{ position: 'absolute', top: 640, left: 80, right: 80, height: 160 }}>
           <div style={{ position: 'absolute', left: 0, right: 0, top: 0, textAlign: 'center' }}>
             <AnimatedText
@@ -176,16 +212,19 @@ export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) =
           </div>
         </div>
 
-        {card(assets.fotoAcolhimento, 'ACOLHIMENTO SEGURO', cardAcolhimento, -4, 80, 1060)}
-        {card(assets.fotoPatrulha, 'PATRULHA MARIA DA PENHA', cardPatrulha, 5, 560, 1360)}
+        {/* Cards tipo polaroide — batem na mesa quando a palavra é dita */}
+        {card(assets.fotoAcolhimento, 'ACOLHIMENTO SEGURO', cardAcolhimento, -6, 90, 1080)}
+        {card(assets.fotoPatrulha, 'PATRULHA MARIA DA PENHA', cardPatrulha, 8, 550, 1380)}
+        {tape('RECURSOS', tapeRecursosOp, tapeRecursosScale, 90, 990, -3)}
+        {tape('PATRULHA', tapePatrulhaOp, tapePatrulhaScale, 560, 1310, 5)}
       </AbsoluteFill>
 
-      {/* Tarja roxa diagonal — transição pra Cena 3 */}
+      {/* Bloco roxo diagonal — WIPE VARRE pra Cena 3 */}
       <AbsoluteFill
         style={{
           opacity: wipeP > 0 ? 1 : 0,
           transform: `translateX(${wipeX}px) skewX(-20deg)`,
-          backgroundColor: COLOR_COMBATE.brandCore,
+          backgroundColor: COLOR_COMBATE.voidDeep,
         }}
       />
     </AbsoluteFill>

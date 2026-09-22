@@ -19,22 +19,24 @@ export const Combate5_Lockup: React.FC<{ assets: CombateAssets }> = ({ assets })
   const { fps } = useVideoConfig();
 
   const microZoom = ci(frame, [0, 150], [1, 1.03], Easing.inOut(Easing.quad));
-  const photoOp = ci(frame, [0, 20], [0, 1]);
+  // Entrada comprimida — a Cena4 já entrega tudo roxo (dissolve), então aqui
+  // a pílula começa a formar já no frame 0, sem hold morto em roxo chapado.
+  const photoOp = ci(frame, [0, 12], [0, 1]);
 
-  const pillScale = ci(frame, [15, 33], [0, 1], Easing.out(Easing.cubic));
-  const pillOp = ci(frame, [15, 25], [0, 1]);
+  const pillScale = ci(frame, [0, 18], [0, 1], Easing.out(Easing.cubic));
+  const pillOp = ci(frame, [0, 10], [0, 1]);
 
-  const nameY = ci(frame, [25, 45], [20, 0], Easing.out(Easing.cubic));
-  const nameBlur = ci(frame, [25, 45], [15, 0], Easing.out(Easing.cubic));
-  const nameOp = ci(frame, [25, 40], [0, 1]);
+  const nameY = ci(frame, [10, 30], [20, 0], Easing.out(Easing.cubic));
+  const nameBlur = ci(frame, [10, 30], [15, 0], Easing.out(Easing.cubic));
+  const nameOp = ci(frame, [10, 25], [0, 1]);
 
-  const baseY = ci(frame, [40, 62], [220, 0], Easing.out(Easing.cubic));
-  const baseOp = ci(frame, [40, 52], [0, 1]);
+  const baseY = ci(frame, [22, 44], [220, 0], Easing.out(Easing.cubic));
+  const baseOp = ci(frame, [22, 34], [0, 1]);
 
-  const numSp = spring({ frame, fps, config: { damping: 12, mass: 1 }, delay: 50 });
+  const numSp = spring({ frame, fps, config: { damping: 12, mass: 1 }, delay: 32 });
   const numScale = ci(numSp, [0, 1], [0.8, 1]);
-  const numBlur = ci(frame - 50, [0, 20], [20, 0]);
-  const numOp = ci(frame, [50, 62], [0, 1]);
+  const numBlur = ci(frame - 32, [0, 20], [20, 0]);
+  const numOp = ci(frame, [32, 44], [0, 1]);
 
   // Fade final — últimos 20 frames da cena (fim real do vídeo)
   const finalFade = ci(frame, [130, 150], [1, 0]);
