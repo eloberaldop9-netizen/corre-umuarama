@@ -54,6 +54,13 @@ export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => 
 
   return (
     <AbsoluteFill style={{ opacity: bgOp, backgroundColor: COLOR_CAUSA.void }}>
+      {/* Degradê roxo/lilás da identidade da Ana — no lugar do preto liso */}
+      <AbsoluteFill
+        style={{
+          background: `radial-gradient(ellipse at 50% 30%, rgba(107,47,160,0.5) 0%, rgba(74,31,114,0.35) 35%, transparent 70%),
+            linear-gradient(160deg, #0D0714 0%, #1C0E33 45%, #341757 75%, #4A1F72 100%)`,
+        }}
+      />
       <NoiseOverlay opacity={0.07} />
       <HalftoneOverlay opacity={0.02} dark />
       <DustParticles count={22} />
