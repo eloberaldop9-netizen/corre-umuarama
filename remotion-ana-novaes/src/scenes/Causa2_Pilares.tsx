@@ -118,12 +118,24 @@ export const Causa2_Pilares: React.FC<{ assets: CausaAssets }> = ({ assets }) =>
       <HalftoneOverlay opacity={0.03} />
 
       <AbsoluteFill style={{ transform: shake.transform }}>
-        <div style={{ position: 'absolute', top: 140, left: 60, right: 60, textAlign: 'center' }}>
+        <div style={{ position: 'absolute', top: 260, left: 40, right: 40, textAlign: 'center' }}>
           <AnimatedText
-            text="Como deputada federal, pretende trabalhar para ampliar o acesso a:"
-            wordDelays={[3, 14, 27, 42, 55, 68, 74, 83, 85, 99]}
-            style={{ justifyContent: 'center', flexWrap: 'wrap' }}
-            wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 34, letterSpacing: -0.5, color: COLOR_CAUSA.textDark }}
+            text="Como deputada federal,"
+            wordDelays={[3, 14, 27]}
+            style={{ justifyContent: 'center' }}
+            wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 50, letterSpacing: -0.5, color: COLOR_CAUSA.textDark }}
+          />
+          <AnimatedText
+            text="pretende trabalhar para"
+            wordDelays={[42, 55, 68]}
+            style={{ justifyContent: 'center', marginTop: 8 }}
+            wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 50, letterSpacing: -0.5, color: COLOR_CAUSA.textDark }}
+          />
+          <AnimatedText
+            text="ampliar o acesso a:"
+            wordDelays={[74, 83, 85, 99]}
+            style={{ justifyContent: 'center', marginTop: 8 }}
+            wordStyle={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 50, letterSpacing: -0.5, color: COLOR_CAUSA.textDark }}
           />
         </div>
 
