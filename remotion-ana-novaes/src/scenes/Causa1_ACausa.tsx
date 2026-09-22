@@ -210,7 +210,7 @@ export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => 
               margin: '0 auto',
               opacity: ribbonOp,
               transform: `scale(${ribbonScale})`,
-              filter: `drop-shadow(0 0 ${16 + symbolGlow * 18}px rgba(52,131,250,0.5))`,
+              filter: `drop-shadow(0 0 ${16 + symbolGlow * 18}px rgba(107,47,160,0.55))`,
             }}
           >
             <AssetImage file={assets.simboloAutismo} label="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
@@ -230,7 +230,7 @@ export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => 
                 fontSize: 96,
                 letterSpacing: -2,
                 color: COLOR_CAUSA.accent,
-                textShadow: `0 0 ${10 + symbolGlow * 20}px rgba(217,45,32,0.4)`,
+                textShadow: `0 0 ${10 + symbolGlow * 20}px rgba(107,47,160,0.45)`,
               }}
             >
               AUTISTA

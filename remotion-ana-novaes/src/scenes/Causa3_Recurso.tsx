@@ -14,7 +14,6 @@ import type { CausaAssets } from '../VideoAnaNovaisCausa';
 // cairia antes da cena nem existir). O fundo é a foto de moedas + seta
 // ascendente (referência do usuário) — fica visível até o fim da cena e
 // segue por baixo na Cena 4, pra nunca ficar tela preta na transição.
-const AMARELO = '#F0C800';
 
 export const Causa3_Recurso: React.FC<{ assets: CausaAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
@@ -87,7 +86,7 @@ export const Causa3_Recurso: React.FC<{ assets: CausaAssets }> = ({ assets }) =>
               fontSize: 168,
               letterSpacing: -6,
               lineHeight: 0.98,
-              color: AMARELO,
+              color: COLOR_CAUSA.gold,
               opacity: maisOp * c1.opacity,
               filter: `blur(${maisBlur + c1.blur}px)`,
               transform: `scale(${maisScale * c1.scale}) rotate(${c1.rotate}deg)`,
@@ -104,7 +103,7 @@ export const Causa3_Recurso: React.FC<{ assets: CausaAssets }> = ({ assets }) =>
               fontSize: 168,
               letterSpacing: -6,
               lineHeight: 1.02,
-              color: AMARELO,
+              color: COLOR_CAUSA.gold,
               opacity: recursosOp * c2.opacity,
               filter: `blur(${recursosBlur + c2.blur}px)`,
               transform: `scale(${recursosScale * c2.scale}) rotate(${c2.rotate}deg)`,
