@@ -6,17 +6,17 @@ import { ED, edIn, outP } from '../lib/editorial';
 import { COMBATE_SCENES, WORD } from '../combate-timing';
 import type { CombateAssets } from '../combate-timing';
 
-// Cena 3 — A Colagem (As 4 Ações) | frames locais 0–300
+// Cena 3 — A Colagem (As 4 Ações) | frames locais 0–250
 // "com atendimento especializado, acolhimento seguro, Patrulhas Maria da
 // Penha e maior acesso a mecanismos de proteção, como o botão do pânico!"
 // Papel off-white, câmera na mão. Três polaroids INTEIRAS (moldura no
 // formato exato de cada foto, nada cortado) caem na mesa no frame em que
-// são faladas. No clímax o botão do pânico explode em vermelho por cima de
-// tudo. Saída: SUCÇÃO para o centro.
+// são faladas. Em "mecanismos de proteção" o botão do pânico explode em
+// vermelho por cima de tudo e o lettering crava em "botão". Saída: SUCÇÃO para o centro.
 const S = COMBATE_SCENES.c3;
 const L = (f: number) => f - S.from;
-const EXIT = 278;
-const BTN_AT = L(WORD.botao) - 16; // "como o botão..."
+const EXIT = 236;
+const BTN_AT = L(WORD.mecanismos); // "maior acesso a mecanismos de proteção, como o botão do pânico"
 
 const Polaroid: React.FC<{ file: string; w: number; ratio: number; tape: string; tapeBg: string; tapeColor: string; tapeRot: number; frame: number; at: number }> = ({
   file, w, ratio, tape, tapeBg, tapeColor, tapeRot, frame, at,

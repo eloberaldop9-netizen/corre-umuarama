@@ -5,25 +5,28 @@ import { NoiseOverlay } from '../lib/Background';
 import { ED, edIn, outP } from '../lib/editorial';
 import { COMBATE_SCENES, WORD } from '../combate-timing';
 
-// Cena 2 — A Trincheira de Recursos | frames locais 0–115
-// "Como deputada federal, pretende defender mais recursos"
-// Só tipografia sobre papel amassado roxo, pan horizontal suave: kicker
-// COMO DEPUTADA FEDERAL, "MAIS" gigante e a fita amarela RECURSOS abrindo
-// em wipe. Saída: WIPE EDITORIAL — bloco off-white varre da direita e vira
-// o papel da Cena 3.
+// Cena 2 — A Trincheira de Recursos | frames locais 0–205
+// "Como deputada federal, pretende defender mais recursos e políticas
+// públicas para ampliar a rede de proteção às vítimas,"
+// Só tipografia sobre papel amassado roxo, pan horizontal suave, na ordem
+// exata da fala: COMO DEPUTADA FEDERAL → MAIS → fita RECURSOS → bloco
+// POLÍTICAS PÚBLICAS → REDE DE PROTEÇÃO → ÀS VÍTIMAS. Saída: WIPE
+// EDITORIAL — bloco off-white varre da direita e vira o papel da Cena 3.
 const S = COMBATE_SCENES.c2;
 const L = (f: number) => f - S.from;
-const EXIT = 95;
+const EXIT = 190;
 
 export const Combate2_Rede: React.FC = () => {
   const frame = useCurrentFrame();
   const flash = ci(frame, [0, 12], [1, 0], Easing.out(Easing.cubic));
-  const pan = ci(frame, [0, S.duration], [-150, 150], Easing.inOut(Easing.sin));
+  const pan = ci(frame, [0, S.duration], [-40, 40], Easing.inOut(Easing.sin));
   const xo = outP(frame, EXIT, 20);
   const wipe = ci(frame, [EXIT, S.duration], [2000, 0], Easing.in(Easing.exp));
 
   const aR = L(WORD.recursos);
   const tapeW = ci(frame, [aR - 2, aR + 16], [0, 1], Easing.out(Easing.cubic));
+  const pP = ci(frame, [L(WORD.politicas), L(WORD.politicas) + 22], [0, 1], Easing.out(Easing.cubic));
+  const pR = ci(frame, [L(WORD.rede), L(WORD.rede) + 22], [0, 1], Easing.out(Easing.cubic));
 
   return (
     <AbsoluteFill style={{ backgroundColor: ED.deskPurple, overflow: 'hidden' }}>
@@ -52,7 +55,7 @@ export const Combate2_Rede: React.FC = () => {
         <div style={{ fontFamily: ED.sans, fontWeight: 800, fontSize: 46, color: ED.lilac, ...edIn(frame, Math.max(4, L(WORD.como)), { trackFrom: -3, trackTo: 1 }) }}>
           COMO DEPUTADA FEDERAL
         </div>
-        <div style={{ marginTop: 40, fontFamily: ED.sans, fontWeight: 900, fontSize: 230, lineHeight: 0.9, color: '#FFFFFF', textShadow: '0 20px 60px rgba(0,0,0,0.45)', ...edIn(frame, L(WORD.mais), { trackFrom: -12, trackTo: -6, y: 30 }) }}>
+        <div style={{ marginTop: 30, fontFamily: ED.sans, fontWeight: 900, fontSize: 190, lineHeight: 0.9, color: '#FFFFFF', textShadow: '0 20px 60px rgba(0,0,0,0.45)', ...edIn(frame, L(WORD.mais), { trackFrom: -12, trackTo: -6, y: 30 }) }}>
           MAIS
         </div>
         <div
@@ -62,9 +65,32 @@ export const Combate2_Rede: React.FC = () => {
             clipPath: 'polygon(0% 6%, 2% 0%, 98% 4%, 100% 0%, 99% 50%, 100% 96%, 97% 100%, 2% 95%, 0% 100%, 1% 50%)',
           }}
         >
-          <span style={{ display: 'inline-block', fontFamily: ED.sans, fontWeight: 900, fontSize: 150, lineHeight: 1, color: ED.textDark, ...edIn(frame, aR + 4, { trackFrom: -8, trackTo: -4, y: 0, blur: 10 }) }}>
+          <span style={{ display: 'inline-block', fontFamily: ED.sans, fontWeight: 900, fontSize: 126, lineHeight: 1, color: ED.textDark, ...edIn(frame, aR + 4, { trackFrom: -8, trackTo: -4, y: 0, blur: 10 }) }}>
             RECURSOS
           </span>
+        </div>
+
+        {/* POLÍTICAS PÚBLICAS — bloco sólido */}
+        <div
+          style={{
+            marginTop: 44, background: ED.paper, padding: '18px 36px 14px', boxShadow: '20px 20px 60px rgba(0,0,0,0.4)',
+            opacity: pP, transform: `translateY(${40 * (1 - pP)}px) rotate(1.5deg)`,
+          }}
+        >
+          <span style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 64, lineHeight: 1, letterSpacing: -2, color: ED.void }}>E POLÍTICAS PÚBLICAS</span>
+        </div>
+
+        {/* REDE DE PROTEÇÃO — branco */}
+        <div
+          style={{
+            marginTop: 54, fontFamily: ED.sans, fontWeight: 900, fontSize: 84, lineHeight: 1, letterSpacing: -3, color: '#FFFFFF',
+            textShadow: '0 16px 50px rgba(0,0,0,0.5)', opacity: pR, transform: `scale(${0.9 + 0.1 * pR})`,
+          }}
+        >
+          REDE DE PROTEÇÃO
+        </div>
+        <div style={{ marginTop: 14, fontFamily: ED.sans, fontWeight: 800, fontSize: 52, color: ED.yellow, ...edIn(frame, L(WORD.vitimas), { trackFrom: -3, trackTo: 1, y: 14 }) }}>
+          ÀS VÍTIMAS
         </div>
       </AbsoluteFill>
 

@@ -6,16 +6,17 @@ import { ED, edIn } from '../lib/editorial';
 import { COMBATE_SCENES, WORD } from '../combate-timing';
 import type { CombateAssets } from '../combate-timing';
 
-// Cena 4 — O Recomeço | frames locais 0–250
+// Cena 4 — O Recomeço | frames locais 0–215
 // "Por isso, Ana propõe incentivar emprego, capacitação profissional e
-// empreendedorismo..." A escuridão explode em luz lilás. A sala de aula
+// empreendedorismo para mulheres em situação de violência." A escuridão explode em luz lilás. A sala de aula
 // ocupa a tela inteira (mesmo formato 9:16 da foto, nada cortado) com
 // máscara de gradiente na base. Letterings sans-serif entram de baixo como
-// tinta: #EMPREGO, #CAPACITAÇÃO, #EMPREENDEDORISMO. Crane Up.
+// tinta: #EMPREGO, #CAPACITAÇÃO, #EMPREENDEDORISMO e fecha com PARA
+// MULHERES EM SITUAÇÃO DE VIOLÊNCIA. Crane Up.
 // Saída: DISSOLVE SUJO rumo ao roxo do selo.
 const S = COMBATE_SCENES.c4;
 const L = (f: number) => f - S.from;
-const EXIT = 228;
+const EXIT = 200;
 
 export const Combate4_Recomeco: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
@@ -49,7 +50,7 @@ export const Combate4_Recomeco: React.FC<{ assets: CombateAssets }> = ({ assets 
         <NoiseOverlay opacity={0.035} />
 
         {/* Letterings — parallax rápido */}
-        <div style={{ position: 'absolute', top: 1210, left: 60, right: 60, transform: `translateY(${crane}px)` }}>
+        <div style={{ position: 'absolute', top: 1130, left: 60, right: 60, transform: `translateY(${crane}px)` }}>
           <div><span style={{ ...tag, ...edIn(frame, L(WORD.emprego), { y: 30, blur: 10, trackFrom: -6, trackTo: -3 }) }}>#EMPREGO</span></div>
           <div><span style={{ ...tag, ...edIn(frame, L(WORD.capacitacao) + 6, { y: 30, blur: 10, trackFrom: -6, trackTo: -3 }) }}>#CAPACITAÇÃO</span></div>
           <div style={{ marginTop: 18 }}>
@@ -61,6 +62,11 @@ export const Combate4_Recomeco: React.FC<{ assets: CombateAssets }> = ({ assets 
             >
               #EMPREENDEDORISMO
             </span>
+          </div>
+          <div style={{ marginTop: 26, fontFamily: ED.sans, fontWeight: 800, fontSize: 46, lineHeight: 1.1, color: ED.brandCore, ...edIn(frame, L(WORD.mulheresFim), { y: 20, blur: 10, trackFrom: -4, trackTo: -1 }) }}>
+            PARA MULHERES EM
+            <br />
+            SITUAÇÃO DE VIOLÊNCIA
           </div>
         </div>
       </AbsoluteFill>
