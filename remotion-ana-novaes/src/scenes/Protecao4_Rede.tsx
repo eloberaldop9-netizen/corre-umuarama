@@ -1,103 +1,100 @@
 import React from 'react';
-import { AbsoluteFill, Easing, useCurrentFrame } from 'remotion';
-import { ci } from '../lib/motion';
-import { NoiseOverlay, DustParticles } from '../lib/Background';
-import { AssetImage } from '../lib/AssetImage';
-import { COLOR_CAUSA } from '../lib/palette-causa';
-import { FONT } from '../lib/palette';
+import { AbsoluteFill, useCurrentFrame } from 'remotion';
+import { ci, mergeStyles } from '../lib/motion';
+import { WordIn } from '../lib/WordIn';
+import { Clipping, clipIn, J, JornalBg, Marked, Rule } from '../lib/jornal';
 import { lf, PROTECAO_SCENES } from '../protecao-timing';
 import type { ProtecaoAssets } from '../VideoAnaNovaisProtecao';
 
 // Cena 4 — A Rede Integrada | frames locais 0–270
 // "e da atuação integrada entre Conselho Tutelar, saúde, assistência social,
 // segurança e Justiça."
-// Mesmo fechamento do vídeo aprovado "A Causa": kicker amarelo + pílulas
-// empilhadas, uma por instituição, no frame exato em que é falada. O fundo
-// da Cena 3 continua por baixo (sem corte seco pra preto) e o vídeo termina
-// num fade.
+// Foto das mãos protegendo a roda de pessoas + manchete "Atuação integrada";
+// as cinco instituições entram como um índice de jornal, uma por vez, no
+// frame em que são faladas. Assinatura discreta e fade final.
 const S = PROTECAO_SCENES.c4;
 const W = (i: number) => lf(i, S);
 
+const ITEMS = [
+  { text: 'Conselho Tutelar', at: 47 },
+  { text: 'Saúde', at: 49 },
+  { text: 'Assistência Social', at: 50 },
+  { text: 'Segurança', at: 52 },
+  { text: 'Justiça', at: 54 },
+];
+
 export const Protecao4_Rede: React.FC<{ assets: ProtecaoAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
-
-  const bgOp = ci(frame, [0, 24], [0, 1], Easing.out(Easing.quad));
-  const microZoom = ci(frame, [0, S.duration], [1.16, 1.28], Easing.inOut(Easing.quad));
-
-  const finalFade = ci(frame, [S.duration - 25, S.duration], [1, 0]);
-
-  const kAt = W(44);
-  const kickerOp = ci(frame, [kAt, kAt + 16], [0, 1], Easing.out(Easing.cubic));
-  const kickerY = ci(frame, [kAt, kAt + 16], [16, 0], Easing.out(Easing.cubic));
-
-  const lineScale = ci(frame, [W(45), W(45) + 16], [0, 1], Easing.inOut(Easing.cubic));
-
-  const pill = (label: string, delay: number) => {
-    const op = ci(frame, [delay, delay + 18], [0, 1], Easing.out(Easing.cubic));
-    const scale = ci(frame, [delay, delay + 18], [0.8, 1], Easing.out(Easing.cubic));
-    const blur = ci(frame, [delay, delay + 14], [10, 0], Easing.out(Easing.cubic));
-    return (
-      <div
-        style={{
-          opacity: op,
-          transform: `scale(${scale})`,
-          filter: `blur(${blur}px)`,
-          border: `2px solid ${COLOR_CAUSA.gold}`,
-          borderRadius: 999,
-          padding: '16px 38px',
-          backgroundColor: 'rgba(10,10,12,0.55)',
-          boxShadow: '0 12px 30px rgba(0,0,0,0.4)',
-        }}
-      >
-        <span style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 40, letterSpacing: -1, color: COLOR_CAUSA.textLight }}>
-          {label}
-        </span>
-      </div>
-    );
-  };
+  const small: React.CSSProperties = { fontFamily: J.sans, fontWeight: 800, fontSize: 30, letterSpacing: J.track, color: J.purple };
+  const head: React.CSSProperties = { fontFamily: J.serif, fontWeight: 900, fontSize: 112, letterSpacing: J.track, color: J.ink, lineHeight: 1 };
+  const fade = ci(frame, [S.duration - 25, S.duration], [1, 0]);
+  const signAt = W(54) + 20;
 
   return (
-    <AbsoluteFill style={{ opacity: bgOp * finalFade, backgroundColor: COLOR_CAUSA.cinematic }}>
-      {/* Fundo — continuação da foto da Câmara da Cena 3, agora mais escura/desfocada,
-          pra nunca haver corte seco pra tela preta entre as cenas. */}
-      <AbsoluteFill style={{ transform: `scale(${microZoom})`, filter: 'blur(3px)' }}>
-        <AssetImage file={assets.fundoCamara} label="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(0.6)' }} />
-      </AbsoluteFill>
-      <AbsoluteFill style={{ background: 'radial-gradient(ellipse at 50% 45%, rgba(10,10,12,0.72) 0%, rgba(10,10,12,0.94) 70%)' }} />
-      <NoiseOverlay opacity={0.05} />
-      <DustParticles count={22} />
+    <AbsoluteFill style={{ opacity: fade }}>
+      <JornalBg />
 
-      <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <div
-          style={{
-            opacity: kickerOp,
-            transform: `translateY(${kickerY}px)`,
-            marginBottom: 26,
-            textAlign: 'center',
-          }}
-        >
-          <span style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 34, letterSpacing: -1, color: COLOR_CAUSA.gold }}>
-            ATUAÇÃO INTEGRADA
-          </span>
-          <div
-            style={{
-              width: 120,
-              height: 2,
-              backgroundColor: COLOR_CAUSA.gold,
-              margin: '14px auto 0',
-              transform: `scaleX(${lineScale})`,
-            }}
-          />
+      <div style={{ position: 'absolute', top: 120, left: 80, right: 80 }}>
+        <Rule frame={frame} at={0} thick={4} />
+        <div style={{ display: 'flex', gap: 10, paddingTop: 16 }}>
+          <WordIn at={W(42)} style={small}>E</WordIn>
+          <WordIn at={W(43)} style={small}>DA</WordIn>
         </div>
+      </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
-          {pill('CONSELHO TUTELAR', W(47))}
-          {pill('SAÚDE', W(49))}
-          {pill('ASSISTÊNCIA SOCIAL', W(50))}
-          {pill('SEGURANÇA', W(52))}
-          {pill('JUSTIÇA', W(54))}
+      <div style={{ position: 'absolute', top: 250, left: 80, ...mergeStyles(clipIn(frame, W(43), -1)) }}>
+        <Clipping file={assets.fotoRede} width={920} height={500} objectPosition="50% 40%" />
+      </div>
+
+      <div style={{ position: 'absolute', top: 810, left: 80, right: 80 }}>
+        <WordIn at={W(44)} style={head}>Atuação</WordIn>
+        <div style={{ marginTop: 6 }}>
+          <WordIn at={W(45)} style={head}>
+            <Marked frame={frame} at={W(45) + 6}>integrada</Marked>
+          </WordIn>
         </div>
-      </AbsoluteFill>
+        <div style={{ marginTop: 22 }}>
+          <WordIn at={W(46)} style={small}>ENTRE</WordIn>
+        </div>
+      </div>
+
+      {/* Índice de jornal — uma instituição por vez */}
+      <div style={{ position: 'absolute', top: 1140, left: 80, right: 80 }}>
+        {ITEMS.map((it, k) => {
+          const at = W(it.at);
+          return (
+            <div key={it.text} style={{ padding: '12px 0 10px', position: 'relative' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 22 }}>
+                <div
+                  style={{
+                    width: 18, height: 18, background: J.purple,
+                    transform: `scale(${ci(frame, [at, at + 10], [0, 1])})`,
+                  }}
+                />
+                <WordIn at={at} style={{ fontFamily: J.serif, fontWeight: 700, fontSize: 56, letterSpacing: J.track, color: J.ink, lineHeight: 1.1 }}>
+                  {k === ITEMS.length - 1 ? <Marked frame={frame} at={at + 6}>{it.text}</Marked> : it.text}
+                </WordIn>
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <Rule frame={frame} at={at} thick={1} color="rgba(26,20,38,0.35)" />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Assinatura */}
+      <div style={{ position: 'absolute', bottom: 110, left: 80, right: 80, textAlign: 'center' }}>
+        <Rule frame={frame} at={signAt} thick={3} origin="center" />
+        <div style={{ paddingTop: 16 }}>
+          <WordIn at={signAt + 4} style={{ fontFamily: J.serif, fontWeight: 900, fontSize: 52, letterSpacing: J.track, color: J.ink }}>
+            Ana Novais
+          </WordIn>
+        </div>
+        <WordIn at={signAt + 10} style={{ fontFamily: J.sans, fontWeight: 700, fontSize: 24, letterSpacing: J.track, color: J.purple }}>
+          DEPUTADA FEDERAL
+        </WordIn>
+      </div>
     </AbsoluteFill>
   );
 };

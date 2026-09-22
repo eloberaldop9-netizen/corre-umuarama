@@ -7,3 +7,7 @@ import '@fontsource/montserrat/500.css';
 import '@fontsource/montserrat/700.css';
 import '@fontsource/montserrat/800.css';
 import '@fontsource/montserrat/900.css';
+// Vídeo 04 (Proteção à Infância) — serifa de manchete de jornal.
+import '@fontsource/playfair-display/700.css';
+import '@fontsource/playfair-display/900.css';
+import '@fontsource/playfair-display/700-italic.css';
