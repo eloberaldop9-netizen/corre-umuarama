@@ -1,7 +1,7 @@
 import React from 'react';
 import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { ci, SPRING } from '../lib/motion';
-import { NoiseOverlay, DustParticles, HalftoneOverlay } from '../lib/Background';
+import { NoiseOverlay, HalftoneOverlay } from '../lib/Background';
 import { AssetImage } from '../lib/AssetImage';
 import { COLOR_CAUSA } from '../lib/palette-causa';
 import { FONT } from '../lib/palette';
@@ -14,6 +14,13 @@ import type { CausaAssets } from '../VideoAnaNovaisCausa';
 // Composição: manchete no topo, retrato emoldurado (estilo recorte de
 // jornal) no centro, texto SEMPRE fora da foto (acima/abaixo, nunca por
 // cima) — legibilidade em primeiro lugar.
+// Fundo copia exatamente o degradê do material oficial (banner "Deputada
+// Federal 2010"): lilás quase branco no topo até roxo profundo embaixo.
+// Texto acompanha a mesma lógica do banner — roxo escuro sobre a parte
+// clara, branco sobre a parte roxa profunda (como o "2010" no bloco sólido).
+const BG_LIGHT = '#F3EEFA';
+const BG_DEEP = '#3B1F73';
+const TEXT_ON_LIGHT = '#2A1B52';
 export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -53,17 +60,15 @@ export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => 
   const exitOp = ci(frame, [198, 222], [1, 0]);
 
   return (
-    <AbsoluteFill style={{ opacity: bgOp, backgroundColor: COLOR_CAUSA.void }}>
-      {/* Degradê roxo/lilás da identidade da Ana — no lugar do preto liso */}
+    <AbsoluteFill style={{ opacity: bgOp, backgroundColor: BG_LIGHT }}>
+      {/* Degradê lilás -> roxo profundo — mesmas cores do banner oficial */}
       <AbsoluteFill
         style={{
-          background: `radial-gradient(ellipse at 50% 30%, rgba(107,47,160,0.5) 0%, rgba(74,31,114,0.35) 35%, transparent 70%),
-            linear-gradient(160deg, #0D0714 0%, #1C0E33 45%, #341757 75%, #4A1F72 100%)`,
+          background: `linear-gradient(165deg, ${BG_LIGHT} 0%, #E3D6F2 22%, #B79FE0 48%, #7B4FB8 68%, ${BG_DEEP} 92%)`,
         }}
       />
-      <NoiseOverlay opacity={0.07} />
-      <HalftoneOverlay opacity={0.02} dark />
-      <DustParticles count={22} />
+      <NoiseOverlay opacity={0.05} />
+      <HalftoneOverlay opacity={0.025} />
 
       <AbsoluteFill
         style={{
@@ -82,7 +87,7 @@ export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => 
                 fontWeight: 900,
                 fontSize: 58,
                 letterSpacing: -1,
-                color: COLOR_CAUSA.textLight,
+                color: TEXT_ON_LIGHT,
                 transform: `translateY(${ci(politicaSp, [0, 1], [40, 0])}px)`,
                 filter: `blur(${ci(frame - 44, [0, 16], [12, 0])}px)`,
                 opacity: ci(frame, [44, 58], [0, 1]),
@@ -97,7 +102,7 @@ export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => 
                 fontWeight: 900,
                 fontSize: 58,
                 letterSpacing: -1,
-                color: COLOR_CAUSA.textLight,
+                color: TEXT_ON_LIGHT,
                 transform: `translateY(${ci(nacionalSp, [0, 1], [40, 0])}px)`,
                 filter: `blur(${ci(frame - 61, [0, 16], [12, 0])}px)`,
                 opacity: ci(frame, [61, 75], [0, 1]),
@@ -170,7 +175,7 @@ export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => 
                 fontWeight: 800,
                 fontSize: 48,
                 letterSpacing: -1,
-                color: COLOR_CAUSA.tea,
+                color: TEXT_ON_LIGHT,
                 transform: `translateY(${ci(protecaoSp, [0, 1], [40, 0])}px)`,
                 filter: `blur(${ci(frame - 80, [0, 16], [12, 0])}px)`,
                 opacity: ci(frame, [80, 94], [0, 1]),
@@ -184,7 +189,7 @@ export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => 
                 fontFamily: FONT.sans,
                 fontWeight: 600,
                 fontSize: 48,
-                color: COLOR_CAUSA.textLight,
+                color: TEXT_ON_LIGHT,
                 opacity: eOp,
               }}
             >
@@ -197,7 +202,7 @@ export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => 
                 fontWeight: 800,
                 fontSize: 48,
                 letterSpacing: -1,
-                color: COLOR_CAUSA.tea,
+                color: TEXT_ON_LIGHT,
                 transform: `translateY(${ci(inclusaoSp, [0, 1], [40, 0])}px)`,
                 filter: `blur(${ci(frame - 100, [0, 16], [12, 0])}px)`,
                 opacity: ci(frame, [100, 114], [0, 1]),
@@ -236,8 +241,8 @@ export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => 
                 fontWeight: 900,
                 fontSize: 96,
                 letterSpacing: -2,
-                color: COLOR_CAUSA.accent,
-                textShadow: `0 0 ${10 + symbolGlow * 20}px rgba(107,47,160,0.45)`,
+                color: COLOR_CAUSA.textLight,
+                textShadow: `0 4px 22px rgba(0,0,0,0.35)`,
               }}
             >
               AUTISTA
