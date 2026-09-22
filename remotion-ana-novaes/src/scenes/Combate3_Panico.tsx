@@ -9,10 +9,9 @@ import { FONT } from '../lib/palette';
 import type { CombateAssets } from '../VideoAnaNovaisCombate';
 
 // Cena 3 — O Mecanismo (Botão do Pânico) | frames locais 0–79 (2.6s)
-// v2: agora cobre só "como o botão do pânico!" — o resto da frase
-// ("e maior acesso a mecanismos de proteção,") passou pra Cena 2, que ficou
-// bem maior na transcrição corrigida. Transcrição real (offset de from=432):
-// "como"@14 "o"@23 "botão"@38 "do"@59 "pânico!"@62 (fala termina ~78)
+// v3: só o lettring em destaque pedido — "o botão do pânico!" — igual ao
+// resto do vídeo agora (nada de legenda corrida). Transcrição real (offset
+// de from=432): "como"@14 "o"@23 "botão"@38 "do"@59 "pânico!"@62 (fim ~78)
 export const Combate3_Panico: React.FC<{ assets: CombateAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
 
@@ -72,8 +71,8 @@ export const Combate3_Panico: React.FC<{ assets: CombateAssets }> = ({ assets })
       <AbsoluteFill style={{ transform: `scale(${collapseScale})`, opacity: collapseOp }}>
         <div style={{ position: 'absolute', bottom: 260, left: 0, right: 0, textAlign: 'center' }}>
           <AnimatedText
-            text="como o BOTÃO DO PÂNICO"
-            wordDelays={[14, 23, 38, 59, 62]}
+            text="O BOTÃO DO PÂNICO!"
+            wordDelays={[23, 38, 59, 62]}
             style={{ justifyContent: 'center', flexWrap: 'wrap', padding: '0 50px' }}
             wordStyle={{
               fontFamily: FONT.sans,
