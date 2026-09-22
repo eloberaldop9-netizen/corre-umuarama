@@ -5,34 +5,43 @@ import { NoiseOverlay } from '../lib/Background';
 import { ED } from '../lib/editorial';
 import { COMBATE_SCENES } from '../combate-timing';
 
-// Cena 5 — O Selo | frames locais 0–150
-// Limpeza absoluta: gradiente institucional roxo → lilás. Pill, nome e
-// número assentam como um bloco único (translateY 30→0, 3f entre eles),
-// micro-zoom quase imperceptível e fade solene para o preto no fim.
+// Cena 5 — O Selo | frames locais 0–140
+// Arte base da campanha: gradiente radial #9859b3 → #2D1643, pill amarela
+// DEPUTADA FEDERAL, nome em lilás e 2010 gigante em branco na base curva.
+// Micro-zoom contínuo e fade solene nos últimos 20 frames.
 const S = COMBATE_SCENES.c5;
 
 export const Combate5_Lockup: React.FC = () => {
   const frame = useCurrentFrame();
-  const zoom = ci(frame, [0, S.duration], [1, 1.025]);
+  const zoom = ci(frame, [0, S.duration], [1, 1.03]);
   const fade = ci(frame, [S.duration - 20, S.duration], [1, 0]);
-  const up = (at: number): React.CSSProperties => {
-    const p = ci(frame, [at, at + 30], [0, 1], Easing.out(Easing.cubic));
-    return { opacity: p, transform: `translateY(${30 * (1 - p)}px)`, filter: `blur(${8 * (1 - p)}px)` };
-  };
+  const bgIn = ci(frame, [0, 10], [0, 1]);
+  const top = ci(frame, [10, 40], [0, 1], Easing.out(Easing.cubic));
+  const base = ci(frame, [25, 60], [0, 1], Easing.out(Easing.cubic));
 
   return (
-    <AbsoluteFill style={{ opacity: fade, backgroundColor: '#000' }}>
-      <AbsoluteFill style={{ background: `linear-gradient(170deg, ${ED.void} 0%, ${ED.brandCore} 60%, ${ED.lilac} 100%)` }} />
+    <AbsoluteFill style={{ opacity: fade * bgIn, backgroundColor: ED.void }}>
+      <AbsoluteFill style={{ background: 'radial-gradient(ellipse 120% 80% at 50% 0%, #9859b3 0%, #2D1643 85%)' }} />
       <NoiseOverlay opacity={0.04} />
-      <AbsoluteFill style={{ transform: `scale(${zoom})`, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-        <div style={{ background: ED.yellow, borderRadius: 999, padding: '16px 46px', ...up(12) }}>
-          <span style={{ fontFamily: ED.sans, fontWeight: 800, fontSize: 36, letterSpacing: -1, color: ED.void }}>DEPUTADA FEDERAL</span>
+      <AbsoluteFill style={{ transform: `scale(${zoom})` }}>
+        <div style={{ position: 'absolute', top: 560, left: 0, right: 0, textAlign: 'center', opacity: top, transform: `translateY(${40 * (1 - top)}px)`, filter: `blur(${15 * (1 - top)}px)` }}>
+          <div style={{ display: 'inline-block', background: ED.yellow, borderRadius: 999, padding: '16px 46px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+            <span style={{ fontFamily: ED.sans, fontWeight: 800, fontSize: 36, letterSpacing: -1, color: ED.void }}>DEPUTADA FEDERAL</span>
+          </div>
+          <div style={{ marginTop: 24, fontFamily: ED.sans, fontWeight: 800, fontSize: 122, letterSpacing: -3, color: ED.lilac, textShadow: '0 10px 40px rgba(0,0,0,0.35)' }}>
+            Ana Novais
+          </div>
         </div>
-        <div style={{ marginTop: 26, fontFamily: ED.sans, fontWeight: 800, fontSize: 120, letterSpacing: -1, color: '#FFFFFF', ...up(15) }}>
-          Ana Novais
-        </div>
-        <div style={{ marginTop: 10, fontFamily: ED.sans, fontWeight: 900, fontSize: 240, letterSpacing: -4, lineHeight: 1, color: ED.yellow, ...up(18) }}>
-          2010
+        <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 640, opacity: base, transform: `translateY(${150 * (1 - base)}px)` }}>
+          <div
+            style={{
+              position: 'absolute', inset: 0, backgroundColor: ED.void, borderTopLeftRadius: '52% 100px', borderTopRightRadius: '52% 100px',
+              boxShadow: '0 -30px 80px rgba(0,0,0,0.35)',
+            }}
+          />
+          <div style={{ position: 'absolute', top: 150, left: 0, right: 0, textAlign: 'center', fontFamily: ED.sans, fontWeight: 900, fontSize: 240, letterSpacing: -4, color: '#FFFFFF', lineHeight: 1 }}>
+            2010
+          </div>
         </div>
       </AbsoluteFill>
     </AbsoluteFill>

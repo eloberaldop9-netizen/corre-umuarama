@@ -13,6 +13,7 @@
     "build:protecao": "remotion render src/index.ts AnaNovais-Protecao out/ana-novais-protecao.mp4"
   },
   "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.3.0",
     "@fontsource/inter": "^5.3.0",
     "@fontsource/montserrat": "^5.3.0",
     "@fontsource/playfair-display": "^5.3.0",

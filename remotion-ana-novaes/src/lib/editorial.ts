@@ -16,6 +16,7 @@ export const ED = {
   lilac: '#B084C1',
   sans: "'Montserrat', 'Helvetica Neue', Arial, sans-serif",
   serif: "'Playfair Display', Georgia, serif",
+  serifLight: "'Cormorant Garamond', Georgia, serif",
 } as const;
 
 /** Revelação editorial: desfoque + tracking que se expande + opacidade (+ leve subida). */

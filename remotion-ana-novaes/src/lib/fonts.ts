@@ -11,3 +11,6 @@ import '@fontsource/montserrat/900.css';
 import '@fontsource/playfair-display/700.css';
 import '@fontsource/playfair-display/900.css';
 import '@fontsource/playfair-display/700-italic.css';
+// Vídeo 03 (Corte Editorial) — serifa leve para os títulos do Recomeço.
+import '@fontsource/cormorant-garamond/300.css';
+import '@fontsource/cormorant-garamond/500.css';
