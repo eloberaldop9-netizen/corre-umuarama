@@ -42,6 +42,11 @@ export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => 
   const inclusaoSp = spring({ frame, fps, config: SPRING.text, delay: 100 });
   const eOp = ci(frame, [98, 112], [0, 1], Easing.out(Easing.cubic));
 
+  // Tarja amarela atrás de "PROTEÇÃO E INCLUSÃO" — mesmo tratamento da
+  // tag "DEPUTADA FEDERAL" no banner oficial, para reforçar legibilidade.
+  const tagOp = ci(frame, [74, 88], [0, 1], Easing.out(Easing.cubic));
+  const tagScale = ci(frame, [74, 90], [0.85, 1], Easing.out(Easing.cubic));
+
   // Símbolo do autismo — surge exatamente quando ela diz "Transtorno do Espectro..."
   const ribbonSp = spring({ frame, fps, config: { damping: 11, mass: 1, stiffness: 110 }, delay: 125 });
   const ribbonScale = ci(ribbonSp, [0, 1], [0.5, 1]);
@@ -165,9 +170,22 @@ export const Causa1_ACausa: React.FC<{ assets: CausaAssets }> = ({ assets }) => 
           </div>
         </div>
 
-        {/* "PROTEÇÃO E INCLUSÃO" — abaixo da foto */}
+        {/* "PROTEÇÃO E INCLUSÃO" — abaixo da foto, tarja amarela como no banner oficial */}
         <div style={{ position: 'absolute', top: 1105, left: 0, right: 0, textAlign: 'center' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap', padding: '0 40px' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              justifyContent: 'center',
+              gap: 14,
+              flexWrap: 'wrap',
+              padding: '16px 40px',
+              backgroundColor: COLOR_CAUSA.gold,
+              borderRadius: 16,
+              opacity: tagOp,
+              transform: `scale(${tagScale})`,
+              boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+            }}
+          >
             <span
               style={{
                 display: 'inline-block',
