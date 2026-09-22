@@ -82,13 +82,19 @@ export const Combate4_Recomeco: React.FC<{ assets: CombateAssets }> = ({ assets 
               transform: `translateY(${photoY}px)`,
               border: '1px solid rgba(255,255,255,0.6)',
               boxShadow: '0 40px 100px rgba(45,22,67,0.35)',
+              overflow: 'hidden',
             }}
           >
             <AssetImage
               file={assets.fotoCapacitacao}
               label="SALA DE AULA — CAPACITAÇÃO PROFISSIONAL"
               tone="light"
-              style={{ width: '100%', height: '100%', filter: 'contrast(1.05) saturate(0.9)' }}
+              style={{
+                width: '100%',
+                height: '100%',
+                filter: 'contrast(1.05) saturate(0.9)',
+                transform: `scale(${ci(frame, [0, 272], [1, 1.09], Easing.inOut(Easing.quad))})`,
+              }}
             />
             <div
               style={{

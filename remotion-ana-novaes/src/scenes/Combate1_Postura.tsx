@@ -143,17 +143,17 @@ export const Combate1_Postura: React.FC<{ assets: CombateAssets }> = ({ assets }
             style={{ width: '100%', height: '100%', filter: 'saturate(1.08) contrast(1.08)' }}
             objectFit="cover"
           />
-          {/* Glow vermelho pulsante — reforça o X na mão (asset já traz o X desenhado) */}
+          {/* Glow vermelho pulsante — reforça o X já desenhado na foto (mão, ~29%/69% da caixa) */}
           <div
             style={{
               position: 'absolute',
-              top: '36%',
-              left: '24%',
+              top: '69%',
+              left: '29%',
               width: 260,
               height: 260,
               marginLeft: -130,
               marginTop: -130,
-              opacity: 0.5 * xGlow,
+              opacity: 0.55 * xGlow,
               background: `radial-gradient(circle, rgba(230,57,70,0.9) 0%, transparent 70%)`,
               filter: 'blur(22px)',
               pointerEvents: 'none',

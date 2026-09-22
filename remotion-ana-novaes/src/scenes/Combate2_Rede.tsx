@@ -158,7 +158,15 @@ export const Combate2_Rede: React.FC<{ assets: CombateAssets }> = ({ assets }) =
           opacity: ci(frame, [0, 16], [0, 0.5]),
         }}
       >
-        <span style={{ fontFamily: FONT.sans, fontWeight: 700, fontSize: 22, letterSpacing: 8, color: COLOR_COMBATE.yellow }}>
+        <span
+          style={{
+            fontFamily: FONT.sans,
+            fontWeight: 700,
+            fontSize: 22,
+            letterSpacing: 8 + Math.sin(frame * 0.045) * 1.5,
+            color: COLOR_COMBATE.yellow,
+          }}
+        >
           A REDE DE PROTEÇÃO
         </span>
       </div>
