@@ -8,16 +8,17 @@ import { IDOSOS_SCENES, WORD } from '../idosos-timing';
 // Cena 5 — A Proposta (só lettering) | frames locais 0–138
 // "Uma das propostas é criar um programa federal para ampliar a
 // implantação de Centros-Dia,"
-// Roxo profundo e liso, Z-push contínuo (1 → 1.15). UMA DAS PROPOSTAS
-// discreto, PROGRAMA FEDERAL enorme em branco e CENTROS-DIA invade em
-// amarelo por cima, com sombra densa. Saída: SUCÇÃO para o centro.
+// Roxo profundo e liso, Z-push contínuo (1 → 1.12). UMA DAS PROPOSTAS e
+// PROGRAMA FEDERAL no terço de cima; faixa do meio LIVRE para a legenda
+// "para ampliar a implantação de"; CENTROS-DIA crava em amarelo abaixo
+// dela, com sombra densa. Saída: SUCÇÃO para o centro.
 const S = IDOSOS_SCENES.c5;
 const L = (f: number) => f - S.from;
 const EXIT = 118;
 
 export const Idosos5_Programa: React.FC = () => {
   const frame = useCurrentFrame();
-  const push = ci(frame, [0, S.duration], [1, 1.15]);
+  const push = ci(frame, [0, S.duration], [1, 1.12]);
   const sp = outP(frame, EXIT, 20);
   const big = (at: number) => {
     const p = ci(frame, [at, at + 24], [0, 1], Easing.out(Easing.cubic));
@@ -31,21 +32,23 @@ export const Idosos5_Programa: React.FC = () => {
       <NoiseOverlay opacity={0.07} />
       <DustParticles count={24} />
 
-      <AbsoluteFill style={{ transform: `scale(${push * (1 - sp)}) rotate(${-15 * sp}deg)`, filter: `blur(${30 * sp}px)`, justifyContent: 'center', alignItems: 'center', flexDirection: 'column', paddingBottom: 280 }}>
-        <div style={{ fontFamily: ED.sans, fontWeight: 800, fontSize: 44, color: ED.lilac, marginBottom: 30, ...edIn(frame, Math.max(3, L(WORD.uma)), { trackFrom: -3, trackTo: 2 }) }}>
-          UMA DAS PROPOSTAS
+      <AbsoluteFill style={{ transform: `scale(${push * (1 - sp)}) rotate(${-15 * sp}deg)`, filter: `blur(${30 * sp}px)` }}>
+        <div style={{ position: 'absolute', top: 250, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ fontFamily: ED.sans, fontWeight: 800, fontSize: 44, color: ED.lilac, marginBottom: 26, ...edIn(frame, Math.max(3, L(WORD.uma)), { trackFrom: -3, trackTo: 2 }) }}>
+            UMA DAS PROPOSTAS
+          </div>
+          <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 150, lineHeight: 0.95, color: '#FFFFFF', whiteSpace: 'nowrap', ...big(L(WORD.programa)) }}>PROGRAMA</div>
+          <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 150, lineHeight: 0.95, color: '#FFFFFF', whiteSpace: 'nowrap', ...big(L(WORD.federal)) }}>FEDERAL</div>
         </div>
-        <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 150, lineHeight: 0.95, color: '#FFFFFF', textAlign: 'center', whiteSpace: 'nowrap', ...big(L(WORD.programa)) }}>PROGRAMA</div>
-        <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 150, lineHeight: 0.95, color: '#FFFFFF', textAlign: 'center', whiteSpace: 'nowrap', ...big(L(WORD.federal)) }}>FEDERAL</div>
-        <div
-          style={{
-            marginTop: -20, background: ED.yellow, padding: '18px 44px 12px', transform: `translateY(${40 * (1 - cd)}px) rotate(-3deg)`, opacity: cd,
-            boxShadow: '0 40px 90px rgba(0,0,0,0.75)', position: 'relative', zIndex: 2,
-          }}
-        >
-          <span style={{ display: 'inline-block', fontFamily: ED.sans, fontWeight: 900, fontSize: 116, lineHeight: 1, color: ED.void, whiteSpace: 'nowrap', ...edIn(frame, L(WORD.centrosDia), { trackFrom: -9, trackTo: -5, y: 0, blur: 12 }) }}>
-            CENTROS-DIA
-          </span>
+
+        {/* faixa do meio (≈ 700–1020) livre para a legenda */}
+
+        <div style={{ position: 'absolute', top: 1040, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
+          <div style={{ background: ED.yellow, padding: '18px 44px 12px', transform: `translateY(${40 * (1 - cd)}px) rotate(-3deg)`, opacity: cd, boxShadow: '0 40px 90px rgba(0,0,0,0.75)' }}>
+            <span style={{ display: 'inline-block', fontFamily: ED.sans, fontWeight: 900, fontSize: 116, lineHeight: 1, color: ED.void, whiteSpace: 'nowrap', ...edIn(frame, L(WORD.centrosDia), { trackFrom: -9, trackTo: -5, y: 0, blur: 12 }) }}>
+              CENTROS-DIA
+            </span>
+          </div>
         </div>
       </AbsoluteFill>
     </AbsoluteFill>

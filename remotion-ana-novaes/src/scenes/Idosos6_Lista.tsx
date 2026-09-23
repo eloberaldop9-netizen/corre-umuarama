@@ -10,8 +10,9 @@ import { IDOSOS_SCENES, WORD } from '../idosos-timing';
 // apoio às famílias."
 // A sucção explode em lilás claro com light leaks; Crane Up lento. As 4
 // ofertas sobem como tiras editoriais (branco, sombra 40px, borda fina),
-// uma por palavra falada, desenhando uma escada. Cada tira tem um ícone de
-// linha no selo amarelo. Terço inferior livre para a legenda.
+// uma por palavra falada, CENTRALIZADAS na composição (bloco no meio da
+// tela, leve zigue-zague simétrico). Cada tira tem um ícone de linha no
+// selo amarelo.
 // Saída: DISSOLVE SUJO (blur 0→40, brilho → 0).
 const S = IDOSOS_SCENES.c6;
 const L = (f: number) => f - S.from;
@@ -52,7 +53,7 @@ const ITEMS = [
 export const Idosos6_Lista: React.FC = () => {
   const frame = useCurrentFrame();
   const light = ci(frame, [0, 14], [1, 0], Easing.out(Easing.cubic));
-  const crane = ci(frame, [0, S.duration], [60, -40], Easing.inOut(Easing.cubic));
+  const crane = ci(frame, [0, S.duration], [40, -30], Easing.inOut(Easing.cubic));
   const d = ci(frame, [EXIT, S.duration], [0, 1], Easing.in(Easing.cubic));
   const leak = Math.sin(frame * 0.02);
 
@@ -68,8 +69,8 @@ export const Idosos6_Lista: React.FC = () => {
         />
         <NoiseOverlay opacity={0.035} />
 
-        <div style={{ position: 'absolute', top: 230, left: 70, right: 70, transform: `translateY(${crane}px)` }}>
-          <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 60, color: ED.brandCore, marginBottom: 34, ...edIn(frame, Math.max(3, L(WORD.oferecendo)), { trackFrom: -5, trackTo: 0 }) }}>
+        <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column', transform: `translateY(${crane}px)` }}>
+          <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 64, color: ED.brandCore, marginBottom: 36, ...edIn(frame, Math.max(3, L(WORD.oferecendo)), { trackFrom: -5, trackTo: 0 }) }}>
             OFERECENDO
           </div>
           {ITEMS.map((it, i) => {
@@ -79,10 +80,10 @@ export const Idosos6_Lista: React.FC = () => {
               <div
                 key={it.key}
                 style={{
-                  marginLeft: i * 30, marginBottom: 28, width: 830, display: 'flex', alignItems: 'center', gap: 28,
+                  transform: `translateX(${(i % 2 ? 22 : -22)}px) translateY(${120 * (1 - p)}px)`, marginBottom: 28, width: 860, display: 'flex', alignItems: 'center', gap: 28,
                   background: '#FFFFFF', border: `2px solid rgba(45,22,67,0.12)`, padding: '28px 32px',
                   boxShadow: '0 20px 40px rgba(45,22,67,0.22)',
-                  opacity: p, transform: `translateY(${120 * (1 - p)}px)`, filter: `blur(${12 * (1 - p)}px)`,
+                  opacity: p, filter: `blur(${12 * (1 - p)}px)`,
                 }}
               >
                 <div style={{ flex: 'none', width: 96, height: 96, borderRadius: '50%', background: ED.yellow, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -97,7 +98,7 @@ export const Idosos6_Lista: React.FC = () => {
               </div>
             );
           })}
-        </div>
+        </AbsoluteFill>
       </AbsoluteFill>
       <AbsoluteFill style={{ backgroundColor: ED.void, opacity: ci(d, [0.5, 1], [0, 1]) }} />
       <AbsoluteFill style={{ backgroundColor: '#FFFFFF', opacity: light }} />

@@ -26,6 +26,9 @@ export const WORD = {
   fortalecendo: 270,
   leis: 290,
   protecao2: 305,
+  quem: 319,
+  tanto: 347,
+  sociedade: 368,
   uma: 392,
   propostas: 403,
   programa: 431,
@@ -57,7 +60,10 @@ export interface IdososAssets {
   anaCutout: string; // Ana na Câmara, fundo removido (rembg)
   anaAbraco: string; // Ana abraçando uma idosa (foto real)
   casalIdosos: string; // Adobe Stock — casal de idosos sorrindo
-  solidao: string; // Adobe Stock — idosa sozinha na janela
+  violencia: string; // Adobe Stock — idoso cobrindo o rosto (VIOLÊNCIA)
+  solidao: string; // Adobe Stock — idosa sozinha na janela (ABANDONO)
+  maos: string; // Adobe Stock — mãos enrugadas (NEGLIGÊNCIA)
+  artesao: string; // Adobe Stock — idoso artesão trabalhando (quem já contribuiu)
   leis: string; // Adobe Stock — martelo e livros
   narracao: string;
 }
@@ -66,7 +72,10 @@ export const IDOSOS_ASSETS: IdososAssets = {
   anaCutout: 'idosos-ana-camara-cutout.png',
   anaAbraco: 'idosos-ana-abraco.jpg',
   casalIdosos: 'stock-idosos-casal.jpg',
+  violencia: 'stock-idoso-violencia.jpg',
   solidao: 'stock-idosa-solidao.jpg',
+  maos: 'stock-idosa-maos.jpg',
+  artesao: 'stock-idoso-artesao.jpg',
   leis: 'stock-leis.jpg',
   narracao: 'narracao-idosos.mp3',
 };

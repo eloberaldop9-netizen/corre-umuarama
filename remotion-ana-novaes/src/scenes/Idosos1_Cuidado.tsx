@@ -2,21 +2,22 @@ import React from 'react';
 import { AbsoluteFill, Easing, Img, staticFile, useCurrentFrame } from 'remotion';
 import { ci } from '../lib/motion';
 import { DustParticles, NoiseOverlay } from '../lib/Background';
+import { NewsSheet, RoughFilter } from '../lib/Newsprint';
 import { ED, edIn, outP } from '../lib/editorial';
 import { IDOSOS_SCENES, WORD } from '../idosos-timing';
 import type { IdososAssets } from '../idosos-timing';
 
 // Cena 1 — A Postura e o Cuidado | frames 0–125
 // "Ana Novais quer fortalecer a proteção e o cuidado com as pessoas idosas!"
-// Roxo profundo com grão. A Ana recortada (adesivo de colagem, borda branca,
-// halftone) emerge da sombra; ANA NOVAIS acende no topo e QUER FORTALECER A
+// Roxo profundo com grão e folhas de jornal rasgadas. A Ana é um recorte de
+// jornal cinematográfico (P&B + halftone, contorno amarelo rasgado
+// seguindo a silhueta, como na referência) e emerge da sombra; ANA NOVAIS acende no topo e QUER FORTALECER A
 // entra na fala. A polaroid do casal de idosos desliza ao lado e PROTEÇÃO E
 // CUIDADO abraça a imagem. Saída Z-DIVE: CUIDADO explode e cega de amarelo,
 // fotos rasgam para as laterais.
 const S = IDOSOS_SCENES.c1;
 const L = (f: number) => f - S.from;
 const EXIT = 104;
-const STICKER = 'drop-shadow(5px 0 0 #fff) drop-shadow(-5px 0 0 #fff) drop-shadow(0 5px 0 #fff) drop-shadow(0 -5px 0 #fff) drop-shadow(0 40px 60px rgba(0,0,0,0.7))';
 
 export const Idosos1_Cuidado: React.FC<{ assets: IdososAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
@@ -37,6 +38,7 @@ export const Idosos1_Cuidado: React.FC<{ assets: IdososAssets }> = ({ assets }) 
       <AbsoluteFill style={{ background: 'radial-gradient(ellipse at 45% 35%, rgba(122,75,148,0.4), transparent 70%)' }} />
       <NoiseOverlay opacity={0.09} />
       <DustParticles count={30} />
+      <RoughFilter id="rough-ana" />
 
       <AbsoluteFill style={{ transform: `scale(${dolly})` }}>
         {/* ANA NOVAIS */}
@@ -46,11 +48,32 @@ export const Idosos1_Cuidado: React.FC<{ assets: IdososAssets }> = ({ assets }) 
           </span>
         </div>
 
-        {/* Ana — adesivo de colagem */}
+        {/* Folhas de jornal rasgadas atrás do recorte */}
+        <div style={{ ...tear(-1), opacity: pIn * (tear(-1).opacity as number) }}>
+          <NewsSheet w={620} h={560} seed={3} style={{ top: 230, left: -60, transform: 'rotate(-6deg)' }} />
+          <NewsSheet w={420} h={300} seed={7} tone="#D9D4CB" style={{ top: 700, left: 360, transform: 'rotate(4deg)' }} />
+        </div>
+
+        {/* Ana — recorte de jornal: contorno amarelo rasgado + P&B halftone */}
         <div style={{ position: 'absolute', top: 250, left: 90, width: 600, ...tear(-1) }}>
-          <div style={{ opacity: pIn, filter: `brightness(${pIn}) blur(${20 * (1 - pIn)}px)`, transform: 'rotate(-3deg)' }}>
-            <div style={{ position: 'relative', filter: STICKER }}>
-              <Img src={staticFile(`assets/${assets.anaCutout}`)} style={{ display: 'block', width: 600 }} />
+          <div style={{ opacity: pIn, filter: `brightness(${pIn}) blur(${20 * (1 - pIn)}px)`, transform: 'rotate(-3deg)', position: 'relative' }}>
+            <div
+              style={{
+                position: 'absolute', inset: 0, background: ED.yellow, transform: 'scale(1.1) translate(6px, 4px)', transformOrigin: '50% 60%',
+                maskImage: `url(${staticFile(`assets/${assets.anaCutout}`)})`, WebkitMaskImage: `url(${staticFile(`assets/${assets.anaCutout}`)})`,
+                maskSize: '100% 100%', WebkitMaskSize: '100% 100%', filter: 'url(#rough-ana) drop-shadow(0 40px 60px rgba(0,0,0,0.6))',
+              }}
+            />
+            <div style={{ position: 'relative' }}>
+              <Img src={staticFile(`assets/${assets.anaCutout}`)} style={{ display: 'block', width: 600, filter: 'grayscale(1) contrast(1.2) brightness(1.05)' }} />
+              <div
+                style={{
+                  position: 'absolute', inset: 0, mixBlendMode: 'multiply', opacity: 0.28,
+                  backgroundImage: 'radial-gradient(rgba(0,0,0,1) 1.1px, transparent 1.7px)', backgroundSize: '6px 6px',
+                  maskImage: `url(${staticFile(`assets/${assets.anaCutout}`)})`, WebkitMaskImage: `url(${staticFile(`assets/${assets.anaCutout}`)})`,
+                  maskSize: '100% 100%', WebkitMaskSize: '100% 100%',
+                }}
+              />
             </div>
           </div>
           <div style={{ position: 'absolute', left: 10, top: 640, ...edIn(frame, L(WORD.fortalecer), { y: 14, blur: 10, trackFrom: -4, trackTo: -1 }) }}>
