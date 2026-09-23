@@ -58,8 +58,8 @@ export const WORD = {
 export const JOVENS_SCENES = {
   c1: { from: 0, duration: 150 }, // "Ana Novais quer ampliar ... mercado de trabalho!" (6–137)
   c2: { from: 143, duration: 222 }, // "Como deputada federal ... primeiro emprego!" (156–360)
-  c3: { from: 358, duration: 248 }, // "A proposta também incentiva ... e iniciativas" (364–596)
-  c4: { from: 599, duration: 108 }, // "para transformar boas ideias em novos negócios!" (598–667) + respiro
+  c3: { from: 358, duration: 256 }, // "A proposta também incentiva ... e iniciativas" (364–597) + leitura
+  c4: { from: 604, duration: 103 }, // "para transformar boas ideias em novos negócios!" (598–667) + respiro — entra em crossfade sobre a sucção
   c5: { from: 687, duration: 140 }, // selo + fade (dissolve sobre o fim da c4)
 } as const;
 
