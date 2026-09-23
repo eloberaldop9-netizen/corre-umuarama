@@ -24,10 +24,12 @@ export const WORD = {
   violencia: 71,
   mulheres: 101,
   como: 122,
+  deputada: 127,
   mais: 186,
   recursos: 198,
   politicas: 214,
   publicas: 228,
+  ampliar: 251,
   rede: 279,
   vitimas: 298,
   atendimento: 323,
@@ -49,9 +51,13 @@ export const WORD = {
 } as const;
 
 // Mapa de cenas guiado pela narração (25,4s) — overlap de 7 frames.
+// A antiga Cena 2 virou três batidas curtas (2a/2b/2c) para deixar espaço
+// livre no terço inferior para a legenda que entra na edição final.
 export const COMBATE_SCENES = {
   c1: { from: 0, duration: 122 }, // "Ana Novais ... contra as mulheres!" (6–116)
-  c2: { from: 115, duration: 205 }, // "Como deputada ... rede de proteção às vítimas," (122–311)
+  c2a: { from: 115, duration: 78 }, // "Como deputada federal, pretende defender" (122–186) — foto da Ana
+  c2b: { from: 186, duration: 70 }, // "mais recursos e políticas públicas" (186–242) — letterings
+  c2c: { from: 249, duration: 71 }, // "para ampliar a rede de proteção às vítimas," (242–311) — rede em motion
   c3: { from: 313, duration: 250 }, // "com atendimento ... como o botão do pânico." (317–553)
   c4: { from: 556, duration: 215 }, // "Por isso ... para mulheres em situação de violência." (558–762)
   c5: { from: 764, duration: 140 }, // selo + fade
@@ -61,6 +67,7 @@ export const TOTAL_FRAMES = COMBATE_SCENES.c5.from + COMBATE_SCENES.c5.duration;
 
 export interface CombateAssets {
   retratoStopX: string; // recorte PNG (fundo removido)
+  retratoOficial: string; // retrato institucional — Cena 2a
   fotoAcolhimento: string; // escritório, mão no ombro — ATENDIMENTO
   fotoAbraco: string; // abraço no banco (Adobe Stock) — ACOLHIMENTO
   fotoPatrulha: string;
@@ -71,6 +78,7 @@ export interface CombateAssets {
 
 export const COMBATE_ASSETS: CombateAssets = {
   retratoStopX: 'combate-stopx-cutout.png',
+  retratoOficial: 'combate-retrato-oficial.jpg',
   fotoAcolhimento: 'combate-acolhimento.jpg',
   fotoAbraco: 'stock-acolhimento-abraco.jpg',
   fotoPatrulha: 'combate-patrulha.jpg',
