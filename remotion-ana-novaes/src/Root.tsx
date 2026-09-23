@@ -3,6 +3,7 @@ import { Composition } from 'remotion';
 import { VideoAnaNovaes, TOTAL_FRAMES, FPS, WIDTH, HEIGHT } from './VideoAnaNovaes';
 import { VideoAnaNovaisCausa, TOTAL_FRAMES as CAUSA_TOTAL_FRAMES } from './VideoAnaNovaisCausa';
 import { VideoAnaNovaisCombate, TOTAL_FRAMES as COMBATE_TOTAL_FRAMES } from './VideoAnaNovaisCombate';
+import { VideoAnaNovaisIdosos, TOTAL_FRAMES as IDOSOS_TOTAL_FRAMES } from './VideoAnaNovaisIdosos';
 import { VideoAnaNovaisProtecao, TOTAL_FRAMES as PROTECAO_TOTAL_FRAMES } from './VideoAnaNovaisProtecao';
 
 export const RemotionRoot: React.FC = () => {
@@ -36,6 +37,14 @@ export const RemotionRoot: React.FC = () => {
         id="AnaNovais-Protecao"
         component={VideoAnaNovaisProtecao}
         durationInFrames={PROTECAO_TOTAL_FRAMES}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+      />
+      <Composition
+        id="AnaNovais-Idosos"
+        component={VideoAnaNovaisIdosos}
+        durationInFrames={IDOSOS_TOTAL_FRAMES}
         fps={FPS}
         width={WIDTH}
         height={HEIGHT}
