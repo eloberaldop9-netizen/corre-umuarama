@@ -14,6 +14,11 @@ export const ICON_PATHS: Record<string, string[]> = {
   foguete: ['M12 3c3 2 5 5.5 5 9.5L15 16H9l-2-3.5C7 8.5 9 5 12 3z', 'M12 9.5a1.5 1.5 0 1 0 0 .01', 'M9 16l-2.5 3.5M15 16l2.5 3.5M12 17v4'],
   alvo: ['M12 3a9 9 0 1 0 0 18 9 9 0 1 0 0-18z', 'M12 7.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 1 0 0-9z', 'M12 11.2a.8.8 0 1 0 0 1.6.8.8 0 1 0 0-1.6z'],
   lampada: ['M9 18h6', 'M10 21h4', 'M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z'],
+  grafico: ['M4 20h16', 'M7 17v-3', 'M11 17v-5', 'M15 17v-4', 'M19 17V9', 'M5 11l4-4 3 3 7-7', 'M16 3h3v3'],
+  megafone: ['M3 10v4h3l8 4.5v-13L6 10H3z', 'M17 9.5a3.5 3.5 0 0 1 0 5', 'M19.5 7a7 7 0 0 1 0 10', 'M6 14l1.5 5.5H10l-1.3-5'],
+  documento: ['M6 3h8l4 4v14H6z', 'M14 3v4h4', 'M9 14l2 2 4-4'],
+  balanca: ['M12 3v17', 'M8 20h8', 'M5 7h14', 'M5 7l-3 6.5a3 3 0 0 0 6 0z', 'M19 7l-3 6.5a3 3 0 0 0 6 0z'],
+  venus: ['M12 3a5.5 5.5 0 1 0 0 11 5.5 5.5 0 1 0 0-11z', 'M12 14v7', 'M8.5 18h7'],
 };
 
 export const LineIcon: React.FC<{ name: keyof typeof ICON_PATHS | string; frame: number; at: number; size: number; color: string; stroke?: number; dur?: number }> = ({
