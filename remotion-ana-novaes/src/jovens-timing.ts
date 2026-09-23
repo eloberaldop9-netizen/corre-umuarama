@@ -53,12 +53,13 @@ export const WORD = {
   fim: 667,
 } as const;
 
-// Mapa de cenas guiado pela fala — overlap de 7 frames. O terço inferior
+// Mapa de cenas guiado pela fala — overlap de 7 frames. Cada saída só
+// começa depois que a última palavra da cena foi falada E lida. O terço inferior
 // fica livre para a legenda da edição final.
 export const JOVENS_SCENES = {
-  c1: { from: 0, duration: 150 }, // "Ana Novais quer ampliar ... mercado de trabalho!" (6–137)
-  c2: { from: 143, duration: 222 }, // "Como deputada federal ... primeiro emprego!" (156–360)
-  c3: { from: 358, duration: 256 }, // "A proposta também incentiva ... e iniciativas" (364–597) + leitura
+  c1: { from: 0, duration: 160 }, // "Ana Novais quer ampliar ... mercado de trabalho!" (6–137)
+  c2: { from: 153, duration: 223 }, // "Como deputada federal ... primeiro emprego!" (156–360)
+  c3: { from: 369, duration: 245 }, // "A proposta também incentiva ... e iniciativas" (364–597) + leitura
   c4: { from: 604, duration: 103 }, // "para transformar boas ideias em novos negócios!" (598–667) + respiro — entra em crossfade sobre a sucção
   c5: { from: 687, duration: 140 }, // selo + fade (dissolve sobre o fim da c4)
 } as const;

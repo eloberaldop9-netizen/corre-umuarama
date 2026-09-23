@@ -20,7 +20,7 @@ const L = (f: number) => f - S.from;
 export const Jovens4_Negocios: React.FC = () => {
   const frame = useCurrentFrame();
   const fadeIn = ci(frame, [0, 12], [0, 1], Easing.inOut(Easing.cubic)); // crossfade sobre a sucção da cena 3
-  const crane = ci(frame, [0, S.duration], [50, -30], Easing.inOut(Easing.cubic));
+  const crane = ci(frame, [0, S.duration], [30, -30], Easing.inOut(Easing.cubic));
   const leak = Math.sin(frame * 0.02);
   const bulbAt = L(WORD.boas) - 4;
   const glow = ci(frame, [L(WORD.ideias), L(WORD.ideias) + 12], [0, 1], Easing.out(Easing.cubic));
@@ -39,21 +39,21 @@ export const Jovens4_Negocios: React.FC = () => {
       <NoiseOverlay opacity={0.035} />
 
       <AbsoluteFill style={{ transform: `translateY(${crane}px)` }}>
-        <div style={{ position: 'absolute', top: 300, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ fontFamily: ED.sans, fontWeight: 800, fontSize: 48, color: ED.brandCore, ...edIn(frame, 0, { y: 12, trackFrom: -4, trackTo: -1 }) }}>para</div>
-          <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 92, lineHeight: 1, color: ED.void, whiteSpace: 'nowrap', ...edIn(frame, Math.max(0, L(WORD.transformar)), { y: 20, trackFrom: 4, trackTo: -4 }) }}>
+        <div style={{ position: 'absolute', top: 500, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ fontFamily: ED.sans, fontWeight: 800, fontSize: 54, color: ED.brandCore, ...edIn(frame, 0, { y: 12, trackFrom: -4, trackTo: -1 }) }}>para</div>
+          <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 102, lineHeight: 1, color: ED.void, whiteSpace: 'nowrap', ...edIn(frame, Math.max(0, L(WORD.transformar)), { y: 20, trackFrom: 4, trackTo: -4 }) }}>
             TRANSFORMAR
           </div>
 
           {/* boas ideias + lâmpada */}
           <div style={{ marginTop: 44, display: 'flex', alignItems: 'center', gap: 26 }}>
-            <div style={{ position: 'relative', width: 130, height: 130, opacity: bulbIn, transform: `scale(${0.75 + 0.25 * bulbIn})` }}>
+            <div style={{ position: 'relative', width: 150, height: 150, opacity: bulbIn, transform: `scale(${0.75 + 0.25 * bulbIn})` }}>
               <div style={{ position: 'absolute', inset: -60, borderRadius: '50%', background: 'radial-gradient(circle, rgba(252,227,0,0.9), transparent 65%)', opacity: glow, transform: `scale(${0.6 + 0.4 * glow})` }} />
               <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: glow > 0 ? ED.yellow : '#FFFFFF', boxShadow: '0 20px 40px rgba(45,22,67,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <LineIcon name="lampada" frame={frame} at={bulbAt} size={82} color={ED.void} stroke={1.9} />
+                <LineIcon name="lampada" frame={frame} at={bulbAt} size={94} color={ED.void} stroke={1.9} />
               </div>
               {/* raios */}
-              <svg width={130} height={130} viewBox="0 0 160 160" style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
+              <svg width={150} height={150} viewBox="0 0 160 160" style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
                 {[...Array(8)].map((_, i) => {
                   const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
                   const r1 = 92 + 6 * glow;
@@ -62,21 +62,21 @@ export const Jovens4_Negocios: React.FC = () => {
                 })}
               </svg>
             </div>
-            <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 76, lineHeight: 1, color: ED.brandCore, whiteSpace: 'nowrap' }}>
+            <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 86, lineHeight: 1, color: ED.brandCore, whiteSpace: 'nowrap' }}>
               <span style={{ display: 'inline-block', marginRight: 22, ...edIn(frame, L(WORD.boas), { y: 14, trackFrom: -6, trackTo: -3 }) }}>boas</span>
               <span style={{ display: 'inline-block', ...edIn(frame, L(WORD.ideias), { y: 14, trackFrom: -6, trackTo: -3 }) }}>ideias</span>
             </div>
           </div>
 
-          <div style={{ marginTop: 48, fontFamily: ED.sans, fontWeight: 900, fontSize: 54, color: ED.void, ...edIn(frame, L(WORD.novos) - 5, { y: 12, trackFrom: -3, trackTo: -1 }) }}>EM</div>
+          <div style={{ marginTop: 52, fontFamily: ED.sans, fontWeight: 900, fontSize: 60, color: ED.void, ...edIn(frame, L(WORD.novos) - 5, { y: 12, trackFrom: -3, trackTo: -1 }) }}>EM</div>
           <div
             style={{
               marginTop: 12, background: ED.yellow, border: `7px solid ${ED.void}`, padding: '18px 40px 10px', textAlign: 'center',
               boxShadow: '0 40px 80px rgba(45,22,67,0.45)', opacity: blk, filter: `blur(${14 * (1 - blk)}px)`, transform: `translateY(${60 * (1 - blk)}px) rotate(-2deg) scale(${1.08 - 0.08 * blk})`,
             }}
           >
-            <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 92, lineHeight: 0.95, letterSpacing: -4, color: ED.void, whiteSpace: 'nowrap' }}>NOVOS</div>
-            <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 92, lineHeight: 0.95, color: ED.void, whiteSpace: 'nowrap', ...edIn(frame, L(WORD.negocios), { y: 0, blur: 10, trackFrom: -8, trackTo: -4 }) }}>
+            <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 104, lineHeight: 0.95, letterSpacing: -4, color: ED.void, whiteSpace: 'nowrap' }}>NOVOS</div>
+            <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 104, lineHeight: 0.95, color: ED.void, whiteSpace: 'nowrap', ...edIn(frame, L(WORD.negocios), { y: 0, blur: 10, trackFrom: -8, trackTo: -4 }) }}>
               NEGÓCIOS!
             </div>
           </div>

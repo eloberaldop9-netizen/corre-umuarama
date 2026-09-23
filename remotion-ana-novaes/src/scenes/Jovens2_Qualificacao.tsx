@@ -6,7 +6,7 @@ import { ED, edIn } from '../lib/editorial';
 import { LineIcon } from '../lib/LineIcon';
 import { JOVENS_SCENES, WORD } from '../jovens-timing';
 
-// Cena 2 — A Qualificação | frames locais 0–222
+// Cena 2 — A Qualificação | frames locais 0–223
 // "Como deputada federal, pretende defender mais qualificação profissional,
 // inclusão digital e políticas que facilitem o acesso ao primeiro emprego!"
 // Papel #F4EEF8 limpo com pan lateral lento, duas batidas CENTRALIZADAS
@@ -18,8 +18,8 @@ import { JOVENS_SCENES, WORD } from '../jovens-timing';
 // Saída: WIPE roxo.
 const S = JOVENS_SCENES.c2;
 const L = (f: number) => f - S.from;
-const B_AT = L(WORD.politicas) - 8;
-const EXIT = 204;
+const B_AT = L(WORD.politicas) - 6; // INCLUSÃO DIGITAL fica ~1s na tela antes de sair
+const EXIT = L(356); // PRIMEIRO EMPREGO! lido antes do wipe
 
 const IconBadge: React.FC<{ frame: number; at: number; name: string; size?: number; bg?: string; color?: string }> = ({ frame, at, name, size = 150, bg = ED.yellow, color = ED.void }) => {
   const p = ci(frame, [at - 4, at + 14], [0, 1], Easing.out(Easing.cubic));
@@ -33,10 +33,10 @@ const IconBadge: React.FC<{ frame: number; at: number; name: string; size?: numb
 export const Jovens2_Qualificacao: React.FC = () => {
   const frame = useCurrentFrame();
   const flash = ci(frame, [0, 12], [1, 0], Easing.out(Easing.cubic));
-  const pan = ci(frame, [0, S.duration], [24, -24], Easing.inOut(Easing.sin));
-  const aOut = ci(frame, [B_AT, B_AT + 14], [0, 1], Easing.in(Easing.cubic));
+  const pan = ci(frame, [0, S.duration], [14, -14], Easing.inOut(Easing.sin));
+  const aOut = ci(frame, [B_AT, B_AT + 18], [0, 1], Easing.inOut(Easing.cubic));
   const aStyle: React.CSSProperties = { opacity: 1 - aOut, transform: `translateY(${-160 * aOut}px)`, filter: `blur(${20 * aOut}px)` };
-  const wipe = ci(frame, [EXIT, S.duration], [2000, 0], Easing.in(Easing.exp));
+  const wipe = ci(frame, [EXIT, S.duration], [2000, 0], Easing.inOut(Easing.cubic));
   const tape = (at: number) => ci(frame, [at, at + 10], [0, 100], Easing.out(Easing.cubic));
   const block = (at: number) => {
     const p = ci(frame, [at - 4, at + 18], [0, 1], Easing.out(Easing.cubic));
@@ -44,7 +44,7 @@ export const Jovens2_Qualificacao: React.FC = () => {
   };
 
   const qTape = tape(L(WORD.qualificacao) - 4);
-  const polTape = tape(L(WORD.politicas) + 6);
+  const polTape = tape(L(WORD.politicas) + 4);
 
   return (
     <AbsoluteFill style={{ backgroundColor: ED.paper, overflow: 'hidden' }}>
@@ -53,36 +53,36 @@ export const Jovens2_Qualificacao: React.FC = () => {
 
       {/* Batida A */}
       <AbsoluteFill style={{ transform: `translateX(${pan}px)`, ...aStyle }}>
-        <div style={{ position: 'absolute', top: 260, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ position: 'absolute', top: 380, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={{ background: ED.void, borderRadius: 999, padding: '16px 42px', ...edIn(frame, Math.max(3, L(WORD.como)), { y: 16, trackFrom: 0, trackTo: 0 }), letterSpacing: undefined }}>
-            <span style={{ display: 'inline-block', fontFamily: ED.sans, fontWeight: 800, fontSize: 42, color: '#FFFFFF', ...edIn(frame, Math.max(3, L(WORD.como)), { y: 0, blur: 0, trackFrom: -4, trackTo: -1 }) }}>
+            <span style={{ display: 'inline-block', fontFamily: ED.sans, fontWeight: 800, fontSize: 48, color: '#FFFFFF', ...edIn(frame, Math.max(3, L(WORD.como)), { y: 0, blur: 0, trackFrom: -4, trackTo: -1 }) }}>
               COMO DEPUTADA FEDERAL
             </span>
           </div>
-          <div style={{ marginTop: 18, fontFamily: ED.sans, fontWeight: 800, fontSize: 46, color: ED.brandCore, ...edIn(frame, L(WORD.pretende), { y: 12, trackFrom: -4, trackTo: -1 }) }}>
+          <div style={{ marginTop: 20, fontFamily: ED.sans, fontWeight: 800, fontSize: 54, color: ED.brandCore, ...edIn(frame, L(WORD.pretende), { y: 12, trackFrom: -4, trackTo: -1 }) }}>
             pretende defender
           </div>
         </div>
 
         {/* MAIS QUALIFICAÇÃO PROFISSIONAL + capelo */}
-        <div style={{ position: 'absolute', top: 520, left: 0, right: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 30 }}>
-          <IconBadge frame={frame} at={L(WORD.qualificacao)} name="diploma" size={130} />
+        <div style={{ position: 'absolute', top: 640, left: 0, right: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 30 }}>
+          <IconBadge frame={frame} at={L(WORD.qualificacao)} name="diploma" size={150} />
           <div>
-            <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 52, color: ED.void, ...edIn(frame, L(WORD.mais), { y: 12, trackFrom: -3, trackTo: -1 }) }}>MAIS</div>
+            <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 58, color: ED.void, ...edIn(frame, L(WORD.mais), { y: 12, trackFrom: -3, trackTo: -1 }) }}>MAIS</div>
             <div style={{ display: 'inline-block', marginTop: 6, background: ED.yellow, padding: '10px 22px 4px', opacity: qTape > 0 ? 1 : 0, clipPath: `inset(0 ${100 - qTape}% 0 0)`, transform: 'rotate(-2deg)', boxShadow: '0 10px 24px rgba(45,22,67,0.2)' }}>
-              <span style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 72, lineHeight: 1, letterSpacing: -3, color: ED.void, whiteSpace: 'nowrap' }}>QUALIFICAÇÃO</span>
+              <span style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 84, lineHeight: 1, letterSpacing: -3, color: ED.void, whiteSpace: 'nowrap' }}>QUALIFICAÇÃO</span>
             </div>
-            <div style={{ marginTop: 10, fontFamily: ED.sans, fontWeight: 900, fontSize: 54, color: ED.brandCore, ...edIn(frame, L(WORD.profissional), { y: 12, trackFrom: -4, trackTo: -2 }) }}>PROFISSIONAL</div>
+            <div style={{ marginTop: 10, fontFamily: ED.sans, fontWeight: 900, fontSize: 62, color: ED.brandCore, ...edIn(frame, L(WORD.profissional), { y: 12, trackFrom: -4, trackTo: -2 }) }}>PROFISSIONAL</div>
           </div>
         </div>
 
         {/* INCLUSÃO DIGITAL + notebook */}
-        <div style={{ position: 'absolute', top: 870, left: 150, right: 150, ...block(L(WORD.inclusao)) }}>
+        <div style={{ position: 'absolute', top: 1040, left: 110, right: 110, ...block(L(WORD.inclusao)) }}>
           <div style={{ background: ED.void, padding: '30px 36px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 30, boxShadow: '0 30px 70px rgba(45,22,67,0.4)' }}>
-            <IconBadge frame={frame} at={L(WORD.inclusao) + 4} name="laptop" size={124} />
-            <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 72, lineHeight: 0.98, color: '#FFFFFF', letterSpacing: -3 }}>
+            <IconBadge frame={frame} at={L(WORD.inclusao) + 4} name="laptop" size={144} />
+            <div style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 86, lineHeight: 0.98, color: '#FFFFFF', letterSpacing: -3 }}>
               INCLUSÃO
-              <div style={{ color: ED.yellow, ...edIn(frame, L(WORD.digital), { y: 10, blur: 10, trackFrom: -6, trackTo: -3 }) }}>DIGITAL</div>
+              <div style={{ color: ED.yellow, ...edIn(frame, L(WORD.inclusao) + 6, { y: 10, blur: 10, trackFrom: -6, trackTo: -3 }) }}>DIGITAL</div>
             </div>
           </div>
         </div>
@@ -90,21 +90,21 @@ export const Jovens2_Qualificacao: React.FC = () => {
 
       {/* Batida B */}
       <AbsoluteFill style={{ transform: `translateX(${pan}px)` }}>
-        <div style={{ position: 'absolute', top: 330, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
+        <div style={{ position: 'absolute', top: 520, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
           <div style={{ background: ED.yellow, padding: '14px 36px 8px', opacity: polTape > 0 ? 1 : 0, clipPath: `inset(0 ${100 - polTape}% 0 0)`, transform: 'rotate(-2deg)', boxShadow: '0 10px 24px rgba(45,22,67,0.2)' }}>
-            <span style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 88, lineHeight: 1, letterSpacing: -3, color: ED.void, whiteSpace: 'nowrap' }}>E POLÍTICAS</span>
+            <span style={{ fontFamily: ED.sans, fontWeight: 900, fontSize: 100, lineHeight: 1, letterSpacing: -3, color: ED.void, whiteSpace: 'nowrap' }}>E POLÍTICAS</span>
           </div>
         </div>
-        <div style={{ position: 'absolute', top: 500, left: 0, right: 0, textAlign: 'center', fontFamily: ED.sans, fontWeight: 800, fontSize: 50, color: ED.void }}>
+        <div style={{ position: 'absolute', top: 700, left: 0, right: 0, textAlign: 'center', fontFamily: ED.sans, fontWeight: 800, fontSize: 56, color: ED.void }}>
           <span style={{ display: 'inline-block', marginRight: 16, ...edIn(frame, L(WORD.facilitem) - 3, { y: 12, trackFrom: -4, trackTo: -1 }) }}>que facilitem</span>
           <span style={{ display: 'inline-block', color: ED.brandCore, ...edIn(frame, L(WORD.acesso) - 3, { y: 12, trackFrom: -4, trackTo: -1 }) }}>o acesso ao</span>
         </div>
-        <div style={{ position: 'absolute', top: 630, left: 130, right: 130, ...block(L(WORD.primeiro)) }}>
+        <div style={{ position: 'absolute', top: 840, left: 100, right: 100, ...block(L(WORD.primeiro)) }}>
           <div style={{ background: ED.void, padding: '36px 36px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 30, boxShadow: '0 40px 80px rgba(45,22,67,0.45)' }}>
-            <IconBadge frame={frame} at={L(WORD.primeiro) + 2} name="briefcase" size={136} />
+            <IconBadge frame={frame} at={L(WORD.primeiro) + 2} name="briefcase" size={156} />
             <div style={{ fontFamily: ED.sans, fontWeight: 900, lineHeight: 0.95, whiteSpace: 'nowrap' }}>
-              <div style={{ fontSize: 88, color: '#FFFFFF', ...edIn(frame, L(WORD.primeiro), { y: 10, blur: 10, trackFrom: -8, trackTo: -4 }) }}>PRIMEIRO</div>
-              <div style={{ fontSize: 92, color: ED.yellow, ...edIn(frame, L(WORD.emprego), { y: 10, blur: 10, trackFrom: -8, trackTo: -4 }) }}>EMPREGO!</div>
+              <div style={{ fontSize: 98, color: '#FFFFFF', ...edIn(frame, L(WORD.primeiro), { y: 10, blur: 10, trackFrom: -8, trackTo: -4 }) }}>PRIMEIRO</div>
+              <div style={{ fontSize: 102, color: ED.yellow, ...edIn(frame, L(WORD.primeiro) + 6, { y: 10, blur: 10, trackFrom: -8, trackTo: -4 }) }}>EMPREGO!</div>
             </div>
           </div>
         </div>
