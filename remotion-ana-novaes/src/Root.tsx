@@ -4,6 +4,7 @@ import { VideoAnaNovaes, TOTAL_FRAMES, FPS, WIDTH, HEIGHT } from './VideoAnaNova
 import { VideoAnaNovaisCausa, TOTAL_FRAMES as CAUSA_TOTAL_FRAMES } from './VideoAnaNovaisCausa';
 import { VideoAnaNovaisCombate, TOTAL_FRAMES as COMBATE_TOTAL_FRAMES } from './VideoAnaNovaisCombate';
 import { VideoAnaNovaisIdosos, TOTAL_FRAMES as IDOSOS_TOTAL_FRAMES } from './VideoAnaNovaisIdosos';
+import { VideoAnaNovaisJovens, TOTAL_FRAMES as JOVENS_TOTAL_FRAMES } from './VideoAnaNovaisJovens';
 import { VideoAnaNovaisProtecao, TOTAL_FRAMES as PROTECAO_TOTAL_FRAMES } from './VideoAnaNovaisProtecao';
 
 export const RemotionRoot: React.FC = () => {
@@ -45,6 +46,14 @@ export const RemotionRoot: React.FC = () => {
         id="AnaNovais-Idosos"
         component={VideoAnaNovaisIdosos}
         durationInFrames={IDOSOS_TOTAL_FRAMES}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+      />
+      <Composition
+        id="AnaNovais-Jovens"
+        component={VideoAnaNovaisJovens}
+        durationInFrames={JOVENS_TOTAL_FRAMES}
         fps={FPS}
         width={WIDTH}
         height={HEIGHT}
