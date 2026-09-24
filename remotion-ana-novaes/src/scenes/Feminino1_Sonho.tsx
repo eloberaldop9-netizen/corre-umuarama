@@ -16,7 +16,8 @@ import type { FemininoAssets } from '../feminino-timing';
 // à direita, fotos rasgadas de mulheres empreendendo (dona de padaria em
 // "mulheres", empreendedora despachando pedidos em "abrir"). Manchete:
 // OPORTUNIDADES / PARA MULHERES, a linha fina "que sonham em abrir ou fazer
-// crescer" e O PRÓPRIO NEGÓCIO! cravado na base em amarelo com borda roxa.
+// crescer" e O PRÓPRIO NEGÓCIO! na base em amarelo com borda roxa, com
+// respiro acima dele e entrada sutil (fade + foco, sem salto).
 // Saída: Z-DIVE em NEGÓCIO (cega em amarelo); colagem rasga para as laterais.
 const S = FEMININO_SCENES.c1;
 const EXIT = 156; // "negócio!" termina em 160 — já lido
@@ -41,12 +42,12 @@ export const Feminino1_Sonho: React.FC<{ assets: FemininoAssets }> = ({ assets }
   };
 
   const negocio = (
-    <div style={{ position: 'absolute', top: 1282, left: 0, right: 0, textAlign: 'center' }}>
+    <div style={{ position: 'absolute', top: 1318, left: 0, right: 0, textAlign: 'center' }}>
       <span
         style={{
           display: 'inline-block', fontFamily: ED.sans, fontWeight: 900, fontSize: 130, lineHeight: 1, color: ED.yellow, whiteSpace: 'nowrap',
           WebkitTextStroke: `12px ${ED.void}`, paintOrder: 'stroke fill', filter: 'drop-shadow(0 24px 30px rgba(45,22,67,0.55))',
-          ...edIn(frame, WORD.proprio + 2, { dur: 18, y: 0, blur: 20, trackFrom: -8, trackTo: -3 }),
+          ...edIn(frame, WORD.proprio + 2, { dur: 22, y: 14, blur: 8, trackFrom: -4, trackTo: -3 }), // entrada sutil
         }}
       >
         NEGÓCIO!
@@ -62,7 +63,7 @@ export const Feminino1_Sonho: React.FC<{ assets: FemininoAssets }> = ({ assets }
 
       <AbsoluteFill style={{ transform: `scale(${dolly})` }}>
         {/* ANA NOVAIS / quer ampliar as */}
-        <div style={{ position: 'absolute', top: 240, left: 0, right: 0, textAlign: 'center', ...tear(-1, 2) }}>
+        <div style={{ position: 'absolute', top: 228, left: 0, right: 0, textAlign: 'center', ...tear(-1, 2) }}>
           <span style={{ display: 'inline-block', fontFamily: ED.sans, fontWeight: 300, fontSize: 60, color: ED.void, ...edIn(frame, WORD.ana, { trackFrom: 0, trackTo: 6, y: 20, blur: 8 }) }}>
             ANA NOVAIS
           </span>
@@ -73,6 +74,8 @@ export const Feminino1_Sonho: React.FC<{ assets: FemininoAssets }> = ({ assets }
           </div>
         </div>
 
+        {/* Colagem ampliada (Ana + mulheres empreendendo) para preencher a tela */}
+        <AbsoluteFill style={{ transform: 'scale(1.2)', transformOrigin: '50% 30%' }}>
         {/* Colagem: folhas de jornal + mulheres empreendendo */}
         <div style={{ ...tear(1), opacity: pIn * (tear(1).opacity as number) }}>
           <NewsSheet w={520} h={420} seed={11} style={{ top: 440, left: 470, transform: 'rotate(-4deg)' }} />
@@ -86,7 +89,7 @@ export const Feminino1_Sonho: React.FC<{ assets: FemininoAssets }> = ({ assets }
         </div>
 
         {/* Ana — recorte de jornal à esquerda */}
-        <div style={{ position: 'absolute', top: 390, left: 90, width: 400, ...tear(-1) }}>
+        <div style={{ position: 'absolute', top: 420, left: 90, width: 400, ...tear(-1) }}>
           <div style={{ opacity: anaIn, transform: `translateY(${60 * (1 - anaIn)}px) rotate(-2deg)`, filter: `blur(${16 * (1 - anaIn)}px)`, position: 'relative' }}>
             <div
               style={{
@@ -107,6 +110,8 @@ export const Feminino1_Sonho: React.FC<{ assets: FemininoAssets }> = ({ assets }
             </div>
           </div>
         </div>
+
+        </AbsoluteFill>
 
         {/* Manchete */}
         <div style={{ position: 'absolute', top: 950, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', ...tear(1, 3) }}>
