@@ -4,6 +4,7 @@ import { VideoAnaNovaes, TOTAL_FRAMES, FPS, WIDTH, HEIGHT } from './VideoAnaNova
 import { VideoAnaNovaisCausa, TOTAL_FRAMES as CAUSA_TOTAL_FRAMES } from './VideoAnaNovaisCausa';
 import { VideoAnaNovaisCombate, TOTAL_FRAMES as COMBATE_TOTAL_FRAMES } from './VideoAnaNovaisCombate';
 import { VideoAnaNovaisIdosos, TOTAL_FRAMES as IDOSOS_TOTAL_FRAMES } from './VideoAnaNovaisIdosos';
+import { VideoAnaNovaisEducacao, TOTAL_FRAMES as EDUCACAO_TOTAL_FRAMES } from './VideoAnaNovaisEducacao';
 import { VideoAnaNovaisFeminino, TOTAL_FRAMES as FEMININO_TOTAL_FRAMES } from './VideoAnaNovaisFeminino';
 import { VideoAnaNovaisJovens, TOTAL_FRAMES as JOVENS_TOTAL_FRAMES } from './VideoAnaNovaisJovens';
 import { VideoAnaNovaisProtecao, TOTAL_FRAMES as PROTECAO_TOTAL_FRAMES } from './VideoAnaNovaisProtecao';
@@ -63,6 +64,14 @@ export const RemotionRoot: React.FC = () => {
         id="AnaNovais-Feminino"
         component={VideoAnaNovaisFeminino}
         durationInFrames={FEMININO_TOTAL_FRAMES}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+      />
+      <Composition
+        id="AnaNovais-Educacao"
+        component={VideoAnaNovaisEducacao}
+        durationInFrames={EDUCACAO_TOTAL_FRAMES}
         fps={FPS}
         width={WIDTH}
         height={HEIGHT}

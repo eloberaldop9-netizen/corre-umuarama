@@ -19,6 +19,9 @@ export const ICON_PATHS: Record<string, string[]> = {
   documento: ['M6 3h8l4 4v14H6z', 'M14 3v4h4', 'M9 14l2 2 4-4'],
   balanca: ['M12 3v17', 'M8 20h8', 'M5 7h14', 'M5 7l-3 6.5a3 3 0 0 0 6 0z', 'M19 7l-3 6.5a3 3 0 0 0 6 0z'],
   venus: ['M12 3a5.5 5.5 0 1 0 0 11 5.5 5.5 0 1 0 0-11z', 'M12 14v7', 'M8.5 18h7'],
+  lupa: ['M10.5 3.5a7 7 0 1 0 0 14 7 7 0 1 0 0-14z', 'M15.8 15.8L21 21', 'M7.5 10.5l2 2 3.5-3.5'],
+  quadro: ['M3 4h18v11H3z', 'M8 20l2.5-5', 'M16 20l-2.5-5', 'M6.5 8h7', 'M6.5 11h4.5', 'M16.5 8.5l1.5 1.5'],
+  holerite: ['M6 3h12v18l-2.5-1.8L13 21l-2.5-1.8L8 21l-2-1.5z', 'M9 8h6', 'M9 11.5h6', 'M9 15h3.5'],
 };
 
 export const LineIcon: React.FC<{ name: keyof typeof ICON_PATHS | string; frame: number; at: number; size: number; color: string; stroke?: number; dur?: number }> = ({
