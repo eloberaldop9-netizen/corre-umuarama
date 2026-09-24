@@ -88,8 +88,9 @@ export const Feminino1_Sonho: React.FC<{ assets: FemininoAssets }> = ({ assets }
           <TornPhoto frame={frame} at={WORD.abrir - 8} file={assets.laptop} w={500} h={330} pos="55% 50%" seed={8} rot={-3} />
         </div>
 
-        {/* Ana — recorte de jornal à esquerda */}
-        <div style={{ position: 'absolute', top: 420, left: 90, width: 400, ...tear(-1) }}>
+        {/* Ana — recorte de jornal à esquerda; grande o bastante para o corte das
+            pernas ficar abaixo da borda da tela (ela nunca "flutua") */}
+        <div style={{ position: 'absolute', top: 420, left: 30, width: 520, ...tear(-1) }}>
           <div style={{ opacity: anaIn, transform: `translateY(${60 * (1 - anaIn)}px) rotate(-2deg)`, filter: `blur(${16 * (1 - anaIn)}px)`, position: 'relative' }}>
             <div
               style={{
@@ -99,7 +100,7 @@ export const Feminino1_Sonho: React.FC<{ assets: FemininoAssets }> = ({ assets }
               }}
             />
             <div style={{ position: 'relative' }}>
-              <Img src={cut} style={{ display: 'block', width: 400, filter: 'grayscale(1) contrast(1.2) brightness(1.03)' }} />
+              <Img src={cut} style={{ display: 'block', width: 520, filter: 'grayscale(1) contrast(1.2) brightness(1.03)' }} />
               <div
                 style={{
                   position: 'absolute', inset: 0, mixBlendMode: 'multiply', opacity: 0.26,
