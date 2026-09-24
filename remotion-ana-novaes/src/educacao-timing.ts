@@ -89,10 +89,10 @@ export interface EducacaoAssets {
   anaCutout: string; // Ana sentada, camisa branca (foto enviada), fundo removido
   alunos: string; // Adobe Stock — alunos levantando a mão
   carteiras: string; // Adobe Stock — turma nas carteiras
-  escola: string; // Adobe Stock — prédio escolar moderno
-  robotica: string; // Adobe Stock — crianças em aula de robótica
+  escola: string; // Adobe Stock — sala de aula equipada e colorida (infraestrutura)
+  tecnologia: string; // Adobe Stock — alunos usando notebooks em sala
   aula: string; // Adobe Stock — professora dando aula
-  psicologa: string; // Adobe Stock — psicóloga conversando com criança
+  psicologa: string; // Adobe Stock — psicóloga escolar atendendo aluno na escola
   inclusao: string; // Adobe Stock — criança com apoio da professora
   narracao: string;
 }
@@ -102,7 +102,7 @@ export const EDUCACAO_ASSETS: EducacaoAssets = {
   alunos: 'stock-edu-alunos.jpg',
   carteiras: 'stock-edu-carteiras.jpg',
   escola: 'stock-edu-escola.jpg',
-  robotica: 'stock-edu-robotica.jpg',
+  tecnologia: 'stock-edu-tecnologia.jpg',
   aula: 'stock-edu-aula.jpg',
   psicologa: 'stock-edu-psicologa.jpg',
   inclusao: 'stock-edu-inclusao.jpg',

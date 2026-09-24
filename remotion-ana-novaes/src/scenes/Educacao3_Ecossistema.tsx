@@ -16,9 +16,10 @@ import type { EducacaoAssets } from '../educacao-timing';
 // sem parar (Crane Up contínuo): seis "telas" empilhadas, cada uma
 // centralizada quando a sua frase é falada. Dentro de cada tela a câmera
 // deriva devagar; nas pausas reais da fala ela sobe para a próxima.
-//  1 infraestrutura (prédio escolar) · 2 tecnologia e inovação (robótica) ·
+//  1 infraestrutura (sala de aula equipada) · 2 tecnologia e inovação
+//  (alunos com notebooks) ·
 //  3 condições de ensino em sala de aula (professora) · 4 psicólogos,
-//  assistentes sociais e equipes multiprofissionais (psicóloga com criança) ·
+//  assistentes sociais e equipes multiprofissionais (psicóloga escolar) ·
 //  5 suporte aos estudantes (apoio em sala) · 6 autismo, TDAH e outras
 //  necessidades específicas.
 // Saída: DISSOLVE SUJO (blur 0→40, brilho → 0) para o roxo do selo.
@@ -105,10 +106,10 @@ export const Educacao3_Ecossistema: React.FC<{ assets: EducacaoAssets }> = ({ as
           {line('A PROPOSTA TAMBÉM PREVÊ', WORD.proposta, 50, ED.brandCore, 380, 0)}
           {line('ESCOLAS COM MELHOR', WORD.escolas2, 66, ED.void, 460, 0)}
           {block('INFRAESTRUTURA', WORD.infraestrutura, 82, 552, 0, 'yellowBorder')}
-          {photo(assets.escola, WORD.escolas2, 880, 520, 730, 0, '50% 60%', 1.2)}
+          {photo(assets.escola, WORD.escolas2, 880, 520, 730, 0, '60% 55%', 1.2)}
 
           {/* Tela 2 — tecnologia e inovação */}
-          {photo(assets.robotica, WORD.tecnologia - 8, 880, 540, 390, 1, '50% 90%', -1.2, 1.35)}
+          {photo(assets.tecnologia, WORD.tecnologia - 8, 880, 540, 390, 1, '40% 60%', -1.2)}
           {line('TECNOLOGIA', WORD.tecnologia, 112, ED.void, 1010, 1)}
           {block('E INOVAÇÃO', WORD.inovacao, 90, 1140, 1, 'yellow', 1.5)}
 
@@ -128,7 +129,7 @@ export const Educacao3_Ecossistema: React.FC<{ assets: EducacaoAssets }> = ({ as
           {line('E EQUIPES', WORD.equipes, 48, ED.brandCore, 784, 3)}
           {block('MULTIPROFISSIONAIS', WORD.multiprofissionais, 58, 842, 3, 'yellow', 1.2)}
           {line('NAS ESCOLAS,', WORD.escolas3, 48, ED.brandCore, 940, 3)}
-          {photo(assets.psicologa, WORD.psicologos, 800, 400, 1024, 3, '50% 45%', -1)}
+          {photo(assets.psicologa, WORD.psicologos, 800, 400, 1024, 3, '60% 40%', -1)}
 
           {/* Tela 5 — suporte aos estudantes */}
           {line('AMPLIANDO O SUPORTE', WORD.ampliando, 62, ED.void, 400, 4)}
