@@ -2,7 +2,7 @@ import React from 'react';
 import { AbsoluteFill, Easing, Img, staticFile, useCurrentFrame } from 'remotion';
 import { ci } from '../lib/motion';
 import { DustParticles, NoiseOverlay } from '../lib/Background';
-import { NewsSheet, RoughFilter } from '../lib/Newsprint';
+import { RoughFilter } from '../lib/Newsprint';
 import { ED, edIn } from '../lib/editorial';
 import { JOVENS_SCENES, WORD } from '../jovens-timing';
 import type { JovensAssets } from '../jovens-timing';
@@ -13,44 +13,14 @@ import type { JovensAssets } from '../jovens-timing';
 // Roxo profundo, Dolly In. Foto REAL: a Ana entregando o certificado ao
 // jovem vira o recorte de jornal (P&B + retícula, contorno amarelo rasgado)
 // na base da tela, de ponta a ponta — os cortes da foto ficam fora do quadro.
-// Atrás das manchetes, três fotos reais da Ana com jovens (recortes de
-// jornal rasgados) entram primeiro inteiras e escurecem quando o texto chega.
+// No topo, um mosaico de revista com três fotos reais da Ana com jovens
+// preenche a tela de ponta a ponta; entra visível e recua (opacidade baixa +
+// véu roxo) quando as manchetes chegam, para o texto ler limpo.
 // Manchetes empilhadas acima das cabeças: OPORTUNIDADES / PARA OS JOVENS /
 // entrarem preparados no / MERCADO DE / TRABALHO!. Saída Z-DIVE em
 // OPORTUNIDADES com cortina amarela; colagem desliza pra esquerda.
 const S = JOVENS_SCENES.c1;
 const EXIT = 138; // "trabalho!" termina em 137 — sai só depois de lido
-
-/** Polígono de borda rasgada irregular (determinístico por seed). */
-const torn = (seed: number) => {
-  const r = (n: number) => {
-    const v = Math.sin(seed * 12.9898 + n * 78.233) * 43758.5453;
-    return v - Math.floor(v);
-  };
-  const N = 16;
-  const pts: string[] = [];
-  for (let i = 0; i <= N; i++) pts.push(`${(i / N) * 100}% ${r(i) * 5}%`);
-  for (let i = 1; i <= N; i++) pts.push(`${100 - r(i + 30) * 4}% ${(i / N) * 100}%`);
-  for (let i = 1; i <= N; i++) pts.push(`${100 - (i / N) * 100}% ${100 - r(i + 60) * 5}%`);
-  for (let i = 1; i < N; i++) pts.push(`${r(i + 90) * 4}% ${100 - (i / N) * 100}%`);
-  return `polygon(${pts.join(',')})`;
-};
-
-const TornPhoto: React.FC<{ frame: number; at: number; file: string; w: number; h: number; pos: string; seed: number; rot: number; dim?: number }> = ({
-  frame, at, file, w, h, pos, seed, rot, dim = 1,
-}) => {
-  const p = ci(frame, [at, at + 24], [0, 1], Easing.out(Easing.cubic));
-  return (
-    <div style={{ opacity: dim * p, transform: `translateY(${50 * (1 - p)}px) rotate(${rot}deg)`, filter: `blur(${12 * (1 - p)}px)` }}>
-      <div style={{ position: 'relative', width: w, height: h, clipPath: torn(seed), background: '#E6E2DA', padding: 12 }}>
-        <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
-          <Img src={staticFile(`assets/${file}`)} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: pos, filter: 'grayscale(1) contrast(1.3)' }} />
-          <div style={{ position: 'absolute', inset: 0, mixBlendMode: 'multiply', opacity: 0.35, backgroundImage: 'radial-gradient(rgba(0,0,0,1) 1.2px, transparent 1.8px)', backgroundSize: '6px 6px' }} />
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export const Jovens1_Oportunidades: React.FC<{ assets: JovensAssets }> = ({ assets }) => {
   const frame = useCurrentFrame();
@@ -67,7 +37,8 @@ export const Jovens1_Oportunidades: React.FC<{ assets: JovensAssets }> = ({ asse
   const diving = frame >= EXIT + 2;
 
   // fotos reais inteiras até as manchetes chegarem; depois recuam para o fundo
-  const dim = ci(frame, [WORD.oportunidades - 6, WORD.oportunidades + 14], [1, 0.5], Easing.inOut(Easing.cubic));
+  const mosaic = pIn * ci(frame, [WORD.oportunidades - 8, WORD.oportunidades + 14], [0.9, 0.34], Easing.inOut(Easing.cubic));
+  const veil = ci(frame, [WORD.oportunidades - 8, WORD.oportunidades + 14], [0.35, 1], Easing.inOut(Easing.cubic));
 
   const opStyle = { ...edIn(frame, WORD.oportunidades, { y: 0, trackFrom: -10, trackTo: -4 }) };
   const opWord = (clip?: string) => (
@@ -86,31 +57,38 @@ export const Jovens1_Oportunidades: React.FC<{ assets: JovensAssets }> = ({ asse
       <RoughFilter id="rough-ana-j" />
 
       <AbsoluteFill style={{ transform: `scale(${dolly})` }}>
+        {/* Mosaico de revista atrás das manchetes: fotos reais da Ana com jovens
+            ocupando todo o topo, de ponta a ponta. Entram visíveis e, quando
+            as manchetes chegam, recuam (opacidade baixa + véu roxo) para o texto
+            ler limpo — nenhuma foto disputa com as letras. */}
+        <div style={{ position: 'absolute', top: -60, left: -20, width: 1120, height: 1000, ...tear(-1), opacity: mosaic * (tear(-1).opacity as number), maskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)' }}>
+          {[
+            { file: assets.fotoMencao, x: 0, y: 0, w: 430, h: 1000, pos: '50% 22%', at: 0 },
+            { file: assets.fotoInclusao, x: 440, y: 0, w: 680, h: 495, pos: '50% 30%', at: 5 },
+            { file: assets.fotoRua, x: 440, y: 505, w: 680, h: 495, pos: '45% 30%', at: 10 },
+          ].map((t) => {
+            const p = ci(frame, [t.at, t.at + 24], [0, 1], Easing.out(Easing.cubic));
+            return (
+              <div key={t.file} style={{ position: 'absolute', left: t.x, top: t.y, width: t.w, height: t.h, overflow: 'hidden', opacity: p, filter: `blur(${10 * (1 - p)}px)` }}>
+                <Img src={staticFile(`assets/${t.file}`)} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: t.pos, filter: 'grayscale(1) contrast(1.2)', transform: `scale(${1.08 - 0.08 * p})` }} />
+                <div style={{ position: 'absolute', inset: 0, mixBlendMode: 'multiply', opacity: 0.3, backgroundImage: 'radial-gradient(rgba(0,0,0,1) 1.2px, transparent 1.8px)', backgroundSize: '6px 6px' }} />
+              </div>
+            );
+          })}
+        </div>
+        {/* véu roxo que cresce com as manchetes */}
+        <div style={{ position: 'absolute', top: -60, left: -20, width: 1120, height: 1000, opacity: veil * (tear(-1).opacity as number), background: 'linear-gradient(to bottom, rgba(45,22,67,0.55) 0%, rgba(45,22,67,0.8) 25%, rgba(45,22,67,0.85) 60%, rgba(45,22,67,0.6) 100%)', maskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 72%, transparent 100%)' }} />
+
         {/* ANA NOVAIS / quer ampliar as */}
         <div style={{ position: 'absolute', top: 226, left: 0, right: 0, textAlign: 'center', ...tear(-1, 2) }}>
-          <span style={{ display: 'inline-block', fontFamily: ED.sans, fontWeight: 300, fontSize: 58, color: '#FFFFFF', ...edIn(frame, WORD.ana, { trackFrom: 0, trackTo: 5, y: 20, blur: 8 }) }}>
+          <span style={{ display: 'inline-block', fontFamily: ED.sans, fontWeight: 300, fontSize: 58, color: '#FFFFFF', textShadow: '0 6px 24px rgba(0,0,0,0.9)', ...edIn(frame, WORD.ana, { trackFrom: 0, trackTo: 5, y: 20, blur: 8 }) }}>
             ANA NOVAIS
           </span>
           <div style={{ marginTop: 10 }}>
-            <span style={{ display: 'inline-block', fontFamily: ED.sans, fontWeight: 800, fontSize: 54, color: ED.lilac, ...edIn(frame, WORD.ampliar - 8, { y: 14, trackFrom: -4, trackTo: -1 }) }}>
+            <span style={{ display: 'inline-block', fontFamily: ED.sans, fontWeight: 800, fontSize: 54, color: ED.lilac, textShadow: '0 6px 24px rgba(0,0,0,0.9)', ...edIn(frame, WORD.ampliar - 8, { y: 14, trackFrom: -4, trackTo: -1 }) }}>
               quer ampliar as
             </span>
           </div>
-        </div>
-
-        {/* Colagem atrás das manchetes: fotos reais da Ana com jovens */}
-        <div style={{ ...tear(-1), opacity: pIn * (tear(-1).opacity as number) }}>
-          <NewsSheet w={520} h={440} seed={5} style={{ top: 360, left: 520, transform: 'rotate(5deg)' }} />
-          <NewsSheet w={440} h={400} seed={9} tone="#D9D4CB" style={{ top: 420, left: 20, transform: 'rotate(-4deg)' }} />
-        </div>
-        <div style={{ position: 'absolute', top: 362, left: 380, ...tear(-1, 1) }}>
-          <TornPhoto frame={frame} at={16} file={assets.fotoMencao} w={320} h={470} pos="50% 30%" seed={4} rot={3} dim={dim} />
-        </div>
-        <div style={{ position: 'absolute', top: 386, left: 10, ...tear(-1, 1) }}>
-          <TornPhoto frame={frame} at={4} file={assets.fotoInclusao} w={400} h={470} pos="50% 30%" seed={2} rot={-6} dim={dim} />
-        </div>
-        <div style={{ position: 'absolute', top: 410, left: 610, ...tear(-1, 1) }}>
-          <TornPhoto frame={frame} at={10} file={assets.fotoRua} w={450} h={400} pos="45% 30%" seed={6} rot={5} dim={dim} />
         </div>
 
         {/* OPORTUNIDADES */}
