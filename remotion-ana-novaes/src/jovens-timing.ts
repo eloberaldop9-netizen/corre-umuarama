@@ -67,15 +67,17 @@ export const JOVENS_SCENES = {
 export const JOVENS_TOTAL_FRAMES = JOVENS_SCENES.c5.from + JOVENS_SCENES.c5.duration; // 827 ≈ 27,6s
 
 export interface JovensAssets {
-  anaCutout: string; // Ana (retrato oficial), fundo removido (rembg)
-  grupo: string; // Adobe Stock — jovens sorrindo em roda
-  escritorio: string; // Adobe Stock — jovens trabalhando em escritório moderno
+  anaCutout: string; // FOTO REAL: Ana entregando certificado a um jovem (rembg + certificado)
+  fotoInclusao: string; // FOTO REAL: Ana abraçada com jovem
+  fotoMencao: string; // FOTO REAL: Ana na entrega de menção honrosa a estudante
+  fotoRua: string; // FOTO REAL: Ana com jovem na rua
   narracao: string;
 }
 
 export const JOVENS_ASSETS: JovensAssets = {
-  anaCutout: 'jovens-ana-cutout.png',
-  grupo: 'stock-jovens-grupo.jpg',
-  escritorio: 'stock-jovens-escritorio.jpg',
+  anaCutout: 'jovens-ana-certificado-cutout.png',
+  fotoInclusao: 'jovens-real-inclusao.jpg',
+  fotoMencao: 'jovens-real-mencao.jpg',
+  fotoRua: 'jovens-real-rua.jpg',
   narracao: 'narracao-jovens.mp3',
 };
