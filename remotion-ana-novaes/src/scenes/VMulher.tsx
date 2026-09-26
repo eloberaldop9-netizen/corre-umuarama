@@ -75,11 +75,22 @@ const CoverArt: React.FC<{ reveal?: number[]; anaIn?: number }> = ({ reveal, ana
   const frame = useCurrentFrame();
   const word = (i: number) => (reveal ? edIn(frame, reveal[i], { dur: 20, y: 24, blur: 14, trackFrom: 2, trackTo: -2 }) : {});
   const solid: React.CSSProperties = { fontFamily: ED.sans, fontWeight: 900, lineHeight: 0.95, color: '#FFFFFF', whiteSpace: 'nowrap', textShadow: '0 10px 40px rgba(40,10,60,0.45)' };
-  const outline: React.CSSProperties = { ...solid, color: 'transparent', WebkitTextStroke: '4px #FFFFFF', textShadow: 'none' };
+  // Contorno limpo: o texto é branco sólido e o filtro SVG #vm-outline deixa só
+  // a borda externa (dilata o alfa e subtrai o original) — sem as sobreposições
+  // internas de contorno que o -webkit-text-stroke mostra na Montserrat.
+  const outline: React.CSSProperties = { ...solid, textShadow: 'none', filter: 'url(#vm-outline)' };
   const cut = staticFile(`assets/${A.anaMaoCutout}`);
   return (
     <AbsoluteFill>
       <PurpleTexture />
+      <svg width={0} height={0} style={{ position: 'absolute' }}>
+        <filter id="vm-outline" x="-5%" y="-10%" width="110%" height="120%">
+          <feMorphology in="SourceAlpha" operator="dilate" radius="3.5" result="d" />
+          <feComposite in="d" in2="SourceAlpha" operator="out" result="o" />
+          <feFlood floodColor="#FFFFFF" />
+          <feComposite in2="o" operator="in" />
+        </filter>
+      </svg>
       {/* Ana — corte inferior e lateral direito da foto ficam fora do quadro */}
       <div style={{ position: 'absolute', top: 760, left: -40, width: 1200, opacity: anaIn, transform: `translateY(${120 * (1 - anaIn)}px)` }}>
         <Img src={cut} style={{ display: 'block', width: 1200, filter: 'grayscale(1) contrast(1.12) brightness(1.02) drop-shadow(0 30px 60px rgba(30,5,50,0.5))' }} />
@@ -88,8 +99,8 @@ const CoverArt: React.FC<{ reveal?: number[]; anaIn?: number }> = ({ reveal, ana
         <div style={{ ...solid, fontSize: 196, letterSpacing: -4, ...word(0) }}>UNIDAS</div>
         <div style={{ ...solid, fontSize: 80, letterSpacing: 1, marginTop: 6, ...word(1) }}>CONSEGUIREMOS</div>
         <div style={{ ...solid, fontSize: 176, letterSpacing: -2, marginTop: 8, ...word(2) }}>VENCER</div>
-        <div style={{ ...outline, fontSize: 176, letterSpacing: -2, ...word(3) }}>ESSA</div>
-        <div style={{ ...outline, fontSize: 150, letterSpacing: 4, ...word(4) }}>BATALHA</div>
+        <div style={{ ...word(3) }}><div style={{ ...outline, fontSize: 176, letterSpacing: -2 }}>ESSA</div></div>
+        <div style={{ ...word(4) }}><div style={{ ...outline, fontSize: 150, letterSpacing: 4 }}>BATALHA</div></div>
       </div>
     </AbsoluteFill>
   );
