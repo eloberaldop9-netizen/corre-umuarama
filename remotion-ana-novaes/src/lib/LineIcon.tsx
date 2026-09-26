@@ -22,6 +22,7 @@ export const ICON_PATHS: Record<string, string[]> = {
   lupa: ['M10.5 3.5a7 7 0 1 0 0 14 7 7 0 1 0 0-14z', 'M15.8 15.8L21 21', 'M7.5 10.5l2 2 3.5-3.5'],
   quadro: ['M3 4h18v11H3z', 'M8 20l2.5-5', 'M16 20l-2.5-5', 'M6.5 8h7', 'M6.5 11h4.5', 'M16.5 8.5l1.5 1.5'],
   holerite: ['M6 3h12v18l-2.5-1.8L13 21l-2.5-1.8L8 21l-2-1.5z', 'M9 8h6', 'M9 11.5h6', 'M9 15h3.5'],
+  escudo: ['M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z', 'M8.5 12l2.5 2.5 4.5-4.5'],
 };
 
 export const LineIcon: React.FC<{ name: keyof typeof ICON_PATHS | string; frame: number; at: number; size: number; color: string; stroke?: number; dur?: number }> = ({
