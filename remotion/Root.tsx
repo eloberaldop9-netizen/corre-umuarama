@@ -7,6 +7,7 @@ import { UaiTofuMantra, DURATION as UAI_MANTRA_DURATION, FPS as UAI_MANTRA_FPS }
 import { UaiTofuFrescalMantra, DURATION as UAI_FRESCAL_DURATION, FPS as UAI_FRESCAL_FPS } from './UaiTofuFrescalMantra';
 import { UaiTofuDashboard, DURATION as UAI_DASHBOARD_DURATION, FPS as UAI_DASHBOARD_FPS } from './UaiTofuDashboard';
 import { UaiTofuBrandIntro, DURATION as UAI_BRAND_INTRO_DURATION, FPS as UAI_BRAND_INTRO_FPS, WIDTH as UAI_BRAND_INTRO_WIDTH, HEIGHT as UAI_BRAND_INTRO_HEIGHT } from './UaiTofuBrandIntro';
+import { GoshenNaCozinhaIntro, DURATION as GOSHEN_DURATION, FPS as GOSHEN_FPS, WIDTH as GOSHEN_WIDTH, HEIGHT as GOSHEN_HEIGHT } from './GoshenNaCozinhaIntro';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -58,6 +59,14 @@ export const RemotionRoot: React.FC = () => {
         fps={UAI_BRAND_INTRO_FPS}
         width={UAI_BRAND_INTRO_WIDTH}
         height={UAI_BRAND_INTRO_HEIGHT}
+      />
+      <Composition
+        id="GoshenNaCozinhaIntro"
+        component={GoshenNaCozinhaIntro}
+        durationInFrames={GOSHEN_DURATION}
+        fps={GOSHEN_FPS}
+        width={GOSHEN_WIDTH}
+        height={GOSHEN_HEIGHT}
       />
       <Composition
         id="UaiCienciaIntro"
