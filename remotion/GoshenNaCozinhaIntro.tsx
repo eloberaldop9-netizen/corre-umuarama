@@ -47,10 +47,17 @@ const DOTS_START = 30;
 const LEAF_MID_START = 46;
 const LOGO_START = 58;
 const WORD_NA_START = 132;
-const WORD_COZINHA_START = 152;
-const WORD_COM_START = 208;
-const WORD_ELO_START = 226;
-const IDLE_START = 255;
+const WORD_NA_WRITE = 24;
+const WORD_COZINHA_START = 150;
+const WORD_COZINHA_WRITE = 54;
+const WORD_COM_START = 214;
+const WORD_ELO_START = 232;
+const IDLE_START = 262;
+
+// Verde da tinta real do script (amostrado de word-cozinha.png), usado só
+// na "ponta da caneta" que acompanha a revelação — não é um asset novo,
+// é a mesma cor do próprio traço.
+const INK = '#126C37';
 
 // Entra deslizando de baixo, desfocada -> nítida, com leve overshoot de
 // escala — a mesma linguagem de "pop para foco" usada no resto do projeto.
@@ -81,6 +88,65 @@ const WordImg: React.FC<{ frame: number; fps: number; start: number; box: Box; t
         transform: `translateY(${translateY}px) scale(${scale})`,
       }}
     />
+  );
+};
+
+// Revelação "escrita à mão": em vez de a palavra inteira entrar em bloco
+// (o que lia como rígido/estático para um script cursivo), a imagem real
+// é revelada da esquerda pra direita via clip-path — como se a própria
+// pincelada estivesse sendo traçada — com uma "ponta de caneta" (um
+// pontinho da mesma cor da tinta) acompanhando a borda da revelação,
+// com um leve chacoalho vertical pra não parecer uma régua deslizando.
+const HandwrittenWord: React.FC<{ frame: number; start: number; writeFrames: number; box: Box }> = ({
+  frame,
+  start,
+  writeFrames,
+  box,
+}) => {
+  const t = interpolate(frame, [start, start + writeFrames], [0, 1] as number[], {
+    ...clampCfg,
+    easing: Easing.inOut(Easing.cubic),
+  });
+  const revealPct = interpolate(t, [0, 1], [0, 100] as number[]);
+  const hiddenPct = 100 - revealPct;
+
+  const tipOpacity = interpolate(
+    frame,
+    [start, start + 6, start + writeFrames - 8, start + writeFrames + 4],
+    [0, 1, 1, 0] as number[],
+    clampCfg
+  );
+  const tipX = box.left + box.w * (revealPct / 100);
+  const wobble = Math.sin(frame * 0.6) * 2.5;
+  const tipY = box.top + box.h * 0.52 + wobble;
+
+  return (
+    <>
+      <Img
+        src={staticFile(`goshen/${box.src}`)}
+        style={{
+          position: 'absolute',
+          left: box.left,
+          top: box.top,
+          width: box.w,
+          height: box.h,
+          clipPath: `inset(0 ${hiddenPct}% 0 0)`,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: tipX - 7,
+          top: tipY - 7,
+          width: 14,
+          height: 14,
+          borderRadius: '50%',
+          background: INK,
+          opacity: tipOpacity * 0.85,
+          filter: 'blur(0.5px)',
+        }}
+      />
+    </>
   );
 };
 
@@ -203,8 +269,8 @@ export const GoshenNaCozinhaIntro: React.FC = () => {
 
       <Logo frame={frame} fps={fps} />
 
-      <WordImg frame={frame} fps={fps} start={WORD_NA_START} box={WORD_NA} />
-      <WordImg frame={frame} fps={fps} start={WORD_COZINHA_START} box={WORD_COZINHA} travel={56} />
+      <HandwrittenWord frame={frame} start={WORD_NA_START} writeFrames={WORD_NA_WRITE} box={WORD_NA} />
+      <HandwrittenWord frame={frame} start={WORD_COZINHA_START} writeFrames={WORD_COZINHA_WRITE} box={WORD_COZINHA} />
       <WordImg frame={frame} fps={fps} start={WORD_COM_START} box={WORD_COM} />
       <WordImg frame={frame} fps={fps} start={WORD_ELO_START} box={WORD_ELO} />
     </AbsoluteFill>
