@@ -3,6 +3,13 @@ import { Composition } from 'remotion';
 import { VideoAnaNovaes, TOTAL_FRAMES, FPS, WIDTH, HEIGHT } from './VideoAnaNovaes';
 import { VideoAnaNovaisCausa, TOTAL_FRAMES as CAUSA_TOTAL_FRAMES } from './VideoAnaNovaisCausa';
 import { VideoAnaNovaisCombate, TOTAL_FRAMES as COMBATE_TOTAL_FRAMES } from './VideoAnaNovaisCombate';
+import {
+  VideoGraficos2D3D,
+  TOTAL_FRAMES as GRAFICOS_TOTAL_FRAMES,
+  FPS as GRAFICOS_FPS,
+  WIDTH as GRAFICOS_WIDTH,
+  HEIGHT as GRAFICOS_HEIGHT,
+} from './graficos/VideoGraficos2D3D';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -30,6 +37,14 @@ export const RemotionRoot: React.FC = () => {
         fps={FPS}
         width={WIDTH}
         height={HEIGHT}
+      />
+      <Composition
+        id="Graficos2D-vs-3D"
+        component={VideoGraficos2D3D}
+        durationInFrames={GRAFICOS_TOTAL_FRAMES}
+        fps={GRAFICOS_FPS}
+        width={GRAFICOS_WIDTH}
+        height={GRAFICOS_HEIGHT}
       />
     </>
   );

@@ -73,3 +73,33 @@ src/
 | 3 — Arquivo | 323 | 157 | 480 |
 | 4 — Compromisso | 473 | 127 | 600 |
 | 5 — Assinatura | 593 | 127 | 720 |
+
+---
+
+# Gráficos 2D vs 3D na Comunicação (Remotion + Three.js)
+
+Vídeo vertical de 60s (1800 frames @ 30fps, 1080×1920) para atividade
+universitária / portfólio. Composição: `Graficos2D-vs-3D`.
+
+```bash
+npm start                       # Studio → escolha Graficos2D-vs-3D
+npm run build:graficos          # gera out/graficos-2d-vs-3d.mp4
+# sem GPU (container/CI):
+npx remotion render src/index.ts Graficos2D-vs-3D out/graficos-2d-vs-3d.mp4 --gl=swangle
+```
+
+| Cena | from | duration | até | Saída |
+|---|---|---|---|---|
+| 1 — O Nascimento do Volume | 0 | 300 | 300 | Flash + Wipe |
+| 2 — O Dinamismo do 2D | 293 | 457 | 750 | Colapso Z-Dive |
+| 3 — A Profundidade do 3D | 743 | 607 | 1350 | Macro Crash |
+| 4 — Comunicação de Outro Nível | 1343 | 457 | 1800 | Dissolve |
+
+```
+src/graficos/
+  theme.ts              paleta + springs da decupagem
+  SpringWords.tsx       texto palavra a palavra (frame - index * 4)
+  three/Studio.tsx      TorusKnot (wireframe → metal PBR), luzes, HDRI procedural, poeira
+  scenes/Scene1..4.tsx  uma cena por arquivo
+  VideoGraficos2D3D.tsx Sequences com overlap de 7f
+```

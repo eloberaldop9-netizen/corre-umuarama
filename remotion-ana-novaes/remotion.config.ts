@@ -10,3 +10,7 @@ Config.setCodec('h264');
 if (process.env.REMOTION_BROWSER_EXECUTABLE) {
   Config.setBrowserExecutable(process.env.REMOTION_BROWSER_EXECUTABLE);
 }
+
+// WebGL (@remotion/three, vídeo Gráficos 2D vs 3D). 'angle' usa a GPU; em
+// máquinas/containers sem GPU, renderize com `--gl=swangle`.
+Config.setChromiumOpenGlRenderer('angle');
