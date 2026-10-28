@@ -60,7 +60,31 @@ interface MetalKnotProps {
   ghostWire?: number;
 }
 
+/** Textura de metal escovado (roughness/bump) gerada em canvas, seed fixa. */
+const useBrushedTexture = () =>
+  useMemo(() => {
+    const c = document.createElement('canvas');
+    c.width = 1024;
+    c.height = 256;
+    const ctx = c.getContext('2d')!;
+    ctx.fillStyle = 'rgb(120,120,120)';
+    ctx.fillRect(0, 0, c.width, c.height);
+    for (let i = 0; i < 1400; i++) {
+      const v = Math.round(70 + random(`brush-v-${i}`) * 120);
+      ctx.fillStyle = `rgba(${v},${v},${v},${0.25 + random(`brush-a-${i}`) * 0.5})`;
+      const x = random(`brush-x-${i}`) * c.width;
+      const y = random(`brush-y-${i}`) * c.height;
+      ctx.fillRect(x, y, 30 + random(`brush-w-${i}`) * 260, 1 + random(`brush-h-${i}`) * 1.5);
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(10, 1);
+    return tex;
+  }, []);
+
 export const MetalKnot: React.FC<MetalKnotProps> = ({ scanY, wireOpacity, ghostWire = 0 }) => {
+  const brushed = useBrushedTexture();
   const solidGeo = useMemo(
     () => new THREE.TorusKnotGeometry(KNOT.radius, KNOT.tube, 360, 56, KNOT.p, KNOT.q),
     []
@@ -77,7 +101,15 @@ export const MetalKnot: React.FC<MetalKnotProps> = ({ scanY, wireOpacity, ghostW
   return (
     <group>
       <mesh geometry={solidGeo}>
-        <meshStandardMaterial color="#0b0e0d" metalness={0.9} roughness={0.2} clippingPlanes={solidPlanes} />
+        <meshStandardMaterial
+          color="#0b0e0d"
+          metalness={0.9}
+          roughness={0.32}
+          roughnessMap={brushed}
+          bumpMap={brushed}
+          bumpScale={0.6}
+          clippingPlanes={solidPlanes}
+        />
       </mesh>
       {wireOpacity > 0 ? (
         <mesh geometry={wireGeo}>

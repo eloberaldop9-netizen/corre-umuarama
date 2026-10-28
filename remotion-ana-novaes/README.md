@@ -99,7 +99,12 @@ npx remotion render src/index.ts Graficos2D-vs-3D out/graficos-2d-vs-3d.mp4 --gl
 src/graficos/
   theme.ts              paleta + springs da decupagem
   SpringWords.tsx       texto palavra a palavra (frame - index * 4)
+  AppBadge.tsx          selos After Effects / Blender / Premiere Pro
+  Grain.tsx             grão de filme global
   three/Studio.tsx      TorusKnot (wireframe → metal PBR), luzes, HDRI procedural, poeira
   scenes/Scene1..4.tsx  uma cena por arquivo
   VideoGraficos2D3D.tsx Sequences com overlap de 7f
 ```
+
+**Créditos e logotipo:** edite `CREDITS` em `src/graficos/scenes/Scene4.tsx`
+(`logo` = arquivo em `public/assets/`, `authors` = nomes do grupo).

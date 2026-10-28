@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { ci } from '../../lib/motion';
 import { FONT, G, SPRINGS } from '../theme';
 import { SpringWords } from '../SpringWords';
+import { AppBadge } from '../AppBadge';
 import { Dust, knotCurvePoint, MetalKnot, StudioEnvironment, StudioLights } from '../three/Studio';
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -159,9 +160,94 @@ const TextOverlay: React.FC<{ frame: number }> = ({ frame }) => {
   );
 };
 
+
+/** Gizmo de eixos (X vermelho, Y verde, Z azul) que gira com a órbita. */
+const AxisGizmo: React.FC<{ orbit: number }> = ({ orbit }) => {
+  const axes = [
+    { label: 'X', color: '#F43F5E', dir: [Math.cos(orbit), 0.0, Math.sin(orbit)] },
+    { label: 'Y', color: '#84CC16', dir: [0, 1, 0] },
+    { label: 'Z', color: '#3B82F6', dir: [-Math.sin(orbit), 0, Math.cos(orbit)] },
+  ];
+  const R = 46;
+  return (
+    <svg width={140} height={140} viewBox="-70 -70 140 140">
+      <circle r={66} fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" />
+      {axes.map((a) => {
+        const x = a.dir[0] * R;
+        const y = -(a.dir[1] * R) + a.dir[2] * R * 0.35;
+        return (
+          <g key={a.label}>
+            <line x1={0} y1={0} x2={x} y2={y} stroke={a.color} strokeWidth={4} strokeLinecap="round" />
+            <circle cx={x} cy={y} r={13} fill={a.color} />
+            <text x={x} y={y + 5} fontSize={14} fontWeight={800} textAnchor="middle" fill="#0A0A0C" fontFamily={FONT}>
+              {a.label}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
+/** HUD de viewport do Blender: modo de shading muda quando o scanner passa. */
+const ViewportHud: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
+  const enter = ci(frame, [50, 72], [0, 1], Easing.out(Easing.cubic));
+  const exit = ci(frame, [T.textExit + 6, T.textExit + 24], [0, 1], Easing.in(Easing.exp));
+  const rendered = frame >= (T.scanStart + T.scanEnd) / 2;
+  const samples = Math.round(ci(frame, [T.scanEnd - 20, T.scanEnd + 90], [1, 128]));
+  const orbit = ci(frame, [0, T.end], [0, Math.PI], Easing.inOut(Easing.cubic));
+  const style = (dir: 1 | -1): React.CSSProperties => ({
+    opacity: enter * ci(exit, [0, 0.7], [1, 0]),
+    transform: `translateY(${(1 - enter) * 60}px) translateX(${dir * 600 * exit}px)`,
+    filter: exit > 0.01 ? `blur(${16 * exit}px)` : undefined,
+  });
+  return (
+    <AbsoluteFill style={{ fontFamily: FONT, pointerEvents: 'none' }}>
+      <div style={{ position: 'absolute', left: 48, bottom: 96, display: 'flex', flexDirection: 'column', gap: 18, ...style(-1) }}>
+        <AppBadge app="blender" variant="glass" size={60} kicker="Criado no" />
+        <div
+          style={{
+            display: 'flex',
+            gap: 10,
+            fontSize: 18,
+            fontWeight: 600,
+            letterSpacing: 2,
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.75)',
+          }}
+        >
+          {['Wireframe', 'Rendered'].map((mode) => {
+            const active = (mode === 'Rendered') === rendered;
+            return (
+              <div
+                key={mode}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  border: `1px solid ${active ? G.emerald : 'rgba(255,255,255,0.15)'}`,
+                  backgroundColor: active ? 'rgba(16,185,129,0.16)' : 'rgba(255,255,255,0.04)',
+                  color: active ? G.emerald : 'rgba(255,255,255,0.5)',
+                }}
+              >
+                {mode}
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ fontSize: 18, fontWeight: 500, letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)' }}>
+          {rendered ? `Cycles · ${samples}/128 samples · Metal PBR` : 'Malha · 14.336 faces'}
+        </div>
+      </div>
+      <div style={{ position: 'absolute', right: 48, bottom: 96, ...style(1) }}>
+        <AxisGizmo orbit={orbit} />
+      </div>
+    </AbsoluteFill>
+  );
+};
+
 export const Scene3: React.FC = () => {
   const frame = useCurrentFrame();
-  const { width, height } = useVideoConfig();
+  const { width, height, fps } = useVideoConfig();
   const blackout = ci(frame, [588, 600], [0, 1]);
 
   return (
@@ -178,6 +264,7 @@ export const Scene3: React.FC = () => {
         <World />
       </ThreeCanvas>
       <TextOverlay frame={frame} />
+      <ViewportHud frame={frame} fps={fps} />
       <AbsoluteFill style={{ backgroundColor: '#000', opacity: blackout }} />
     </AbsoluteFill>
   );

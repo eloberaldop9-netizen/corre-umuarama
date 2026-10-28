@@ -6,54 +6,97 @@ import { SpringWords } from '../SpringWords';
 
 // ─────────────────────────────────────────────────────────────────────────
 // CENA 1 — O Nascimento do Volume (0–300)
-// Círculo 2D desenhado → extrusão em túnel wireframe → Z-push → FLASH + WIPE.
-// Câmera simulada em CSS 3D: FOV vira `perspective`, posição Z vira translateZ.
+// Formas planas (círculo, quadrado, triângulo) são desenhadas em vetor e
+// ganham volume: extrusão em wireframe (cilindro, cubo, prisma). Z-push para
+// dentro do túnel → FLASH + WIPE. Câmera em CSS 3D: FOV vira `perspective`.
 // ─────────────────────────────────────────────────────────────────────────
 
 const H = 1920;
-const RING_R = 200; // círculo de 400px
-const CIRC = 2 * Math.PI * RING_R; // 1256.6 → strokeDashoffset 1256 → 0
-const RING_COUNT = 24;
-const RAIL_COUNT = 12;
-const TUNNEL_DEPTH = 800;
+const RING_R = 200; // círculo herói de 400px (perímetro 1256)
 
 /** FOV vertical (graus) → distância de perspectiva CSS equivalente. */
 const perspectiveFromFov = (fov: number) => H / 2 / Math.tan((fov * Math.PI) / 360);
 const P0 = perspectiveFromFov(70);
-/** Câmera a 1000 no frame 0 ⇒ o círculo aparece em 1:1 (400px reais). */
+/** Câmera a 1000 no frame 0 ⇒ as formas aparecem em 1:1 (círculo de 400px). */
 const CAM_UNIT = P0 / 1000;
 
-const Ring: React.FC<{ dash?: string; dashOffset?: number; opacity: number; glow?: boolean }> = ({
+type ShapeKind = 'circle' | 'square' | 'triangle';
+
+interface ShapeDef {
+  kind: ShapeKind;
+  size: number; // diâmetro / lado
+  x: number;
+  y: number;
+  depth: number;
+  clones: number;
+  draw: [number, number];
+  extrudeAt: number;
+  spinFactor: number;
+  stroke: number;
+}
+
+const SHAPES: ShapeDef[] = [
+  { kind: 'square', size: 170, x: -290, y: -560, depth: 340, clones: 10, draw: [18, 42], extrudeAt: 44, spinFactor: -0.6, stroke: 3 },
+  { kind: 'triangle', size: 210, x: 290, y: 560, depth: 340, clones: 10, draw: [21, 45], extrudeAt: 48, spinFactor: 0.6, stroke: 3 },
+  { kind: 'circle', size: RING_R * 2, x: 0, y: 0, depth: 800, clones: 24, draw: [15, 40], extrudeAt: 40, spinFactor: 1, stroke: 4 },
+];
+
+const TRI_H = Math.sqrt(3) / 2;
+const vertices = (s: ShapeDef): Array<[number, number]> => {
+  const r = s.size / 2;
+  if (s.kind === 'square') return [[-r, -r], [r, -r], [r, r], [-r, r]];
+  if (s.kind === 'triangle') {
+    const h = s.size * TRI_H;
+    return [[0, -h * (2 / 3)], [r, h / 3], [-r, h / 3]];
+  }
+  return Array.from({ length: 12 }, (_, i) => {
+    const a = (i / 12) * Math.PI * 2;
+    return [Math.cos(a) * r, Math.sin(a) * r] as [number, number];
+  });
+};
+
+/** Contorno vetorial; `pathLength=1` normaliza o desenho do stroke. */
+const Outline: React.FC<{ shape: ShapeDef; draw: number; dash?: boolean; opacity: number; glow?: boolean }> = ({
+  shape,
+  draw,
   dash,
-  dashOffset = 0,
   opacity,
   glow,
-}) => (
-  <svg
-    width={RING_R * 2 + 8}
-    height={RING_R * 2 + 8}
-    viewBox={`${-RING_R - 4} ${-RING_R - 4} ${RING_R * 2 + 8} ${RING_R * 2 + 8}`}
-    style={{
-      position: 'absolute',
-      left: -RING_R - 4,
-      top: -RING_R - 4,
-      opacity,
-      overflow: 'visible',
-      filter: glow ? 'drop-shadow(0 0 14px rgba(79,70,229,0.85))' : undefined,
-    }}
-  >
-    <circle
-      r={RING_R}
-      fill="none"
-      stroke={G.indigo}
-      strokeWidth={4}
-      strokeDasharray={dash ?? `${CIRC}`}
-      strokeDashoffset={dashOffset}
-      strokeLinecap="round"
-      transform="rotate(-90)"
-    />
-  </svg>
-);
+}) => {
+  const pad = 8;
+  const half = shape.size / 2 + pad;
+  const common = {
+    fill: 'none',
+    stroke: G.indigo,
+    strokeWidth: shape.stroke,
+    strokeLinejoin: 'round' as const,
+    strokeLinecap: 'round' as const,
+    pathLength: 1,
+    strokeDasharray: dash ? '0.012 0.03' : '1',
+    strokeDashoffset: dash ? 0 : 1 - draw,
+  };
+  return (
+    <svg
+      width={half * 2}
+      height={half * 2}
+      viewBox={`${-half} ${-half} ${half * 2} ${half * 2}`}
+      style={{
+        position: 'absolute',
+        left: -half,
+        top: -half,
+        opacity,
+        overflow: 'visible',
+        filter: glow ? 'drop-shadow(0 0 14px rgba(79,70,229,0.85))' : undefined,
+      }}
+    >
+      {shape.kind === 'circle' ? (
+        <circle r={shape.size / 2} transform="rotate(-90)" {...common} />
+      ) : (
+        <polygon points={vertices(shape).map((v) => v.join(',')).join(' ')} {...common} />
+      )}
+    </svg>
+  );
+};
 
 export const Scene1: React.FC = () => {
   const frame = useCurrentFrame();
@@ -64,26 +107,20 @@ export const Scene1: React.FC = () => {
   const dive = ci(frame, [120, 280], [0, 1], Easing.inOut(Easing.cubic));
   const pierce = ci(frame, [275, 292], [0, 1], Easing.in(Easing.exp));
 
-  // RotX 0→60 / RotY 0→-30 revelam o tubo; durante o mergulho a câmera se
-  // realinha ao eixo do túnel (60→12 / -30→-6) para "entrar" nele.
+  // RotX 0→60 / RotY 0→-30 revelam os volumes; durante o mergulho a câmera
+  // se realinha ao eixo do túnel (60→12 / -30→-6) para "entrar" nele.
   const rotX = 60 * tilt - 48 * dive;
   const rotY = -30 * tilt + 24 * dive;
   const fov = interpolate(dive, [0, 1], [70, 40]);
   const perspective = perspectiveFromFov(fov);
-  const camZ = interpolate(dive, [0, 1], [1000, 200]) - 1100 * pierce; // fura a parede
-  const camDist = camZ * CAM_UNIT;
+  const camDist = (interpolate(dive, [0, 1], [1000, 200]) - 1100 * pierce) * CAM_UNIT;
   const worldZ = perspective - camDist;
 
-  // ── TÚNEL ─────────────────────────────────────────────────────────────
-  const draw = ci(frame, [15, 40], [CIRC, 0], Easing.inOut(Easing.cubic));
-  const extrude = frame < 40 ? 0 : spring({ frame: frame - 40, fps, config: SPRINGS.extrude });
-  const clonesIn = ci(frame, [40, 50], [0, 1]);
   const spin = Math.max(0, frame - 40) * 0.5; // 0.5°/frame
-
   const nearFade = (depth: number) => ci(camDist + depth, [30, 200], [0, 1]);
 
   // ── TEXTO ─────────────────────────────────────────────────────────────
-  const textDrift = 80 * dive; // parallax Z sutil do texto acompanhando o push
+  const textDrift = 80 * dive;
   const glowA = 0.4 + 0.2 * Math.sin(frame * 0.05); // 0.2 ↔ 0.6
 
   // ── FLASH + WIPE ──────────────────────────────────────────────────────
@@ -100,9 +137,7 @@ export const Scene1: React.FC = () => {
     <AbsoluteFill style={{ backgroundColor: G.void, overflow: 'hidden' }}>
       {/* BACKGROUND — base + radial indigo + grid com parallax Z */}
       <AbsoluteFill
-        style={{
-          background: 'radial-gradient(circle at 50% 50%, rgba(79, 70, 229, 0.15), transparent 60%)',
-        }}
+        style={{ background: 'radial-gradient(circle at 50% 50%, rgba(79, 70, 229, 0.15), transparent 60%)' }}
       />
       <AbsoluteFill
         style={{
@@ -126,49 +161,66 @@ export const Scene1: React.FC = () => {
             transform: `translateZ(${worldZ}px) rotateX(${rotX}deg) rotateY(${rotY}deg)`,
           }}
         >
-          <div style={{ position: 'absolute', transformStyle: 'preserve-3d', transform: `rotateZ(${spin}deg)` }}>
-            {/* Trilhos longitudinais do wireframe cilíndrico */}
-            {Array.from({ length: RAIL_COUNT }).map((_, i) => (
+          {SHAPES.map((shape) => {
+            const draw = ci(frame, shape.draw, [0, 1], Easing.inOut(Easing.cubic));
+            const extrude =
+              frame < shape.extrudeAt ? 0 : spring({ frame: frame - shape.extrudeAt, fps, config: SPRINGS.extrude });
+            const clonesIn = ci(frame, [shape.extrudeAt, shape.extrudeAt + 10], [0, 1]);
+            const isHero = shape.kind === 'circle';
+            return (
               <div
-                key={`rail-${i}`}
+                key={shape.kind}
                 style={{
                   position: 'absolute',
-                  left: 0,
-                  top: -1,
-                  width: TUNNEL_DEPTH * extrude,
-                  height: 2,
-                  transformOrigin: '0 50%',
-                  transform: `rotateZ(${(360 / RAIL_COUNT) * i}deg) translateX(${RING_R}px) rotateY(90deg)`,
-                  background: 'linear-gradient(90deg, rgba(79,70,229,0.75), rgba(79,70,229,0))',
-                  opacity: 0.55 * clonesIn * nearFade(0),
+                  transformStyle: 'preserve-3d',
+                  transform: `translate(${shape.x}px, ${shape.y}px) rotateZ(${spin * shape.spinFactor}deg)`,
                 }}
-              />
-            ))}
-
-            {/* Anéis de extrusão — do fundo para frente */}
-            {Array.from({ length: RING_COUNT })
-              .map((_, i) => RING_COUNT - 1 - i)
-              .map((i) => {
-                const depth = TUNNEL_DEPTH * extrude * (i / (RING_COUNT - 1));
-                const isBase = i === 0;
-                const opacity = isBase
-                  ? nearFade(0)
-                  : clonesIn * (1 - 0.78 * (i / (RING_COUNT - 1))) * nearFade(depth);
-                return (
+              >
+                {/* Arestas longitudinais (trilhos do wireframe) */}
+                {vertices(shape).map(([vx, vy], i) => (
                   <div
-                    key={`ring-${i}`}
-                    style={{ position: 'absolute', transformStyle: 'preserve-3d', transform: `translateZ(${-depth}px)` }}
-                  >
-                    <Ring
-                      opacity={opacity}
-                      glow={isBase}
-                      dash={isBase ? undefined : i % 3 === 0 ? '6 22' : undefined}
-                      dashOffset={isBase ? draw : 0}
-                    />
-                  </div>
-                );
-              })}
-          </div>
+                    key={`rail-${i}`}
+                    style={{
+                      position: 'absolute',
+                      left: vx,
+                      top: vy - 1,
+                      width: shape.depth * extrude,
+                      height: 2,
+                      transformOrigin: '0 50%',
+                      transform: 'rotateY(90deg)',
+                      background: 'linear-gradient(90deg, rgba(79,70,229,0.8), rgba(79,70,229,0))',
+                      opacity: (isHero ? 0.55 : 0.75) * clonesIn * nearFade(0),
+                    }}
+                  />
+                ))}
+
+                {/* Clones de extrusão — do fundo para frente */}
+                {Array.from({ length: shape.clones })
+                  .map((_, i) => shape.clones - 1 - i)
+                  .map((i) => {
+                    const depth = shape.depth * extrude * (i / (shape.clones - 1));
+                    const isBase = i === 0;
+                    const opacity = isBase
+                      ? nearFade(0)
+                      : clonesIn * (1 - 0.78 * (i / (shape.clones - 1))) * nearFade(depth);
+                    return (
+                      <div
+                        key={`clone-${i}`}
+                        style={{ position: 'absolute', transformStyle: 'preserve-3d', transform: `translateZ(${-depth}px)` }}
+                      >
+                        <Outline
+                          shape={shape}
+                          draw={isBase ? draw : 1}
+                          opacity={opacity}
+                          glow={isBase}
+                          dash={!isBase && isHero && i % 3 === 0}
+                        />
+                      </div>
+                    );
+                  })}
+              </div>
+            );
+          })}
         </div>
       </AbsoluteFill>
 
@@ -220,12 +272,7 @@ export const Scene1: React.FC = () => {
       </AbsoluteFill>
 
       {/* WIPE — guilhotina vertical revelando o off-white da Cena 2 */}
-      <AbsoluteFill
-        style={{
-          backgroundColor: G.offWhite,
-          clipPath: `inset(0 0 ${(1 - wipe) * 100}% 0)`,
-        }}
-      />
+      <AbsoluteFill style={{ backgroundColor: G.offWhite, clipPath: `inset(0 0 ${(1 - wipe) * 100}% 0)` }} />
       {wipe > 0 && wipe < 1 ? (
         <div
           style={{

@@ -4,6 +4,7 @@ import { Scene1 } from './scenes/Scene1';
 import { Scene2 } from './scenes/Scene2';
 import { Scene3 } from './scenes/Scene3';
 import { Scene4 } from './scenes/Scene4';
+import { Grain } from './Grain';
 
 // Gráficos 2D vs 3D na Comunicação — 60s vertical (1080×1920 @ 30fps).
 // Mapa de cenas da decupagem: overlap de 7 frames entre todas as cenas.
@@ -35,5 +36,6 @@ export const VideoGraficos2D3D: React.FC = () => (
     <Sequence name="Cena 4 — Comunicação de Outro Nível" from={SCENES.c4.from} durationInFrames={SCENES.c4.duration}>
       <Scene4 />
     </Sequence>
+    <Grain />
   </AbsoluteFill>
 );
