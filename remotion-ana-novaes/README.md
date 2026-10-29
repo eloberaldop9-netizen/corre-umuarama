@@ -76,10 +76,10 @@ src/
 
 ---
 
-# Gráficos 2D vs 3D na Comunicação (Remotion + Three.js)
+# Gráficos 2D e 3D na Comunicação (Remotion + Three.js)
 
-Vídeo vertical de 60s (1800 frames @ 30fps, 1080×1920) para atividade
-universitária / portfólio. Composição: `Graficos2D-vs-3D`.
+Vídeo vertical de 60s (1800 frames @ 30fps, 1080×1920), projeto didático.
+Segue o "Pensamento de Vídeo" (Roteiro final). Composição: `Graficos2D-vs-3D`.
 
 ```bash
 npm start                       # Studio → escolha Graficos2D-vs-3D
@@ -90,21 +90,20 @@ npx remotion render src/index.ts Graficos2D-vs-3D out/graficos-2d-vs-3d.mp4 --gl
 
 | Cena | from | duration | até | Saída |
 |---|---|---|---|---|
-| 1 — O Nascimento do Volume | 0 | 300 | 300 | Flash + Wipe |
-| 2 — O Dinamismo do 2D | 293 | 457 | 750 | Colapso Z-Dive |
-| 3 — A Profundidade do 3D | 743 | 607 | 1350 | Macro Crash |
-| 4 — Comunicação de Outro Nível | 1343 | 457 | 1800 | Dissolve |
+| 1 — O Nascimento da Massa (CineA) | 0 | 300 | 300 | Z-Dive massivo |
+| 2 — A Força do 2D (CineB) | 293 | 457 | 750 | Colapso lateral |
+| 3 — A Profundidade do 3D (CineC) | 743 | 607 | 1350 | Wipe volumétrico |
+| 4 — Comunicação de Outro Nível (CineD) | 1343 | 457 | 1800 | Dissolve |
 
 ```
 src/graficos/
-  theme.ts              paleta + springs da decupagem
-  SpringWords.tsx       texto palavra a palavra (frame - index * 4)
-  AppBadge.tsx          selos After Effects / Blender / Premiere Pro
+  theme.ts              paleta + springs do Pensamento de Vídeo
+  SpringWords.tsx       texto palavra a palavra
+  AppBadge.tsx          selo After Effects
   Grain.tsx             grão de filme global
-  three/Studio.tsx      TorusKnot (wireframe → metal PBR), luzes, HDRI procedural, poeira
-  scenes/Scene1..4.tsx  uma cena por arquivo
+  three/Studio.tsx      morfo quadrado→esfera, escultura wireframe→sólido, HDRI procedural
+  scenes/CineA..D.tsx   uma cena por arquivo
   VideoGraficos2D3D.tsx Sequences com overlap de 7f
 ```
 
-**Créditos e logotipo:** edite `CREDITS` em `src/graficos/scenes/Scene4.tsx`
-(`logo` = arquivo em `public/assets/`, `authors` = nomes do grupo).
+**Créditos:** edite `CREDITS` em `src/graficos/scenes/CineD.tsx`.

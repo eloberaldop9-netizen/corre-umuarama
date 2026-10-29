@@ -57,7 +57,7 @@ export const AppTile: React.FC<{ app: AppId; size: number; style?: CSSProperties
 interface AppBadgeProps {
   app: AppId;
   size?: number;
-  variant: 'brutal' | 'glass';
+  variant: 'brutal' | 'glass' | 'flat';
   /** Linha pequena acima do nome. */
   kicker?: string;
   style?: CSSProperties;
@@ -65,7 +65,8 @@ interface AppBadgeProps {
 
 /** Selo "Feito no ..." — versão brutalista (Cena 2) ou vidro (Cenas 3/4). */
 export const AppBadge: React.FC<AppBadgeProps> = ({ app, size = 72, variant, kicker, style }) => {
-  const brutal = variant === 'brutal';
+  const brutal = variant === 'brutal' || variant === 'flat';
+  const flat = variant === 'flat';
   return (
     <div
       style={{
@@ -76,8 +77,8 @@ export const AppBadge: React.FC<AppBadgeProps> = ({ app, size = 72, variant, kic
         fontFamily: FONT,
         borderRadius: brutal ? 0 : 999,
         backgroundColor: brutal ? '#FFFFFF' : 'rgba(20,20,22,0.6)',
-        border: brutal ? '4px solid #0A0A0C' : '1px solid rgba(255,255,255,0.16)',
-        boxShadow: brutal ? '8px 8px 0 0 #0A0A0C' : '0 12px 40px rgba(0,0,0,0.45)',
+        border: brutal ? `${flat ? 3 : 4}px solid #0A0A0C` : '1px solid rgba(255,255,255,0.16)',
+        boxShadow: flat ? 'none' : brutal ? '8px 8px 0 0 #0A0A0C' : '0 12px 40px rgba(0,0,0,0.45)',
         backdropFilter: brutal ? undefined : 'blur(16px)',
         ...style,
       }}
@@ -90,7 +91,7 @@ export const AppBadge: React.FC<AppBadgeProps> = ({ app, size = 72, variant, kic
             fontWeight: 600,
             letterSpacing: 2.5,
             textTransform: 'uppercase',
-            color: brutal ? '#4F46E5' : 'rgba(255,255,255,0.55)',
+            color: flat ? '#1D4ED8' : brutal ? '#4F46E5' : 'rgba(255,255,255,0.55)',
           }}
         >
           {kicker ?? APPS[app].role}

@@ -3,31 +3,15 @@ import { useThree } from '@react-three/fiber';
 import { random } from 'remotion';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { G } from '../theme';
+import { P } from '../theme';
 
-// Peças 3D compartilhadas pelas Cenas 3 e 4: escultura TorusKnot (wireframe →
-// metal PBR), estúdio de luz e poeira. Tudo dirigido por frame, sem useFrame,
-// para o render ser determinístico.
-
-export const KNOT = { radius: 140, tube: 42, p: 2, q: 3 } as const;
-
-/** Ponto da curva central do TorusKnot (mesma fórmula do three.js). */
-export const knotCurvePoint = (u: number): THREE.Vector3 => {
-  const { radius, p, q } = KNOT;
-  const qu = (q / p) * u;
-  const cs = Math.cos(qu);
-  return new THREE.Vector3(
-    radius * (2 + cs) * 0.5 * Math.cos(u),
-    radius * (2 + cs) * Math.sin(u) * 0.5,
-    radius * Math.sin(qu) * 0.5
-  );
-};
+// Peças 3D compartilhadas: HDRI de estúdio procedural, o morfo quadrado→esfera
+// (C1) e a escultura wireframe→sólido (C3/C4). Tudo dirigido por frame.
 
 /** Ambiente HDRI procedural (RoomEnvironment) — reflexos sem baixar arquivos. */
-export const StudioEnvironment: React.FC<{ intensity: number }> = ({ intensity }) => {
+export const StudioEnvironment: React.FC<{ intensity: number; rotationY?: number }> = ({ intensity, rotationY = 0 }) => {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
-  gl.localClippingEnabled = true;
 
   const env = useMemo(() => {
     const pmrem = new THREE.PMREMGenerator(gl);
@@ -39,7 +23,8 @@ export const StudioEnvironment: React.FC<{ intensity: number }> = ({ intensity }
   useLayoutEffect(() => {
     scene.environment = env.texture;
     scene.environmentIntensity = intensity;
-  }, [scene, env, intensity]);
+    scene.environmentRotation.set(0, rotationY, 0);
+  }, [scene, env, intensity, rotationY]);
 
   useEffect(
     () => () => {
@@ -52,16 +37,71 @@ export const StudioEnvironment: React.FC<{ intensity: number }> = ({ intensity }
   return null;
 };
 
-interface MetalKnotProps {
-  /** Altura (Y, mundo) do scanner: acima vira metal, abaixo continua malha. */
-  scanY: number;
-  wireOpacity: number;
-  /** Malha fantasma sobre o metal (Cena 4 — 2D + 3D juntos). */
-  ghostWire?: number;
-}
+// ─────────────────────────────────────────────────────────────────────────
+// MORFO — cubo subdividido com morph target para esfera. De frente, com
+// material emissivo chapado, é um quadrado 2D perfeito; ao inflar, vira esfera.
+// ─────────────────────────────────────────────────────────────────────────
+const useMorphGeometry = () =>
+  useMemo(() => {
+    const geo = new THREE.BoxGeometry(1, 1, 1, 48, 48, 48);
+    const pos = geo.attributes.position;
+    const sphere = new Float32Array(pos.count * 3);
+    const v = new THREE.Vector3();
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i).normalize().multiplyScalar(0.5);
+      sphere[i * 3] = v.x;
+      sphere[i * 3 + 1] = v.y;
+      sphere[i * 3 + 2] = v.z;
+    }
+    geo.morphAttributes.position = [new THREE.BufferAttribute(sphere, 3)];
+    const normals = new Float32Array(pos.count * 3);
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i).normalize();
+      normals[i * 3] = v.x;
+      normals[i * 3 + 1] = v.y;
+      normals[i * 3 + 2] = v.z;
+    }
+    geo.morphAttributes.normal = [new THREE.BufferAttribute(normals, 3)];
+    return geo;
+  }, []);
 
-/** Textura de metal escovado (roughness/bump) gerada em canvas, seed fixa. */
-const useBrushedTexture = () =>
+const FLAT_BLUE = new THREE.Color(P.blueprint);
+const BLACK = new THREE.Color('#000000');
+const CHROME = new THREE.Color('#e9edf2');
+
+export const MorphShape: React.FC<{ morph: number; size: number; y: number; scale: number }> = ({
+  morph,
+  size,
+  y,
+  scale,
+}) => {
+  const geometry = useMorphGeometry();
+  const t = Math.min(1, Math.max(0, morph));
+  const color = useMemo(() => new THREE.Color(), []);
+  color.copy(BLACK).lerp(CHROME, t);
+  return (
+    <mesh geometry={geometry} morphTargetInfluences={[t]} position={[0, y, 0]} scale={size * scale}>
+      <meshStandardMaterial
+        color={color}
+        emissive={FLAT_BLUE}
+        emissiveIntensity={1 - t}
+        metalness={t}
+        roughness={1 - 0.93 * t}
+        envMapIntensity={t}
+        side={THREE.DoubleSide}
+      />
+    </mesh>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// ESCULTURA — TorusKnot (3,5) complexo. Wireframe que se desenha (drawRange)
+// → sólido chumbo texturizado (roughness 0.4).
+// ─────────────────────────────────────────────────────────────────────────
+export const SCULPT = { radius: 150, tube: 34, p: 3, q: 5 } as const;
+
+/** Textura procedural de metal fosco escovado (roughness/bump), seed fixa. */
+export const useBrushedTexture = () =>
   useMemo(() => {
     const c = document.createElement('canvas');
     c.width = 1024;
@@ -69,82 +109,85 @@ const useBrushedTexture = () =>
     const ctx = c.getContext('2d')!;
     ctx.fillStyle = 'rgb(120,120,120)';
     ctx.fillRect(0, 0, c.width, c.height);
-    for (let i = 0; i < 1400; i++) {
-      const v = Math.round(70 + random(`brush-v-${i}`) * 120);
+    for (let i = 0; i < 1600; i++) {
+      const v = Math.round(60 + random(`brush-v-${i}`) * 140);
       ctx.fillStyle = `rgba(${v},${v},${v},${0.25 + random(`brush-a-${i}`) * 0.5})`;
-      const x = random(`brush-x-${i}`) * c.width;
-      const y = random(`brush-y-${i}`) * c.height;
-      ctx.fillRect(x, y, 30 + random(`brush-w-${i}`) * 260, 1 + random(`brush-h-${i}`) * 1.5);
+      ctx.fillRect(
+        random(`brush-x-${i}`) * c.width,
+        random(`brush-y-${i}`) * c.height,
+        30 + random(`brush-w-${i}`) * 260,
+        1 + random(`brush-h-${i}`) * 1.5
+      );
     }
     const tex = new THREE.CanvasTexture(c);
     tex.wrapS = THREE.RepeatWrapping;
     tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(10, 1);
+    tex.repeat.set(14, 1);
     return tex;
   }, []);
 
-export const MetalKnot: React.FC<MetalKnotProps> = ({ scanY, wireOpacity, ghostWire = 0 }) => {
+interface SculptureProps {
+  /** 0→1: quanto da malha já foi "desenhado". */
+  wireDraw: number;
+  wireOpacity: number;
+  solidOpacity: number;
+  shadows?: boolean;
+}
+
+export const Sculpture: React.FC<SculptureProps> = ({ wireDraw, wireOpacity, solidOpacity, shadows }) => {
   const brushed = useBrushedTexture();
   const solidGeo = useMemo(
-    () => new THREE.TorusKnotGeometry(KNOT.radius, KNOT.tube, 360, 56, KNOT.p, KNOT.q),
+    () => new THREE.TorusKnotGeometry(SCULPT.radius, SCULPT.tube, 480, 56, SCULPT.p, SCULPT.q),
     []
   );
   const wireGeo = useMemo(
-    () => new THREE.TorusKnotGeometry(KNOT.radius, KNOT.tube, 128, 14, KNOT.p, KNOT.q),
+    () =>
+      new THREE.WireframeGeometry(
+        new THREE.TorusKnotGeometry(SCULPT.radius, SCULPT.tube, 220, 14, SCULPT.p, SCULPT.q)
+      ),
     []
   );
-  const solidPlanes = useMemo(() => [new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)], []);
-  const wirePlanes = useMemo(() => [new THREE.Plane(new THREE.Vector3(0, -1, 0), 0)], []);
-  solidPlanes[0].constant = -scanY; // mantém y >= scanY
-  wirePlanes[0].constant = scanY; // mantém y <= scanY
+  const wireCount = wireGeo.attributes.position.count;
+  // Desenha em pares de vértices (cada segmento de linha = 2 vértices).
+  wireGeo.setDrawRange(0, Math.floor((wireCount * Math.min(1, Math.max(0, wireDraw))) / 2) * 2);
 
   return (
     <group>
-      <mesh geometry={solidGeo}>
-        <meshStandardMaterial
-          color="#0b0e0d"
-          metalness={0.9}
-          roughness={0.32}
-          roughnessMap={brushed}
-          bumpMap={brushed}
-          bumpScale={0.6}
-          clippingPlanes={solidPlanes}
-        />
-      </mesh>
-      {wireOpacity > 0 ? (
-        <mesh geometry={wireGeo}>
-          <meshBasicMaterial
-            color={G.emerald}
-            wireframe
-            transparent
-            opacity={wireOpacity}
-            clippingPlanes={wirePlanes}
-            toneMapped={false}
+      {solidOpacity > 0.001 ? (
+        <mesh geometry={solidGeo} castShadow={shadows} receiveShadow={false}>
+          <meshStandardMaterial
+            color="#4a4e55"
+            metalness={0.55}
+            roughness={0.4}
+            roughnessMap={brushed}
+            bumpMap={brushed}
+            bumpScale={0.5}
+            transparent={solidOpacity < 1}
+            opacity={solidOpacity}
+            depthWrite={solidOpacity > 0.5}
+            side={THREE.DoubleSide}
           />
         </mesh>
       ) : null}
-      {ghostWire > 0 ? (
-        <mesh geometry={wireGeo} scale={1.004}>
-          <meshBasicMaterial color={G.emerald} wireframe transparent opacity={ghostWire} toneMapped={false} />
-        </mesh>
+      {wireOpacity > 0.001 ? (
+        <lineSegments geometry={wireGeo}>
+          <lineBasicMaterial color={P.wire} transparent opacity={wireOpacity} toneMapped={false} depthWrite={false} />
+        </lineSegments>
       ) : null}
     </group>
   );
 };
 
-/** Rim lights verdes laterais + key fria. `accent` adiciona o indigo do 2D. */
-export const StudioLights: React.FC<{ accent?: boolean }> = ({ accent }) => (
-  <>
-    <ambientLight intensity={0.04} />
-    <pointLight position={[-420, 90, 140]} color={G.emerald} intensity={3.2} decay={0} />
-    <pointLight position={[400, -140, -280]} color={G.emerald} intensity={2.2} decay={0} />
-    <directionalLight position={[200, 420, 320]} color="#dfe7ff" intensity={0.7} />
-    {accent ? <pointLight position={[320, 260, 260]} color={G.indigo} intensity={2.4} decay={0} /> : null}
-  </>
-);
-
-const useSoftDotTexture = () =>
-  useMemo(() => {
+/** Poeira de estúdio: sprites suaves flutuando lentamente. */
+export const Dust: React.FC<{ frame: number; seed: string; count: number; spread: number; size: number; opacity: number }> = ({
+  frame,
+  seed,
+  count,
+  spread,
+  size,
+  opacity,
+}) => {
+  const map = useMemo(() => {
     const c = document.createElement('canvas');
     c.width = 64;
     c.height = 64;
@@ -155,23 +198,8 @@ const useSoftDotTexture = () =>
     g.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, 64, 64);
-    const tex = new THREE.CanvasTexture(c);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    return tex;
+    return new THREE.CanvasTexture(c);
   }, []);
-
-interface DustProps {
-  frame: number;
-  seed: string;
-  count: number;
-  spread: number;
-  size: number;
-  opacity: number;
-}
-
-/** Poeira 3D: sprites suaves (bokeh) flutuando devagar pela lente. */
-export const Dust: React.FC<DustProps> = ({ frame, seed, count, spread, size, opacity }) => {
-  const map = useSoftDotTexture();
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
@@ -181,7 +209,6 @@ export const Dust: React.FC<DustProps> = ({ frame, seed, count, spread, size, op
     }
     return arr;
   }, [count, seed, spread]);
-
   return (
     <points position={[0, frame * 0.12, 0]} rotation={[0, frame * 0.0015, 0]}>
       <bufferGeometry>
@@ -195,7 +222,7 @@ export const Dust: React.FC<DustProps> = ({ frame, seed, count, spread, size, op
         opacity={opacity}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
-        color="#cffbe8"
+        color="#dbeafe"
       />
     </points>
   );

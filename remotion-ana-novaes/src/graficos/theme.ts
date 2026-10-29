@@ -1,27 +1,25 @@
-// Gráficos 2D vs 3D na Comunicação — Paleta Técnica e Springs da decupagem
-// (Diretriz VERBO Motion O.S. v5.0). Toda cor e config de física do vídeo sai daqui.
+// Gráficos 2D e 3D na Comunicação — Paleta Técnica e física do "Pensamento de
+// Vídeo" (Padrão VERBO Motion O.S.). Toda cor e config de spring sai daqui.
 
-export const G = {
-  void: '#0A0A0C', // Cena 1 — tabula rasa
-  offWhite: '#F4F4F5', // Cena 2 — tela de software vetorial
-  deep: '#050505', // Cena 3 — espaço profundo
-  glass: '#111113', // Cena 4 — dark glass
-  indigo: '#4F46E5', // accent 2D
-  emerald: '#10B981', // accent 3D
-  white: '#FFFFFF',
-  ink: '#111827',
-  black: '#0A0A0C',
+export const P = {
+  paper: '#FAFAFA', // Cena 1 — a prancheta do designer
+  blueprint: '#1D4ED8', // Cena 2 — azul ultramarino / cartazes
+  void: '#05050A', // Cena 3 — preto abissal
+  ice: '#E5E7EB', // Cena 4 — cinza gelo
+  neon: '#CCFF00', // accent ácido
+  ink: '#111827', // texto flat
+  wire: '#38BDF8', // malhas wireframe
+  rim: 'rgba(255,255,255,0.85)',
+  gray: '#8A8A8E',
+  slate: '#4B5563',
+  lead: '#1F2125', // chumbo do blockout C3 → C4
 } as const;
 
 export const FONT = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
 
 export const SPRINGS = {
-  text: { damping: 14, mass: 0.8 }, // padrão de texto (regra 2)
-  impact: { damping: 10, mass: 0.8, stiffness: 120 }, // impacto (regra 2)
-  extrude: { damping: 12, mass: 1.2 }, // anéis de extrusão (C1)
-  cardThrow: { damping: 10, mass: 1.2, stiffness: 120 }, // cartas jogadas na mesa (C2)
-  letters: { damping: 14, mass: 0.6, stiffness: 180 }, // letra a letra rápido (C2)
-  emerge: { damping: 14 }, // texto emergindo do abismo (C3)
-  panel: { damping: 14, mass: 0.9 }, // placa de vidro (C4)
-  cta: { damping: 12, stiffness: 120 }, // CTA pulando na tela (C4)
+  text: { damping: 14, mass: 0.8 },
+  morph: { damping: 12, mass: 1.5 }, // quadrado → esfera (C1)
+  card: { damping: 14, mass: 1 }, // UI cards pesantes (C4)
+  badge: { damping: 12, mass: 0.7, stiffness: 120 },
 } as const;
