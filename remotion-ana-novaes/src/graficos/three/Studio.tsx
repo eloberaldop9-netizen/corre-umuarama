@@ -38,56 +38,109 @@ export const StudioEnvironment: React.FC<{ intensity: number; rotationY?: number
 };
 
 // ─────────────────────────────────────────────────────────────────────────
-// MORFO — cubo subdividido com morph target para esfera. De frente, com
-// material emissivo chapado, é um quadrado 2D perfeito; ao inflar, vira esfera.
+// MORFO — cubo subdividido com morph targets de "caixa arredondada": cada
+// target é a mesma caixa com borderRadius r (0 → 50% do lado). r = 50% é a
+// esfera. De frente, com material emissivo chapado, r = 0 é um quadrado 2D.
 // ─────────────────────────────────────────────────────────────────────────
+const MORPH_STEPS = 12;
+
+/** Ponto da caixa unitária com raio de canto r (0..0.5) e sua normal. */
+const roundedBoxPoint = (p: THREE.Vector3, r: number, outP: THREE.Vector3, outN: THREE.Vector3) => {
+  const inner = 0.5 - r;
+  const core = new THREE.Vector3(
+    Math.max(-inner, Math.min(inner, p.x)),
+    Math.max(-inner, Math.min(inner, p.y)),
+    Math.max(-inner, Math.min(inner, p.z))
+  );
+  const d = p.clone().sub(core);
+  if (d.lengthSq() < 1e-12) {
+    // Vértice dentro do núcleo (só ocorre com r = 0.5 no centro das faces): usa a face dominante.
+    const ax = Math.abs(p.x), ay = Math.abs(p.y), az = Math.abs(p.z);
+    d.set(ax >= ay && ax >= az ? Math.sign(p.x) : 0, ay > ax && ay >= az ? Math.sign(p.y) : 0, az > ax && az > ay ? Math.sign(p.z) : 0);
+  }
+  d.normalize();
+  outN.copy(d);
+  outP.copy(core).addScaledVector(d, r);
+};
+
 const useMorphGeometry = () =>
   useMemo(() => {
     const geo = new THREE.BoxGeometry(1, 1, 1, 48, 48, 48);
     const pos = geo.attributes.position;
-    const sphere = new Float32Array(pos.count * 3);
+    const nrm = geo.attributes.normal;
     const v = new THREE.Vector3();
-    for (let i = 0; i < pos.count; i++) {
-      v.fromBufferAttribute(pos, i).normalize().multiplyScalar(0.5);
-      sphere[i * 3] = v.x;
-      sphere[i * 3 + 1] = v.y;
-      sphere[i * 3 + 2] = v.z;
+    const op = new THREE.Vector3();
+    const on = new THREE.Vector3();
+    const positions: THREE.BufferAttribute[] = [];
+    const normals: THREE.BufferAttribute[] = [];
+    for (let k = 1; k <= MORPH_STEPS; k++) {
+      const r = (0.5 * k) / MORPH_STEPS;
+      const ps = new Float32Array(pos.count * 3);
+      const ns = new Float32Array(pos.count * 3);
+      for (let i = 0; i < pos.count; i++) {
+        v.fromBufferAttribute(pos, i);
+        roundedBoxPoint(v, r, op, on);
+        // Morph targets relativos: deslocamento a partir do cubo base.
+        ps[i * 3] = op.x - v.x;
+        ps[i * 3 + 1] = op.y - v.y;
+        ps[i * 3 + 2] = op.z - v.z;
+        ns[i * 3] = on.x - nrm.getX(i);
+        ns[i * 3 + 1] = on.y - nrm.getY(i);
+        ns[i * 3 + 2] = on.z - nrm.getZ(i);
+      }
+      positions.push(new THREE.BufferAttribute(ps, 3));
+      normals.push(new THREE.BufferAttribute(ns, 3));
     }
-    geo.morphAttributes.position = [new THREE.BufferAttribute(sphere, 3)];
-    const normals = new Float32Array(pos.count * 3);
-    for (let i = 0; i < pos.count; i++) {
-      v.fromBufferAttribute(pos, i).normalize();
-      normals[i * 3] = v.x;
-      normals[i * 3 + 1] = v.y;
-      normals[i * 3 + 2] = v.z;
-    }
-    geo.morphAttributes.normal = [new THREE.BufferAttribute(normals, 3)];
+    geo.morphAttributes.position = positions;
+    geo.morphAttributes.normal = normals;
+    geo.morphTargetsRelative = true;
     return geo;
   }, []);
+
+/** Pesos dos targets para um borderRadius contínuo t (0..1): interpola entre os dois vizinhos. */
+const morphWeights = (t: number) => {
+  const x = t * MORPH_STEPS;
+  const lo = Math.floor(x);
+  const frac = x - lo;
+  return Array.from({ length: MORPH_STEPS }, (_, i) => {
+    const k = i + 1;
+    if (k === lo) return 1 - frac;
+    if (k === lo + 1) return frac;
+    return 0;
+  });
+};
 
 const FLAT_BLUE = new THREE.Color(P.blueprint);
 const BLACK = new THREE.Color('#000000');
 const CHROME = new THREE.Color('#e9edf2');
 
-export const MorphShape: React.FC<{ morph: number; size: number; y: number; scale: number }> = ({
-  morph,
-  size,
-  y,
-  scale,
-}) => {
+interface MorphShapeProps {
+  /** 0→1: quadrado chapado → esfera cromada (geometria + material). */
+  morph: number;
+  /** 0→1: o cromo "estoura" de volta no azul chapado (Z-dive → Cena 2). */
+  flatten?: number;
+  size: number;
+  y: number;
+  z?: number;
+  scale: number;
+}
+
+export const MorphShape: React.FC<MorphShapeProps> = ({ morph, flatten = 0, size, y, z = 0, scale }) => {
   const geometry = useMorphGeometry();
   const t = Math.min(1, Math.max(0, morph));
+  const f = Math.min(1, Math.max(0, flatten));
+  const chrome = t * (1 - f);
   const color = useMemo(() => new THREE.Color(), []);
-  color.copy(BLACK).lerp(CHROME, t);
+  color.copy(BLACK).lerp(CHROME, chrome);
   return (
-    <mesh geometry={geometry} morphTargetInfluences={[t]} position={[0, y, 0]} scale={size * scale}>
+    <mesh geometry={geometry} morphTargetInfluences={morphWeights(t)} position={[0, y, z]} scale={size * scale}>
       <meshStandardMaterial
         color={color}
         emissive={FLAT_BLUE}
-        emissiveIntensity={1 - t}
-        metalness={t}
-        roughness={1 - 0.93 * t}
-        envMapIntensity={t}
+        emissiveIntensity={1 - chrome}
+        metalness={chrome}
+        roughness={1 - 0.93 * chrome}
+        envMapIntensity={chrome}
         side={THREE.DoubleSide}
       />
     </mesh>

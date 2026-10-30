@@ -9,7 +9,9 @@ import {
   FPS as GRAFICOS_FPS,
   WIDTH as GRAFICOS_WIDTH,
   HEIGHT as GRAFICOS_HEIGHT,
+  SCENES,
 } from './graficos/VideoGraficos2D3D';
+import { CineA } from './graficos/scenes/CineA';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -42,6 +44,15 @@ export const RemotionRoot: React.FC = () => {
         id="Graficos2D-vs-3D"
         component={VideoGraficos2D3D}
         durationInFrames={GRAFICOS_TOTAL_FRAMES}
+        fps={GRAFICOS_FPS}
+        width={GRAFICOS_WIDTH}
+        height={GRAFICOS_HEIGHT}
+      />
+      {/* Cenas isoladas do Gráficos 2D vs 3D — revisão cena a cena */}
+      <Composition
+        id="Graficos-Cena1"
+        component={CineA}
+        durationInFrames={SCENES.c1.duration}
         fps={GRAFICOS_FPS}
         width={GRAFICOS_WIDTH}
         height={GRAFICOS_HEIGHT}
