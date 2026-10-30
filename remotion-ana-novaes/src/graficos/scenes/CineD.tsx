@@ -28,9 +28,11 @@ const T = {
   cta: 60,
   credits: 75,
   dolly: [0, 400] as const,
+  slabsIn: 0, // Blockout Híbrido: vidro entra sobre a massa chumbo da C3
+  slabsOut: 18, // ...e sobe revelando o palco
   uiExit: 420,
   worldExit: 430,
-  end: 457,
+  end: 456, // último frame da composição (1799) — preto absoluto
 } as const;
 
 const FOV = 40;
@@ -249,14 +251,84 @@ const Monogram: React.FC = () => (
   </svg>
 );
 
+// ── TRANSIÇÃO C3 → C4 — BLOCKOUT HÍBRIDO ──────────────────────────────────
+// Lâminas de acrílico (glassmorphism) com grade plana sobem de baixo, cobrem
+// a massa chumbo da C3 enquanto o palco cinza gelo nasce por trás, e seguem
+// para cima revelando a composição. Direção: de baixo → para cima (a C2 saiu
+// pelas laterais e a C3 pela lente — nenhuma direção se repete).
+const SLABS = 4;
+const SLAB_W = 1080 / SLABS;
+
+const GlassSlabs: React.FC<{ frame: number }> = ({ frame }) => (
+  <AbsoluteFill style={{ pointerEvents: 'none' }}>
+    {Array.from({ length: SLABS }, (_, i) => {
+      // stagger 3f do centro para fora — o palco abre como uma cortina de vidro
+      const order = [1, 0, 2, 3][i];
+      const inP = ci(frame, [T.slabsIn + order * 3, T.slabsIn + order * 3 + 16], [1, 0], Easing.out(Easing.exp));
+      const outP = ci(frame, [T.slabsOut + order * 3, T.slabsOut + order * 3 + 16], [0, 1], Easing.in(Easing.exp));
+      const y = 1920 * inP - 2100 * outP;
+      const blur = 4 + 18 * outP;
+      return (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            left: i * SLAB_W - 1,
+            top: 0,
+            width: SLAB_W + 2,
+            height: 1920,
+            transform: `translateY(${y}px) scale(${1 - 0.04 * outP})`,
+            backgroundColor: 'rgba(229,231,235,0.22)',
+            backgroundImage:
+              'linear-gradient(rgba(17,24,39,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(17,24,39,0.10) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+            borderLeft: '1px solid rgba(255,255,255,0.55)',
+            borderRight: '1px solid rgba(255,255,255,0.18)',
+            backdropFilter: `blur(${blur}px) saturate(1.2)`,
+            WebkitBackdropFilter: `blur(${blur}px) saturate(1.2)`,
+            opacity: ci(outP, [0.4, 1], [1, 0]),
+          }}
+        />
+      );
+    })}
+  </AbsoluteFill>
+);
+
+/** Título HUD palavra por palavra: translateY -100→0, blur 10→0, out exp. */
+const HudWords: React.FC<{ text: string; start: number; frame: number; color: string }> = ({ text, start, frame, color }) => (
+  <div style={{ display: 'flex', justifyContent: 'center', columnGap: '0.26em', fontSize: 80, color }}>
+    {text.split(' ').map((w, i) => {
+      const p = ci(frame, [start + i * 3, start + i * 3 + 24], [0, 1], Easing.out(Easing.exp));
+      return (
+        <span
+          key={i}
+          style={{
+            display: 'inline-block',
+            whiteSpace: 'nowrap',
+            fontSize: 80,
+            fontWeight: 900,
+            letterSpacing: -3,
+            lineHeight: 1.05,
+            opacity: p,
+            transform: `translateY(${-100 * (1 - p)}px)`,
+            filter: p < 0.999 ? `blur(${10 * (1 - p)}px)` : undefined,
+          }}
+        >
+          {w}
+        </span>
+      );
+    })}
+  </div>
+);
+
 export const CineD: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
 
   const bgIn = ci(frame, [T.bg, T.bg + 30], [0, 1], Easing.out(Easing.cubic));
+  // O palco (cinza gelo + 3D) só nasce quando o vidro já cobre a massa chumbo.
+  const stage = ci(frame, [T.slabsIn + 12, T.slabsOut + 6], [0, 1], Easing.out(Easing.cubic));
 
-  // HUD
-  const titleP = (offset: number) => ci(frame, [T.titles + offset, T.titles + offset + 24], [0, 1], Easing.out(Easing.exp));
   const ctaP = ci(frame, [T.cta, T.cta + 24], [0, 1], Easing.out(Easing.exp));
   const creditsP = ci(frame, [T.credits, T.credits + 24], [0, 1], Easing.out(Easing.exp));
 
@@ -266,24 +338,16 @@ export const CineD: React.FC = () => {
   const uiExit: CSSProperties = {
     opacity: 1 - ui,
     filter: ui > 0.01 ? `blur(${10 * ui}px)` : undefined,
-    transform: `translateY(${20 * ui}px)`,
+    transform: `translateY(${20 * ui}px) scale(${1 - 0.04 * ui})`,
   };
 
-  const titleStyle = (p: number): CSSProperties => ({
-    fontSize: 80,
-    fontWeight: 900,
-    letterSpacing: -3,
-    lineHeight: 1.05,
-    textAlign: 'center',
-    opacity: p,
-    transform: `translateY(${-100 * (1 - p)}px)`,
-    filter: p < 0.999 ? `blur(${10 * (1 - p)}px)` : undefined,
-  });
-
   return (
-    <AbsoluteFill style={{ backgroundColor: P.lead, overflow: 'hidden', fontFamily: FONT }}>
+    <AbsoluteFill style={{ overflow: 'hidden', fontFamily: FONT }}>
+      {/* Massa chumbo herdada da C3 — some quando o palco cinza gelo assume,
+          para que o dissolve final caia no preto absoluto da composição. */}
+      <AbsoluteFill style={{ backgroundColor: P.lead, opacity: 1 - bgIn }} />
       {/* MUNDO — BG + 3D + cards orbitais (dissolve 430) */}
-      <AbsoluteFill style={{ opacity: 1 - world, transform: `scale(${1 + 0.02 * world})` }}>
+      <AbsoluteFill style={{ opacity: stage * (1 - world), transform: `scale(${1 + 0.02 * world})` }}>
         <AbsoluteFill style={{ opacity: bgIn }}>
           <AbsoluteFill style={{ backgroundColor: P.ice }} />
           <AbsoluteFill
@@ -317,11 +381,13 @@ export const CineD: React.FC = () => {
         </div>
       </AbsoluteFill>
 
+      <GlassSlabs frame={frame} />
+
       {/* HUD — chumbado na tela (Z mais alto) */}
       <div style={{ position: 'absolute', inset: 0, ...uiExit }}>
         <div style={{ position: 'absolute', top: 160, left: 40, right: 40 }}>
-          <div style={{ ...titleStyle(titleP(0)), color: P.ink }}>Comunicação de</div>
-          <div style={{ ...titleStyle(titleP(4)), color: P.blueprint }}>Outro Nível!</div>
+          <HudWords text="Comunicação de" start={T.titles} frame={frame} color={P.ink} />
+          <HudWords text="Outro Nível!" start={T.titles + 4} frame={frame} color={P.blueprint} />
         </div>
 
         {/* Card rodapé CTA — vidro blur 16px */}
