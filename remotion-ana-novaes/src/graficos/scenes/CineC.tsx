@@ -1,7 +1,7 @@
-import React, { useLayoutEffect, useMemo } from 'react';
+import React, { useLayoutEffect } from 'react';
 import { ThreeCanvas } from '@remotion/three';
 import { useThree } from '@react-three/fiber';
-import { AbsoluteFill, Easing, interpolate, random, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Easing, random, useCurrentFrame, useVideoConfig } from 'remotion';
 import * as THREE from 'three';
 import { ci } from '../../lib/motion';
 import { FONT, P } from '../theme';
@@ -53,14 +53,24 @@ const Rig: React.FC<{ frame: number }> = ({ frame }) => {
   return null;
 };
 
-/** Rim (directional traseiro branco) + Fill (point quente lateral), presos à câmera. */
+/**
+ * Rim (directional traseiro branco) + Fill (point quente lateral), presos à
+ * câmera. O rim fica atrás e de lado (~145° da lente) para desenhar a borda
+ * da escultura contra o void; o fill entra a ~70° do outro lado.
+ */
+/** Direção (mundo) da rim light: atrás e de lado em relação à lente, alta. */
+const rimDirection = (frame: number) => {
+  const rimA = orbitAngle(frame) + Math.PI - 0.6;
+  return new THREE.Vector3(Math.sin(rimA) * 700, 520, Math.cos(rimA) * 700).normalize();
+};
+
 const StudioLights: React.FC<{ frame: number }> = ({ frame }) => {
   const rim = ci(frame, [T.rim[0], T.rim[1]], [0, 5], Easing.inOut(Easing.cubic));
-  const fill = ci(frame, [T.fill[0], T.fill[1]], [0, 1.6], Easing.inOut(Easing.cubic));
+  const fill = ci(frame, [T.fill[0], T.fill[1]], [0, 2.4], Easing.inOut(Easing.cubic));
   const a = orbitAngle(frame);
-  const rimPos = useMemo(() => new THREE.Vector3(), []);
-  rimPos.set(-Math.sin(a) * 700 + Math.cos(a) * 180, 320, -Math.cos(a) * 700 - Math.sin(a) * 180);
-  const fillPos: [number, number, number] = [Math.sin(a + 1.25) * 650, 60, Math.cos(a + 1.25) * 650];
+  const fillA = a + 1.2;
+  const rimPos = rimDirection(frame).multiplyScalar(890);
+  const fillPos: [number, number, number] = [Math.sin(fillA) * 650, 120, Math.cos(fillA) * 650];
   return (
     <>
       <ambientLight intensity={0.05} />
@@ -78,11 +88,17 @@ const World: React.FC = () => {
   const inflate = ci(frame, [T.inflate, T.end], [1, 40], Easing.in(Easing.exp));
   return (
     <>
-      <StudioEnvironment intensity={0.18} />
+      <StudioEnvironment intensity={0.18 + ci(frame, [T.fill[0], T.fill[1]], [0, 0.32], Easing.inOut(Easing.cubic))} />
       <StudioLights frame={frame} />
       <Rig frame={frame} />
       <group scale={SCULPT_SCALE * inflate} rotation={[0.25, 0, 0]}>
-        <Sculpture wireDraw={wireDraw} wireOpacity={wireIn * (1 - swap)} solidOpacity={swap} />
+        <Sculpture
+          wireDraw={wireDraw}
+          wireOpacity={wireIn * (1 - swap)}
+          solidOpacity={swap}
+          rimGlow={ci(frame, [T.rim[0], T.rim[1]], [0, 1], Easing.inOut(Easing.cubic))}
+          rimDir={rimDirection(frame)}
+        />
       </group>
       <Dust frame={frame} seed="c3-dust" count={220} spread={1800} size={4} opacity={0.35} />
     </>
@@ -150,7 +166,7 @@ const TitleLine: React.FC<{ text: string; start: number; frame: number; style: R
             display: 'inline-block',
             whiteSpace: 'nowrap',
             opacity: p,
-            transform: `scale(${interpolate(p, [0, 1], [1.1, 1])})`,
+            transform: `scale(${ci(p, [0, 1], [1.1, 1])})`,
             filter: p < 0.999 ? `blur(${20 * (1 - p)}px)` : undefined,
           }}
         >
@@ -214,9 +230,12 @@ export const CineC: React.FC = () => {
 
   const etapa = ci(frame, [T.etapa, T.etapa + 24], [0, 1], Easing.inOut(Easing.cubic));
   const textExit = ci(frame, [T.textExit, T.textExit + 18], [0, 1], Easing.in(Easing.exp));
+  // Saída Quádrupla: o roteiro pede opacity + blur 25; a skill completa com
+  // posição (sobe, contrária à massa que avança) e contração sutil.
   const textExitStyle: React.CSSProperties = {
-    opacity: 1 - textExit,
+    opacity: ci(textExit, [0.35, 1], [1, 0]),
     filter: textExit > 0.01 ? `blur(${25 * textExit}px)` : undefined,
+    transform: `translateY(${-120 * textExit}px) scale(${1 - 0.05 * textExit})`,
   };
   const blockout = ci(frame, [586, T.end], [0, 1], Easing.in(Easing.cubic));
   const float = Math.sin(frame * 0.03) * 6;
@@ -233,7 +252,7 @@ export const CineC: React.FC = () => {
         <World />
       </ThreeCanvas>
 
-      <div style={{ position: 'absolute', top: 190, left: 40, right: 40, transform: `translateY(${float}px)`, ...textExitStyle }}>
+      <div style={{ position: 'absolute', top: 190, left: 40, right: 40, ...textExitStyle }}>\n        <div style={{ transform: `translateY(${float}px)` }}>
         <div
           style={{
             textAlign: 'center',
@@ -255,6 +274,7 @@ export const CineC: React.FC = () => {
           frame={frame}
           style={{ fontSize: 80, fontWeight: 800, letterSpacing: -2, color: '#FFFFFF', lineHeight: 1.08 }}
         />
+        </div>
       </div>
 
       <div style={textExitStyle}>

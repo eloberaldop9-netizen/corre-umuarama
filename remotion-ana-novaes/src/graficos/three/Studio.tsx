@@ -185,9 +185,68 @@ interface SculptureProps {
   wireOpacity: number;
   solidOpacity: number;
   shadows?: boolean;
+  /** 0→1: contorno de luz de recorte (fresnel) — a "Rim Light" do roteiro. */
+  rimGlow?: number;
+  /** Direção (mundo) de onde vem o recorte. */
+  rimDir?: THREE.Vector3;
 }
 
-export const Sculpture: React.FC<SculptureProps> = ({ wireDraw, wireOpacity, solidOpacity, shadows }) => {
+// Recorte fotográfico: fresnel aditivo, mais forte nas bordas voltadas para a
+// luz traseira. Cor = Luz Rim da paleta (rgba(255,255,255,0.85)).
+const RIM_VERTEX = `
+  varying vec3 vN;
+  varying vec3 vV;
+  void main() {
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    vN = normalize(mat3(modelMatrix) * normal);
+    vV = normalize(cameraPosition - wp.xyz);
+    gl_Position = projectionMatrix * viewMatrix * wp;
+  }
+`;
+const RIM_FRAGMENT = `
+  uniform float uGlow;
+  uniform vec3 uDir;
+  varying vec3 vN;
+  varying vec3 vV;
+  void main() {
+    vec3 n = normalize(vN);
+    if (!gl_FrontFacing) n = -n;
+    float fres = pow(1.0 - clamp(dot(n, normalize(vV)), 0.0, 1.0), 3.0);
+    float side = 0.35 + 0.65 * clamp(dot(n, normalize(uDir)) * 0.5 + 0.5, 0.0, 1.0);
+    gl_FragColor = vec4(vec3(0.85) * fres * side * uGlow, 1.0);
+  }
+`;
+
+const RimShell: React.FC<{ geometry: THREE.BufferGeometry; glow: number; dir: THREE.Vector3 }> = ({ geometry, glow, dir }) => {
+  const material = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        uniforms: { uGlow: { value: 0 }, uDir: { value: new THREE.Vector3(0, 1, -1) } },
+        vertexShader: RIM_VERTEX,
+        fragmentShader: RIM_FRAGMENT,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+        depthFunc: THREE.LessEqualDepth,
+        toneMapped: false,
+      }),
+    []
+  );
+  material.uniforms.uGlow.value = glow;
+  material.uniforms.uDir.value.copy(dir);
+  return <mesh geometry={geometry} material={material} renderOrder={2} />;
+};
+
+const DEFAULT_RIM_DIR = new THREE.Vector3(0, 1, -1);
+
+export const Sculpture: React.FC<SculptureProps> = ({
+  wireDraw,
+  wireOpacity,
+  solidOpacity,
+  shadows,
+  rimGlow = 0,
+  rimDir = DEFAULT_RIM_DIR,
+}) => {
   const brushed = useBrushedTexture();
   const solidGeo = useMemo(
     () => new THREE.TorusKnotGeometry(SCULPT.radius, SCULPT.tube, 480, 56, SCULPT.p, SCULPT.q),
@@ -222,6 +281,7 @@ export const Sculpture: React.FC<SculptureProps> = ({ wireDraw, wireOpacity, sol
           />
         </mesh>
       ) : null}
+      {rimGlow > 0.001 && solidOpacity > 0.5 ? <RimShell geometry={solidGeo} glow={rimGlow * solidOpacity} dir={rimDir} /> : null}
       {wireOpacity > 0.001 ? (
         <lineSegments geometry={wireGeo}>
           <lineBasicMaterial color={P.wire} transparent opacity={wireOpacity} toneMapped={false} depthWrite={false} />
