@@ -30,6 +30,7 @@ const T = {
   bladeMid: 425,
   bladeTicker: 427,
   bladeBg: 430,
+  c3Start: 450, // overlap: a Cena 3 (por baixo) começa aqui
 } as const;
 
 // ── Lâminas da saída: translateX + skewX + blur + opacity + scale ────────
@@ -326,7 +327,15 @@ export const CineB: React.FC = () => {
   const crossB = ci(frame, [190, 208], [0, 1], SNAP);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: P.void, overflow: 'hidden', fontFamily: FONT }}>
+    <AbsoluteFill
+      style={{
+        // O "abismo" revelado pelas lâminas é o mesmo #05050A da Cena 3. Antes dela
+        // existir, a Cena 2 o pinta; a partir do overlap, deixa a Cena 3 aparecer.
+        backgroundColor: frame < T.c3Start ? P.void : 'transparent',
+        overflow: 'hidden',
+        fontFamily: FONT,
+      }}
+    >
       {/* LÂMINA BG — azul + grid + linha de leitura */}
       <AbsoluteFill style={blade(frame, T.bladeBg, -1)}>
         <AbsoluteFill style={{ backgroundColor: P.blueprint }} />
@@ -391,7 +400,7 @@ export const CineB: React.FC = () => {
               fontWeight: 800,
               letterSpacing: 3,
               color: P.neon,
-              transform: `translateX(${-((frame * 5) % 1700)}px)`,
+              transform: `translateX(${-frame * 5}px)`,
             }}
           >
             {TICKER.repeat(5)}
