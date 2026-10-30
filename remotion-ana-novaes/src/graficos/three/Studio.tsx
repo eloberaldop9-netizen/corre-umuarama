@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo } from 'react';
+import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import { useThree } from '@react-three/fiber';
 import { random } from 'remotion';
 import * as THREE from 'three';
@@ -8,31 +8,51 @@ import { P } from '../theme';
 // Peças 3D compartilhadas: HDRI de estúdio procedural, o morfo quadrado→esfera
 // (C1) e a escultura wireframe→sólido (C3/C4). Tudo dirigido por frame.
 
-/** Ambiente HDRI procedural (RoomEnvironment) — reflexos sem baixar arquivos. */
+/**
+ * Ambiente HDRI procedural (RoomEnvironment) — reflexos sem baixar arquivos.
+ *
+ * O mapa é aplicado DIRETO em cada MeshStandardMaterial (material.envMap +
+ * envMapIntensity), não via scene.environment — assim cada material escala o
+ * reflexo pelo seu estado (userData.envScale): o morfo chapado não reflete
+ * nada e o cromo reflete tudo. Intensidade final = intensity × envScale.
+ * Criação e descarte vivem no mesmo efeito (seguro contra remount).
+ */
 export const StudioEnvironment: React.FC<{ intensity: number; rotationY?: number }> = ({ intensity, rotationY = 0 }) => {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
+  const envRef = useRef<THREE.Texture | null>(null);
 
-  const env = useMemo(() => {
+  useLayoutEffect(() => {
     const pmrem = new THREE.PMREMGenerator(gl);
     const rt = pmrem.fromScene(new RoomEnvironment(), 0.04);
     pmrem.dispose();
-    return rt;
+    envRef.current = rt.texture;
+    return () => {
+      envRef.current = null;
+      rt.dispose();
+    };
   }, [gl]);
 
+  // Sem deps: roda a cada commit (a cada frame), depois que o R3F aplicou as
+  // props dos materiais — então sempre vence e nunca acumula.
   useLayoutEffect(() => {
-    scene.environment = env.texture;
-    scene.environmentIntensity = intensity;
-    scene.environmentRotation.set(0, rotationY, 0);
-  }, [scene, env, intensity, rotationY]);
-
-  useEffect(
-    () => () => {
-      scene.environment = null;
-      env.dispose();
-    },
-    [scene, env]
-  );
+    const tex = envRef.current;
+    scene.environment = null;
+    scene.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      const mats = mesh.material ? (Array.isArray(mesh.material) ? mesh.material : [mesh.material]) : [];
+      for (const m of mats) {
+        if (!(m instanceof THREE.MeshStandardMaterial)) continue;
+        if (m.envMap !== tex) {
+          m.envMap = tex;
+          m.needsUpdate = true;
+        }
+        const scale = typeof m.userData.envScale === 'number' ? m.userData.envScale : 1;
+        m.envMapIntensity = intensity * scale;
+        m.envMapRotation.set(0, rotationY, 0);
+      }
+    });
+  });
 
   return null;
 };
@@ -130,8 +150,9 @@ export const MorphShape: React.FC<MorphShapeProps> = ({ morph, flatten = 0, size
   const t = Math.min(1, Math.max(0, morph));
   const f = Math.min(1, Math.max(0, flatten));
   const chrome = t * (1 - f);
-  const color = useMemo(() => new THREE.Color(), []);
-  color.copy(BLACK).lerp(CHROME, chrome);
+  // Objeto novo a cada frame: o R3F só reaplica props cuja referência mudou.
+  // (Mutar uma Color memoizada congelava a cor do primeiro frame no render.)
+  const color = BLACK.clone().lerp(CHROME, chrome);
   return (
     <mesh geometry={geometry} morphTargetInfluences={morphWeights(t)} position={[0, y, z]} scale={size * scale}>
       <meshStandardMaterial
@@ -140,7 +161,7 @@ export const MorphShape: React.FC<MorphShapeProps> = ({ morph, flatten = 0, size
         emissiveIntensity={1 - chrome}
         metalness={chrome}
         roughness={1 - 0.93 * chrome}
-        envMapIntensity={chrome}
+        userData={{ envScale: chrome }}
         side={THREE.DoubleSide}
       />
     </mesh>

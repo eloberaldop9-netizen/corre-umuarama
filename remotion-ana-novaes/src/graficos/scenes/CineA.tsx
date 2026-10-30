@@ -96,12 +96,11 @@ const World: React.FC = () => {
   // 293→294: o brilho morre em corte seco — em 294 a superfície já é azul chapado.
   const flatten = ci(frame, [T.pop, T.pop + 1], [0, 1]);
   // Luz e HDRI só existem no estado cromado: o 2D é emissivo puro (#1D4ED8 exato).
-  // (scene.environment ignora material.envMapIntensity — por isso o fade é aqui.)
   const chrome = Math.min(s, 1) * (1 - flatten);
   return (
     <>
       {/* "Luzes rodando fora de quadro": o HDRI de estúdio gira em Y */}
-      <StudioEnvironment intensity={1.1 * chrome} rotationY={frame * 0.012} />
+      <StudioEnvironment intensity={1.1} rotationY={frame * 0.012} />
       <pointLight position={[-260, 220, -300]} intensity={1.4 * chrome} decay={0} />
       <pointLight position={[300, -120, -200]} intensity={0.5 * chrome} decay={0} color="#c7d2fe" />
       <Camera frame={frame} />
