@@ -1,37 +1,85 @@
 import React, { CSSProperties } from 'react';
-import { AbsoluteFill, Easing, useCurrentFrame } from 'remotion';
+import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { ci } from '../../lib/motion';
-import { FONT, P } from '../theme';
-import { AppBadge } from '../AppBadge';
+import { FONT, P, SPRINGS } from '../theme';
 
 // ─────────────────────────────────────────────────────────────────────────
-// CENA 2 — A Força do 2D (frames 293–750, local 0–457)
-// Blueprint azul, grid ortogonal, design suíço. ZERO sombra, ZERO eixo Z:
-// tudo em X/Y, snaps exponenciais, textos saindo de máscaras (clipPath).
-// Pan ortográfico: a prancheta inteira dá um solavanco -1080 no frame 150.
-// Saída: COLAPSO LATERAL em lâminas que rasgam a tela.
+// CENA 2 — A Força do 2D na Informação (frames 293–750, local 0–457)
+// Roteiro: "elementos planos, tipografias dinâmicas, cartazes e infográficos
+// limpos sendo organizados na tela". Blueprint azul, flat absoluto (zero
+// sombra, zero eixo Z). Um cartaz e três infográficos entram de direções
+// diferentes e se encaixam num grid; no meio da cena o layout se reorganiza
+// (morph de posições) — o 2D organizando a informação. Movimento suave:
+// entradas out-cubic/spring, morph in-out-cubic, micro-animações senoidais.
+// Saída: COLAPSO LATERAL em lâminas que revelam o void da Cena 3.
 // ─────────────────────────────────────────────────────────────────────────
 
 const W = 1080;
 const H = 1920;
-const GRID = 40;
-const SNAP = Easing.out(Easing.exp);
+const ENTRY = Easing.out(Easing.cubic);
+const MORPH = Easing.inOut(Easing.cubic);
 
 const T = {
   grid: 0,
-  etapa: 15,
-  titleA: 20,
-  titleB: 25,
-  card: 40,
-  bar1: [70, 100] as const,
-  bar2: [80, 110] as const,
-  pan: 150,
+  title: [8, 18] as const,
+  poster: 40,
+  bars: 52,
+  donut: 60,
+  line: 70,
+  reflow: [210, 246] as const, // reorganização do layout
   bladeTop: 420,
-  bladeMid: 425,
-  bladeTicker: 427,
+  bladeMid: 424,
+  bladeLow: 428,
   bladeBg: 430,
   c3Start: 450, // overlap: a Cena 3 (por baixo) começa aqui
 } as const;
+
+// ── Grid de layout (margens 80, gutter 24) — duas arrumações ─────────────
+type Box = { x: number; y: number; w: number; h: number };
+type SlotKey = 'poster' | 'bars' | 'donut' | 'line';
+const COL_L = 80;
+const COL_R = 552;
+const COL_W = 448;
+const ROW_1 = 600;
+const LAYOUT_A: Record<SlotKey, Box> = {
+  poster: { x: COL_L, y: ROW_1, w: COL_W, h: 640 },
+  bars: { x: COL_R, y: ROW_1, w: COL_W, h: 308 },
+  donut: { x: COL_R, y: ROW_1 + 332, w: COL_W, h: 308 },
+  line: { x: COL_L, y: ROW_1 + 664, w: 920, h: 300 },
+};
+// Reorganizado: as colunas descem e o gráfico de linha passa para o topo.
+const LAYOUT_B: Record<SlotKey, Box> = {
+  poster: { x: COL_L, y: ROW_1 + 324, w: COL_W, h: 640 },
+  bars: { x: COL_R, y: ROW_1 + 324, w: COL_W, h: 308 },
+  donut: { x: COL_R, y: ROW_1 + 656, w: COL_W, h: 308 },
+  line: { x: COL_L, y: ROW_1, w: 920, h: 300 },
+};
+
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+/**
+ * Reorganização sem cruzamentos: o gráfico de linha sai pela esquerda, as
+ * colunas descem abrindo espaço e ele volta pela direita já no topo.
+ */
+const LINE_OUT = [T.reflow[0], T.reflow[0] + 20] as const;
+const LINE_IN = [T.reflow[0] + 22, T.reflow[1] + 14] as const;
+const boxAt = (key: SlotKey, frame: number): Box => {
+  const a = LAYOUT_A[key];
+  const b = LAYOUT_B[key];
+  if (key === 'line') {
+    const out = ci(frame, [LINE_OUT[0], LINE_OUT[1]], [0, 1], Easing.in(Easing.cubic));
+    const back = ci(frame, [LINE_IN[0], LINE_IN[1]], [1, 0], ENTRY);
+    const home = frame < LINE_IN[0] ? a : b;
+    return { ...home, x: home.x - 1100 * out * (frame < LINE_IN[0] ? 1 : 0) + 1100 * back * (frame < LINE_IN[0] ? 0 : 1) };
+  }
+  const t = ci(frame, [T.reflow[0] + 8, T.reflow[1]], [0, 1], MORPH);
+  return { x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), w: a.w, h: a.h };
+};
+
+/** Blur de velocidade do gráfico de linha durante a viagem. */
+const lineTravelBlur = (frame: number) =>
+  frame < LINE_IN[0]
+    ? 18 * ci(frame, [LINE_OUT[0], LINE_OUT[1]], [0, 1], Easing.in(Easing.cubic))
+    : 18 * ci(frame, [LINE_IN[0], LINE_IN[1]], [1, 0], ENTRY);
 
 // ── Lâminas da saída: translateX + skewX + blur + opacity + scale ────────
 const blade = (frame: number, start: number, dir: 1 | -1, dur = 20): CSSProperties => {
@@ -43,66 +91,71 @@ const blade = (frame: number, start: number, dir: 1 | -1, dur = 20): CSSProperti
   };
 };
 
-// ── GRID — linhas se desenhando + cruzes que estalam 90° a cada 90f ──────
-const Grid: React.FC<{ frame: number; width: number }> = ({ frame, width }) => {
-  const draw = ci(frame, [T.grid, T.grid + 30], [1, 0], SNAP);
-  const cycle = frame % 90;
-  const crossRot = Math.floor(frame / 90) * 90 + 90 * ci(cycle, [0, 8], [0, 1], SNAP);
-  const cols = Math.ceil(width / GRID) + 1;
-  const rows = Math.ceil(H / GRID) + 1;
-  const line = { stroke: '#FFFFFF', strokeOpacity: 0.15, strokeWidth: 1, pathLength: 1, strokeDasharray: 1, strokeDashoffset: draw };
+// ── Entrada direcional suave (skill: entryFrom — posição + blur + opacity) ─
+const entryFrom = (frame: number, start: number, dx: number, dy: number, dur = 26): CSSProperties => {
+  const p = ci(frame, [start, start + dur], [0, 1], ENTRY);
+  const bl = 14 * ci(frame, [start, start + dur * 0.7], [1, 0]);
+  return {
+    opacity: ci(frame, [start, start + dur * 0.5], [0, 1]),
+    transform: `translate(${dx * (1 - p)}px, ${dy * (1 - p)}px)`,
+    filter: bl > 0.05 ? `blur(${bl}px)` : undefined,
+  };
+};
+
+/** Flutuação flat (só Y), defasada por elemento — o 2D respira sem profundidade. */
+const hover = (frame: number, phase: number) => Math.sin(frame * 0.03 + phase) * 4 * ci(frame, [90, 120], [0, 1]);
+
+// ── BACKGROUND — azul em corte seco + glow radial + grid fino ────────────
+const Background: React.FC<{ frame: number }> = ({ frame }) => {
+  const gridIn = ci(frame, [T.grid, T.grid + 24], [0, 1], ENTRY);
   return (
-    <svg width={width} height={H} style={{ position: 'absolute', left: 0, top: 0 }}>
-      {Array.from({ length: cols }, (_, i) => (
-        <line key={`v${i}`} x1={i * GRID} y1={0} x2={i * GRID} y2={H} {...line} />
-      ))}
-      {Array.from({ length: rows }, (_, i) => (
-        <line key={`h${i}`} x1={0} y1={i * GRID} x2={width} y2={i * GRID} {...line} />
-      ))}
-      {/* marcadores "+" nos vértices (a cada 2 células) */}
-      {Array.from({ length: Math.ceil(cols / 2) }).flatMap((_, ci2) =>
-        Array.from({ length: Math.ceil(rows / 2) }).map((__, ri) => {
-          const x = ci2 * GRID * 2;
-          const y = ri * GRID * 2;
-          return (
-            <path
-              key={`c${ci2}-${ri}`}
-              d={`M${x - 6} ${y} H${x + 6} M${x} ${y - 6} V${y + 6}`}
-              stroke="#FFFFFF"
-              strokeOpacity={0.55 * (1 - draw)}
-              strokeWidth={2}
-              transform={`rotate(${crossRot} ${x} ${y})`}
-            />
-          );
-        })
-      )}
-    </svg>
+    <AbsoluteFill>
+      <AbsoluteFill style={{ backgroundColor: P.blueprint }} />
+      <AbsoluteFill style={{ background: 'radial-gradient(ellipse at 50% 35%, rgba(255,255,255,0.10) 0%, transparent 65%)' }} />
+      <svg width={W} height={H} style={{ position: 'absolute', inset: 0, opacity: gridIn }}>
+        <defs>
+          <pattern id="c2-grid" width={40} height={40} patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#FFFFFF" strokeOpacity={0.1} strokeWidth={1} />
+          </pattern>
+          <pattern id="c2-cross" width={160} height={160} patternUnits="userSpaceOnUse">
+            <path d="M-6 0 H6 M0 -6 V6 M154 160 H166 M160 154 V166" stroke="#FFFFFF" strokeOpacity={0.35} strokeWidth={1.5} />
+          </pattern>
+        </defs>
+        <rect width={W} height={H} fill="url(#c2-grid)" />
+        <rect width={W} height={H} fill="url(#c2-cross)" />
+      </svg>
+    </AbsoluteFill>
   );
 };
 
-/** Texto que corre de trás de uma máscara (clipPath), palavra a palavra. */
-const MaskedLine: React.FC<{ text: string; start: number; from: number; style: CSSProperties; frame: number }> = ({
-  text,
+// ── TIPOGRAFIA DINÂMICA — título palavra por palavra (máscara + blur) ────
+const TitleLine: React.FC<{ words: string[]; start: number; frame: number; accent?: number }> = ({
+  words,
   start,
-  from,
-  style,
   frame,
+  accent,
 }) => (
-  <div style={{ display: 'flex', gap: '0.26em', ...style }}>
-    {text.split(' ').map((word, i) => {
-      // Cada palavra tem sua própria máscara; o deslocamento é no mínimo a
-      // largura da palavra, para ela nascer 100% escondida atrás do recorte.
-      const k = ci(frame, [start + i * 2, start + i * 2 + 22], [1, 0], SNAP);
+  <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: '0.26em', fontSize: 104 }}>
+    {words.map((w, i) => {
+      const s = start + i * 3;
+      const p = ci(frame, [s, s + 22], [0, 1], ENTRY);
+      const bl = 12 * ci(frame, [s, s + 13], [1, 0]);
       return (
-        <span key={i} style={{ display: 'inline-block', overflow: 'hidden', clipPath: 'inset(0 0 0 0)' }}>
+        <span key={i} style={{ display: 'inline-block', overflow: 'hidden', paddingBottom: 10 }}>
           <span
             style={{
               display: 'inline-block',
               whiteSpace: 'nowrap',
-              transform: `translateX(calc(${-k} * max(${Math.abs(from)}px, 105%)))`,
+              fontWeight: 900,
+              letterSpacing: -4,
+              lineHeight: 1.02,
+              color: i === accent ? P.neon : P.paper,
+              opacity: ci(frame, [s, s + 12], [0, 1]),
+              transform: `translateY(${(1 - p) * 70}px)`,
+              filter: bl > 0.05 ? `blur(${bl}px)` : undefined,
             }}
           >
-            {word}
+            {w}
           </span>
         </span>
       );
@@ -110,125 +163,22 @@ const MaskedLine: React.FC<{ text: string; start: number; from: number; style: C
   </div>
 );
 
-// ── PRANCHETA A — Infográfico suíço ──────────────────────────────────────
-const Bar: React.FC<{ frame: number; label: string; range: readonly [number, number]; target: number }> = ({
-  frame,
-  label,
-  range,
-  target,
-}) => {
-  const p = ci(frame, [range[0], range[1]], [0, target], SNAP);
+// ── CARTAZ SUÍÇO — formas planas que se organizam ────────────────────────
+const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
+  const f = frame - T.poster;
+  const circle = f < 26 ? 0 : spring({ frame: f - 26, fps, config: SPRINGS.badge });
+  const stripes = [0, 1, 2].map((i) => ci(f, [34 + i * 4, 58 + i * 4], [0, 1], ENTRY));
+  const square = ci(f, [44, 70], [0, 1], ENTRY);
+  const spin = ci(frame, [120, 420], [0, 90]);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 26, fontWeight: 700, color: P.ink }}>
-        <span style={{ letterSpacing: 2, textTransform: 'uppercase' }}>{label}</span>
-        <span style={{ fontVariantNumeric: 'tabular-nums' }}>{Math.round(p)}%</span>
-      </div>
-      <div style={{ height: 46, backgroundColor: P.ink }}>
-        <div style={{ width: `${p}%`, height: '100%', backgroundColor: P.neon }} />
-      </div>
-    </div>
-  );
-};
-
-const InfoCard: React.FC<{ frame: number }> = ({ frame }) => {
-  const open = ci(frame, [T.card, T.card + 20], [0, 1], Easing.inOut(Easing.cubic));
-  const boxes = [P.ink, P.blueprint, P.neon];
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: 80,
-        top: 720,
-        width: 920,
-        height: 760,
-        backgroundColor: P.paper,
-        transform: `scaleY(${open})`,
-        transformOrigin: 'center',
-        padding: 56,
-        boxSizing: 'border-box',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 34,
-        overflow: 'hidden',
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: 4, color: P.ink }}>INFOGRÁFICO · 01</span>
-        <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: 2, color: P.ink, backgroundColor: P.neon, padding: '6px 14px' }}>
-          2D
-        </span>
-      </div>
-      <MaskedLine
-        frame={frame}
-        text="O Dinamismo do 2D"
-        start={T.card + 14}
-        from={-700}
-        style={{ fontSize: 64, fontWeight: 800, letterSpacing: -2, color: P.blueprint, lineHeight: 1.1 }}
-      />
-      <div style={{ height: 4, backgroundColor: P.ink, transform: `scaleX(${ci(frame, [T.card + 18, T.card + 34], [0, 1], SNAP)})`, transformOrigin: 'left' }} />
-      <Bar frame={frame} label="Hierarquia" range={T.bar1} target={85} />
-      <Bar frame={frame} label="Clareza" range={T.bar2} target={100} />
-      {/* Caixas sólidas se expandindo */}
-      <div style={{ display: 'flex', gap: 20, marginTop: 6 }}>
-        {boxes.map((c, i) => (
-          <div key={c} style={{ flex: 1, height: 120, position: 'relative' }}>
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundColor: c,
-                transform: `scaleX(${ci(frame, [96 + i * 4, 114 + i * 4], [0, 1], SNAP)})`,
-                transformOrigin: 'left',
-              }}
-            />
-            <span
-              style={{
-                position: 'absolute',
-                left: 16,
-                bottom: 12,
-                fontSize: 20,
-                fontWeight: 800,
-                letterSpacing: 2,
-                color: c === P.neon ? P.ink : P.paper,
-                opacity: ci(frame, [108 + i * 4, 114 + i * 4], [0, 1]),
-              }}
-            >
-              {['COR', 'FORMA', 'TIPO'][i]}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// ── PRANCHETA B — Cartaz suíço (revelado pelo pan) ───────────────────────
-const SwissPoster: React.FC<{ frame: number }> = ({ frame }) => {
-  const f = frame - T.pan; // tempo desde o solavanco
-  const circle = ci(f, [8, 24], [0, 1], SNAP);
-  const rule = ci(f, [12, 30], [0, 1], SNAP);
-  const block = ci(f, [16, 32], [0, 1], SNAP);
-  const orbit = Math.max(0, f) * 0.8;
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: W + 80,
-        top: 720,
-        width: 920,
-        height: 760,
-        backgroundColor: P.paper,
-        overflow: 'hidden',
-      }}
-    >
+    <div style={{ position: 'absolute', inset: 0, backgroundColor: P.paper, overflow: 'hidden' }}>
       <div
         style={{
           position: 'absolute',
-          right: -90,
-          top: -60,
-          width: 460,
-          height: 460,
+          right: -70,
+          top: -70,
+          width: 330,
+          height: 330,
           borderRadius: '50%',
           backgroundColor: P.neon,
           transform: `scale(${circle})`,
@@ -237,94 +187,185 @@ const SwissPoster: React.FC<{ frame: number }> = ({ frame }) => {
       <div
         style={{
           position: 'absolute',
-          left: 0,
-          top: 470,
-          width: 920,
-          height: 120,
-          backgroundColor: P.blueprint,
-          transform: `scaleX(${block})`,
-          transformOrigin: 'left',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: 56,
-          top: 40,
-          fontSize: 400,
-          fontWeight: 900,
-          letterSpacing: -28,
-          lineHeight: 1,
-          color: P.ink,
-          transform: `translateY(${ci(f, [0, 22], [420, 0], SNAP)}px)`,
-        }}
-      >
-        2D
-      </div>
-      <div style={{ position: 'absolute', left: 56, right: 56, top: 440, height: 6, backgroundColor: P.ink, transform: `scaleX(${rule})`, transformOrigin: 'left' }} />
-      <div
-        style={{
-          position: 'absolute',
-          left: 56,
-          top: 500,
-          fontSize: 44,
-          fontWeight: 900,
-          letterSpacing: -1,
-          color: P.paper,
-          transform: `translateX(${ci(f, [18, 38], [-700, 0], SNAP)}px)`,
-        }}
-      >
-        CARTAZ · GRID · TIPO
-      </div>
-      <div style={{ position: 'absolute', left: 56, top: 610, display: 'flex', gap: 48 }}>
-        {['Hierarquia', 'Contraste', 'Ritmo'].map((t, i) => (
-          <div
-            key={t}
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              letterSpacing: 2,
-              textTransform: 'uppercase',
-              color: P.ink,
-              transform: `translateY(${ci(f, [22 + i * 3, 40 + i * 3], [80, 0], SNAP)}px)`,
-            }}
-          >
-            {String(i + 1).padStart(2, '0')} {t}
-          </div>
-        ))}
-      </div>
-      {/* quadrado orbitando — "vinheta" em loop */}
-      <div
-        style={{
-          position: 'absolute',
-          right: 150,
-          top: 150,
-          width: 70,
-          height: 70,
+          right: 120,
+          top: 210,
+          width: 64,
+          height: 64,
           backgroundColor: P.ink,
-          transform: `rotate(${orbit}deg) scale(${circle})`,
+          opacity: square,
+          transform: `translateY(${(1 - square) * 40}px) rotate(${spin}deg)`,
         }}
       />
-      <div style={{ position: 'absolute', left: 56, bottom: 30, transform: `translateX(${ci(f, [30, 50], [-700, 0], SNAP)}px)` }}>
-        <AppBadge app="ae" variant="flat" size={56} kicker="Feito no" />
+      {stripes.map((p, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 300 + i * 46,
+            height: 26,
+            width: [300, 380, 220][i],
+            backgroundColor: P.blueprint,
+            transform: `scaleX(${p})`,
+            transformOrigin: 'left',
+          }}
+        />
+      ))}
+      <div style={{ position: 'absolute', left: 30, bottom: 6, display: 'flex', overflow: 'hidden' }}>
+        {['2', 'D'].map((ch, i) => {
+          const p = ci(f, [30 + i * 4, 56 + i * 4], [0, 1], ENTRY);
+          return (
+            <span
+              key={ch}
+              style={{
+                display: 'inline-block',
+                fontSize: 250,
+                fontWeight: 900,
+                letterSpacing: -16,
+                lineHeight: 0.9,
+                color: P.ink,
+                transform: `translateY(${(1 - p) * 240}px)`,
+              }}
+            >
+              {ch}
+            </span>
+          );
+        })}
       </div>
     </div>
   );
 };
 
-const TICKER = 'INFORMAÇÃO ✦ HIERARQUIA ✦ CLAREZA ✦ GRID ✦ TIPOGRAFIA ✦ CARTAZ ✦ INFOGRÁFICO ✦ ';
+// ── INFOGRÁFICO 1 — barras crescendo ─────────────────────────────────────
+const BARS = [0.45, 0.7, 0.55, 0.88, 1];
+const BarChart: React.FC<{ frame: number }> = ({ frame }) => {
+  const f = frame - T.bars;
+  return (
+    <div style={{ position: 'absolute', inset: 0, backgroundColor: P.paper }}>
+      <div style={{ position: 'absolute', left: 40, right: 40, bottom: 40, top: 40, display: 'flex', alignItems: 'flex-end', gap: 20 }}>
+        {BARS.map((b, i) => {
+          const grow = ci(f, [24 + i * 4, 52 + i * 4], [0, 1], ENTRY);
+          const breathe = 1 + 0.04 * Math.sin(frame * 0.05 + i) * ci(frame, [130, 160], [0, 1]);
+          return (
+            <div
+              key={i}
+              style={{ flex: 1, height: `${b * grow * breathe * 100}%`, backgroundColor: i === BARS.length - 1 ? P.neon : P.ink }}
+            />
+          );
+        })}
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          left: 40,
+          right: 40,
+          bottom: 38,
+          height: 3,
+          backgroundColor: P.blueprint,
+          transform: `scaleX(${ci(f, [18, 42], [0, 1], ENTRY)})`,
+          transformOrigin: 'left',
+        }}
+      />
+    </div>
+  );
+};
+
+// ── INFOGRÁFICO 2 — rosca preenchendo + contador ─────────────────────────
+const Donut: React.FC<{ frame: number }> = ({ frame }) => {
+  const f = frame - T.donut;
+  const fill = ci(f, [26, 70], [0, 0.72], ENTRY);
+  const R = 82;
+  const C = 2 * Math.PI * R;
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: P.paper,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 28,
+        padding: '0 40px',
+        boxSizing: 'border-box',
+      }}
+    >
+      <svg width={200} height={200} viewBox="0 0 200 200" style={{ flexShrink: 0 }}>
+        <circle cx={100} cy={100} r={R} fill="none" stroke="#E5E7EB" strokeWidth={28} />
+        <circle
+          cx={100}
+          cy={100}
+          r={R}
+          fill="none"
+          stroke={P.blueprint}
+          strokeWidth={28}
+          strokeDasharray={`${C * fill} ${C}`}
+          transform="rotate(-90 100 100)"
+        />
+      </svg>
+      <div style={{ fontSize: 76, fontWeight: 900, letterSpacing: -4, color: P.ink, fontVariantNumeric: 'tabular-nums' }}>
+        {Math.round(fill * 100)}%
+      </div>
+    </div>
+  );
+};
+
+// ── INFOGRÁFICO 3 — linha se desenhando + ponto que percorre ─────────────
+const LINE_PTS = [0.72, 0.58, 0.64, 0.4, 0.46, 0.26, 0.32, 0.12];
+const LineChart: React.FC<{ frame: number; box: Box }> = ({ frame, box }) => {
+  const f = frame - T.line;
+  const draw = ci(f, [24, 80], [0, 1], MORPH);
+  const iw = box.w - 80;
+  const ih = box.h - 80;
+  const pts = LINE_PTS.map((v, i) => [(i / (LINE_PTS.length - 1)) * iw, v * ih] as const);
+  const d = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${y}`).join(' ');
+  const area = `${d} L${iw} ${ih} L0 ${ih} Z`;
+  const run = (Math.max(0, frame - 150) * 0.004) % 1;
+  const k = run * (LINE_PTS.length - 1);
+  const i0 = Math.min(LINE_PTS.length - 2, Math.floor(k));
+  const fr = k - i0;
+  const dot = [lerp(pts[i0][0], pts[i0 + 1][0], fr), lerp(pts[i0][1], pts[i0 + 1][1], fr)];
+  return (
+    <div style={{ position: 'absolute', inset: 0, backgroundColor: P.ink }}>
+      <svg width={iw} height={ih} style={{ position: 'absolute', left: 40, top: 40, overflow: 'visible' }}>
+        {[0.25, 0.5, 0.75].map((g) => (
+          <line key={g} x1={0} x2={iw} y1={g * ih} y2={g * ih} stroke="#FFFFFF" strokeOpacity={0.08} />
+        ))}
+        <path d={area} fill={P.neon} opacity={0.12 * ci(f, [60, 90], [0, 1])} />
+        <path
+          d={d}
+          fill="none"
+          stroke={P.neon}
+          strokeWidth={6}
+          strokeLinejoin="round"
+          pathLength={1}
+          strokeDasharray={1}
+          strokeDashoffset={1 - draw}
+        />
+        <circle cx={dot[0]} cy={dot[1]} r={11} fill={P.paper} opacity={ci(frame, [150, 162], [0, 1])} />
+      </svg>
+    </div>
+  );
+};
+
+// ── Card posicionado no grid (abre do centro em scaleY, flat) ────────────
+const Slot: React.FC<{
+  box: Box;
+  frame: number;
+  enter: CSSProperties;
+  open: number;
+  phase: number;
+  children: React.ReactNode;
+}> = ({ box, frame, enter, open, phase, children }) => (
+  <div style={{ position: 'absolute', left: box.x, top: box.y + hover(frame, phase), width: box.w, height: box.h, ...enter }}>
+    <div style={{ position: 'absolute', inset: 0, transform: `scaleY(${open})`, overflow: 'hidden' }}>{children}</div>
+  </div>
+);
 
 export const CineB: React.FC = () => {
   const frame = useCurrentFrame();
-
-  // Pan ortográfico: solavanco 0 → -1080 no frame 150
-  const pan = ci(frame, [T.pan, T.pan + 18], [0, -W], Easing.inOut(Easing.exp));
-  const scanX = ((frame * 14) % (W + 200)) - 100; // linha de leitura neon
-  const tickerIn = ci(frame, [30, 52], [W, 0], SNAP);
-
-  // Linhas contínuas cruzando a tela
-  const crossA = ci(frame, [112, 130], [0, 1], SNAP);
-  const crossB = ci(frame, [190, 208], [0, 1], SNAP);
+  const { fps } = useVideoConfig();
+  const open = (start: number) => ci(frame, [start, start + 24], [0, 1], MORPH);
+  const line = boxAt('line', frame);
 
   return (
     <AbsoluteFill
@@ -336,75 +377,36 @@ export const CineB: React.FC = () => {
         fontFamily: FONT,
       }}
     >
-      {/* LÂMINA BG — azul + grid + linha de leitura */}
+      {/* LÂMINA BG */}
       <AbsoluteFill style={blade(frame, T.bladeBg, -1)}>
-        <AbsoluteFill style={{ backgroundColor: P.blueprint }} />
-        <div style={{ position: 'absolute', left: 0, top: 0, transform: `translateX(${pan}px)` }}>
-          <Grid frame={frame} width={W * 2} />
-        </div>
-        <div style={{ position: 'absolute', top: 0, bottom: 0, left: scanX, width: 3, backgroundColor: P.neon }} />
-        <div style={{ position: 'absolute', left: 0, top: 690, height: 3, width: W, backgroundColor: P.paper, transform: `scaleX(${crossA})`, transformOrigin: 'left' }} />
-        <div style={{ position: 'absolute', left: 0, top: 1510, height: 3, width: W, backgroundColor: P.neon, transform: `scaleX(${crossB})`, transformOrigin: 'right' }} />
+        <Background frame={frame} />
       </AbsoluteFill>
 
-      {/* LÂMINA MEIO — prancheta com pan (infográfico → cartaz) */}
+      {/* LÂMINA — gráfico de linha (no topo do grid após a reorganização) */}
+      <AbsoluteFill style={{ ...blade(frame, T.bladeLow, -1), ...(lineTravelBlur(frame) > 0.05 && frame < T.bladeLow ? { filter: `blur(${lineTravelBlur(frame)}px)` } : {}) }}>
+        <Slot box={line} frame={frame} enter={entryFrom(frame, T.line, 0, 260)} open={open(T.line)} phase={2.4}>
+          <LineChart frame={frame} box={line} />
+        </Slot>
+      </AbsoluteFill>
+
+      {/* LÂMINA — cartaz + infográficos */}
       <AbsoluteFill style={blade(frame, T.bladeMid, 1)}>
-        <div style={{ position: 'absolute', left: 0, top: 0, width: W * 2, height: H, transform: `translateX(${pan}px)` }}>
-          {/* a prancheta A sai de cena no solavanco; não volta na saída em lâminas */}
-          {frame < T.pan + 20 ? <InfoCard frame={frame} /> : null}
-          <SwissPoster frame={frame} />
-        </div>
+        <Slot box={boxAt('poster', frame)} frame={frame} enter={entryFrom(frame, T.poster, -360, 0)} open={open(T.poster)} phase={0}>
+          <Poster frame={frame} fps={fps} />
+        </Slot>
+        <Slot box={boxAt('bars', frame)} frame={frame} enter={entryFrom(frame, T.bars, 360, 0)} open={open(T.bars)} phase={0.8}>
+          <BarChart frame={frame} />
+        </Slot>
+        <Slot box={boxAt('donut', frame)} frame={frame} enter={entryFrom(frame, T.donut, 360, 0)} open={open(T.donut)} phase={1.6}>
+          <Donut frame={frame} />
+        </Slot>
       </AbsoluteFill>
 
-      {/* LÂMINA TOPO — textos mascarados */}
+      {/* LÂMINA TOPO — título */}
       <AbsoluteFill style={blade(frame, T.bladeTop, -1)}>
-        <div style={{ position: 'absolute', left: 80, right: 40, top: 160, display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <MaskedLine frame={frame} text="Etapa 1:" start={T.etapa} from={-400} style={{ fontSize: 48, fontWeight: 500, letterSpacing: 2, color: P.neon }} />
-          <MaskedLine
-            frame={frame}
-            text="A Força do 2D"
-            start={T.titleA}
-            from={-600}
-            style={{ fontSize: 110, fontWeight: 900, letterSpacing: -4, color: P.paper, lineHeight: 1.08 }}
-          />
-          <MaskedLine
-            frame={frame}
-            text="na Informação"
-            start={T.titleB}
-            from={-600}
-            style={{ fontSize: 110, fontWeight: 900, letterSpacing: -4, color: P.paper, lineHeight: 1.08 }}
-          />
-        </div>
-      </AbsoluteFill>
-
-      {/* LÂMINA BASE — ticker */}
-      <AbsoluteFill style={blade(frame, T.bladeTicker, -1)}>
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: 1600,
-            height: 96,
-            backgroundColor: P.ink,
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            transform: `translateX(${tickerIn}px)`,
-          }}
-        >
-          <div
-            style={{
-              whiteSpace: 'nowrap',
-              fontSize: 34,
-              fontWeight: 800,
-              letterSpacing: 3,
-              color: P.neon,
-              transform: `translateX(${-frame * 5}px)`,
-            }}
-          >
-            {TICKER.repeat(5)}
-          </div>
+        <div style={{ position: 'absolute', left: 80, right: 60, top: 190 }}>
+          <TitleLine words={['A', 'Força', 'do', '2D']} start={T.title[0]} frame={frame} />
+          <TitleLine words={['na', 'Informação']} start={T.title[1]} frame={frame} accent={1} />
         </div>
       </AbsoluteFill>
     </AbsoluteFill>

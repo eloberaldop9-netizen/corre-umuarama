@@ -11,8 +11,9 @@ import { MorphShape, StudioEnvironment } from '../three/Studio';
 // ─────────────────────────────────────────────────────────────────────────
 // CENA 1 — O Nascimento da Massa (0–300 | from=0)
 // Prancheta off-white. Um quadrado azul chapado "infla" (scale punch 1→1.3→1)
-// e vira esfera cromada com sombra de oclusão. O texto abraça o objeto.
-// Saída: Z-DIVE MASSIVO — a esfera engole a lente; em 293 o cromo estoura no
+// e ganha volume: vira um CUBO cromado que gira revelando as faces, com sombra
+// de oclusão. O texto abraça o objeto.
+// Saída: Z-DIVE MASSIVO — o cubo engole a lente; em 293 o cromo estoura no
 // azul chapado da Cena 2 (que fica por baixo desta cena durante o overlap).
 //
 // Espaço de câmera único (WebGL + DOM): a câmera olha para +Z a partir de
@@ -63,6 +64,21 @@ const punchScale = (s: number) => {
   return 1 + 0.3 * Math.sin(Math.PI * rise) - 0.5 * over;
 };
 
+/**
+ * O quadrado vira CUBO: as bordas ganham um chanfro sutil (raio 6% do lado) e
+ * o volume gira para revelar três faces — de frente era só o quadrado 2D.
+ * No hold, o cubo segue girando bem devagar em Y para o cromo reagir à luz.
+ */
+const CUBE_BEVEL = 0.12; // 0.12 × 50% = raio de canto de 6% do lado
+/** Visto em 3/4 o cubo ocupa ~1.6× o lado; ele "assenta" menor para abraçar o texto. */
+const cubeFit = (s: number) => 1 - 0.3 * Math.min(s, 1);
+const cubeRotation = (frame: number, s: number): [number, number, number] => {
+  const turn = Math.min(s, 1.1);
+  // Giro curto (0.72 → 1.12 rad): nunca volta a ficar de frente (π/2).
+  const spin = ci(frame, [T.hold - 30, T.end], [0, 0.4]);
+  return [-0.5 * turn, 0.72 * turn + spin, 0];
+};
+
 /** Flutuação gravitacional: Math.sin(frame × 0.015), entra suave antes do hold. */
 const floatWave = (frame: number) => Math.sin(frame * 0.015) * ci(frame, [T.hold - 30, T.hold], [0, 1]);
 
@@ -106,11 +122,13 @@ const World: React.FC = () => {
       <Camera frame={frame} />
       <MorphShape
         morph={Math.min(s, 1)}
+        round={CUBE_BEVEL * Math.min(s, 1)}
+        rotation={cubeRotation(frame, s)}
         flatten={flatten}
         size={SIZE}
         y={y}
         z={-diveZ(frame)}
-        scale={punchScale(s) * diveScale(frame)}
+        scale={punchScale(s) * cubeFit(s) * diveScale(frame)}
       />
     </>
   );
@@ -177,7 +195,7 @@ export const CineA: React.FC = () => {
   // ── Sombra de oclusão: 0 80px 120px rgba(0,0,0,0.3) — blur 120px ≡ σ 60px
   const s = morphSpring(frame, fps);
   const camDist = -cameraZ(frame);
-  const diameter = SIZE * pxPerUnit(camDist) * punchScale(s);
+  const diameter = SIZE * pxPerUnit(camDist) * punchScale(s) * cubeFit(s) * 1.3;
   const fl = floatWave(frame); // -1..1 (1 = esfera no alto, sombra mais fraca e menor)
   const shadowIn = ci(frame, [T.shadow, T.shadow + 25], [0, 1], Easing.out(Easing.exp));
   const shadowAlpha =

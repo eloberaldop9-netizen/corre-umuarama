@@ -135,8 +135,12 @@ const BLACK = new THREE.Color('#000000');
 const CHROME = new THREE.Color('#e9edf2');
 
 interface MorphShapeProps {
-  /** 0→1: quadrado chapado → esfera cromada (geometria + material). */
+  /** 0→1: material chapado → cromo. */
   morph: number;
+  /** 0→1: raio de canto da geometria (0 = cubo, 1 = esfera). Padrão = morph. */
+  round?: number;
+  /** Rotação (rad) — o cubo gira para revelar as faces. */
+  rotation?: [number, number, number];
   /** 0→1: o cromo "estoura" de volta no azul chapado (Z-dive → Cena 2). */
   flatten?: number;
   size: number;
@@ -145,16 +149,23 @@ interface MorphShapeProps {
   scale: number;
 }
 
-export const MorphShape: React.FC<MorphShapeProps> = ({ morph, flatten = 0, size, y, z = 0, scale }) => {
+export const MorphShape: React.FC<MorphShapeProps> = ({ morph, round, rotation = [0, 0, 0], flatten = 0, size, y, z = 0, scale }) => {
   const geometry = useMorphGeometry();
   const t = Math.min(1, Math.max(0, morph));
+  const r = Math.min(1, Math.max(0, round ?? morph));
   const f = Math.min(1, Math.max(0, flatten));
   const chrome = t * (1 - f);
   // Objeto novo a cada frame: o R3F só reaplica props cuja referência mudou.
   // (Mutar uma Color memoizada congelava a cor do primeiro frame no render.)
   const color = BLACK.clone().lerp(CHROME, chrome);
   return (
-    <mesh geometry={geometry} morphTargetInfluences={morphWeights(t)} position={[0, y, z]} scale={size * scale}>
+    <mesh
+      geometry={geometry}
+      morphTargetInfluences={morphWeights(r)}
+      position={[0, y, z]}
+      rotation={rotation}
+      scale={size * scale}
+    >
       <meshStandardMaterial
         color={color}
         emissive={FLAT_BLUE}
