@@ -35,7 +35,7 @@ const T = {
 } as const;
 
 // ── Grid de layout (margens 80, gutter 24) — duas arrumações ─────────────
-type Box = { x: number; y: number; w: number; h: number };
+export type Box = { x: number; y: number; w: number; h: number };
 type SlotKey = 'poster' | 'bars' | 'donut' | 'line';
 const COL_L = 80;
 const COL_R = 552;
@@ -164,7 +164,7 @@ const TitleLine: React.FC<{ words: string[]; start: number; frame: number; accen
 );
 
 // ── CARTAZ SUÍÇO — formas planas que se organizam ────────────────────────
-const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
+export const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const f = frame - T.poster;
   const circle = f < 26 ? 0 : spring({ frame: f - 26, fps, config: SPRINGS.badge });
   const stripes = [0, 1, 2].map((i) => ci(f, [34 + i * 4, 58 + i * 4], [0, 1], ENTRY));
@@ -238,7 +238,7 @@ const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
 
 // ── INFOGRÁFICO 1 — barras crescendo ─────────────────────────────────────
 const BARS = [0.45, 0.7, 0.55, 0.88, 1];
-const BarChart: React.FC<{ frame: number }> = ({ frame }) => {
+export const BarChart: React.FC<{ frame: number }> = ({ frame }) => {
   const f = frame - T.bars;
   return (
     <div style={{ position: 'absolute', inset: 0, backgroundColor: P.paper }}>
@@ -271,7 +271,7 @@ const BarChart: React.FC<{ frame: number }> = ({ frame }) => {
 };
 
 // ── INFOGRÁFICO 2 — rosca preenchendo + contador ─────────────────────────
-const Donut: React.FC<{ frame: number }> = ({ frame }) => {
+export const Donut: React.FC<{ frame: number }> = ({ frame }) => {
   const f = frame - T.donut;
   const fill = ci(f, [26, 70], [0, 0.72], ENTRY);
   const R = 82;
@@ -311,7 +311,7 @@ const Donut: React.FC<{ frame: number }> = ({ frame }) => {
 
 // ── INFOGRÁFICO 3 — linha se desenhando + ponto que percorre ─────────────
 const LINE_PTS = [0.72, 0.58, 0.64, 0.4, 0.46, 0.26, 0.32, 0.12];
-const LineChart: React.FC<{ frame: number; box: Box }> = ({ frame, box }) => {
+export const LineChart: React.FC<{ frame: number; box: Box }> = ({ frame, box }) => {
   const f = frame - T.line;
   const draw = ci(f, [24, 80], [0, 1], MORPH);
   const iw = box.w - 80;
