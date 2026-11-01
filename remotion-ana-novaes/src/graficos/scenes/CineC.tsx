@@ -5,26 +5,26 @@ import { AbsoluteFill, Easing, random, useCurrentFrame, useVideoConfig } from 'r
 import * as THREE from 'three';
 import { ci } from '../../lib/motion';
 import { FONT, P } from '../theme';
-import { AppBadge } from '../AppBadge';
-import { Dust, Sculpture, StudioEnvironment } from '../three/Studio';
+import { Dust, StudioEnvironment } from '../three/Studio';
+import { ProductCan } from '../three/Can';
 
 // ─────────────────────────────────────────────────────────────────────────
 // CENA 3 — A Profundidade do 3D (frames 743–1350, local 0–607)
-// Esqueleto wireframe ciano se desenha no vazio → órbita 180° épica →
-// malha vira sólido chumbo texturizado → Rim Light acende → Fill quente.
+// Objeto de destaque: uma LATA (o mockup 3D clássico da produção gráfica).
+// Wireframe ciano se desenha no vazio → órbita 180° → malha vira lata cinza →
+// o rótulo 2D é aplicado como textura → Rim Light acende → Fill quente.
 // Saída: WIPE VOLUMÉTRICO — órbita vertiginosa + escala 1→40 (blockout).
 // ─────────────────────────────────────────────────────────────────────────
 
 const T = {
   wire: 10,
-  etapa: 40,
   title: 50,
   titleStagger: 15,
   orbit: [30, 570] as const,
-  solid: [200, 260] as const,
+  solid: [200, 260] as const, // malha → lata cinza (clay)
+  label: [240, 300] as const, // o rótulo 2D é aplicado como textura
   rim: [280, 320] as const,
   fill: [320, 360] as const,
-  hud: 90,
   textExit: 570,
   inflate: 575,
   end: 600,
@@ -32,7 +32,7 @@ const T = {
 
 const ORBIT_RADIUS = 800;
 const LOOK_AT = new THREE.Vector3(0, 70, 0);
-const SCULPT_SCALE = 0.62;
+const OBJ_SCALE = 1.4; // lata ~940px de altura no hold
 
 const orbitAngle = (frame: number) =>
   ci(frame, [T.orbit[0], T.orbit[1]], [0, Math.PI], Easing.inOut(Easing.cubic)) +
@@ -85,17 +85,21 @@ const World: React.FC = () => {
   const wireDraw = ci(frame, [T.wire, T.wire + 100], [0, 1], Easing.out(Easing.sin));
   const wireIn = ci(frame, [T.wire, T.wire + 40], [0, 1], Easing.out(Easing.sin));
   const swap = ci(frame, [T.solid[0], T.solid[1]], [0, 1], Easing.inOut(Easing.cubic));
+  const label = ci(frame, [T.label[0], T.label[1]], [0, 1], Easing.inOut(Easing.cubic));
+  const gl = useThree((s) => s.gl);
+  gl.localClippingEnabled = true;
   const inflate = ci(frame, [T.inflate, T.end], [1, 40], Easing.in(Easing.exp));
   return (
     <>
       <StudioEnvironment intensity={0.18 + ci(frame, [T.fill[0], T.fill[1]], [0, 0.32], Easing.inOut(Easing.cubic))} />
       <StudioLights frame={frame} />
       <Rig frame={frame} />
-      <group scale={SCULPT_SCALE * inflate} rotation={[0.25, 0, 0]}>
-        <Sculpture
+      <group scale={OBJ_SCALE * inflate} rotation={[0, 0, 0.1]}>
+        <ProductCan
           wireDraw={wireDraw}
           wireOpacity={wireIn * (1 - swap)}
           solidOpacity={swap}
+          labelWipe={label}
           rimGlow={ci(frame, [T.rim[0], T.rim[1]], [0, 1], Easing.inOut(Easing.cubic))}
           rimDir={rimDirection(frame)}
         />
@@ -177,58 +181,12 @@ const TitleLine: React.FC<{ text: string; start: number; frame: number; style: R
   </div>
 );
 
-const STAGES = ['Wireframe', 'Textura', 'Luz'] as const;
-
-const Hud: React.FC<{ frame: number }> = ({ frame }) => {
-  const enter = ci(frame, [T.hud, T.hud + 22], [0, 1], Easing.out(Easing.cubic));
-  const stage = frame >= T.rim[0] ? 2 : frame >= T.solid[0] ? 1 : 0;
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: 48,
-        right: 48,
-        bottom: 110,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
-        opacity: enter,
-        transform: `translateY(${(1 - enter) * 50}px)`,
-      }}
-    >
-      <AppBadge app="ae" variant="glass" size={56} kicker="Feito no" />
-      <div style={{ display: 'flex', gap: 10 }}>
-        {STAGES.map((label, i) => {
-          const active = i === stage;
-          return (
-            <div
-              key={label}
-              style={{
-                padding: '10px 16px',
-                borderRadius: 10,
-                fontSize: 17,
-                fontWeight: 700,
-                letterSpacing: 2,
-                textTransform: 'uppercase',
-                color: active ? P.void : 'rgba(255,255,255,0.5)',
-                backgroundColor: active ? P.wire : 'rgba(255,255,255,0.05)',
-                border: `1px solid ${active ? P.wire : 'rgba(255,255,255,0.14)'}`,
-              }}
-            >
-              {label}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
+const TITLE: React.CSSProperties = { fontSize: 88, fontWeight: 800, letterSpacing: -2, color: '#FFFFFF', lineHeight: 1.08 };
 
 export const CineC: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
 
-  const etapa = ci(frame, [T.etapa, T.etapa + 24], [0, 1], Easing.inOut(Easing.cubic));
   const textExit = ci(frame, [T.textExit, T.textExit + 18], [0, 1], Easing.in(Easing.exp));
   // Saída Quádrupla: o roteiro pede opacity + blur 25; a skill completa com
   // posição (sobe, contrária à massa que avança) e contração sutil.
@@ -252,33 +210,12 @@ export const CineC: React.FC = () => {
         <World />
       </ThreeCanvas>
 
-      <div style={{ position: 'absolute', top: 190, left: 40, right: 40, ...textExitStyle }}>\n        <div style={{ transform: `translateY(${float}px)` }}>
-        <div
-          style={{
-            textAlign: 'center',
-            fontSize: 48,
-            fontWeight: 300,
-            letterSpacing: 4,
-            color: P.gray,
-            opacity: etapa,
-            filter: etapa < 0.999 ? `blur(${20 * (1 - etapa)}px)` : undefined,
-            marginBottom: 14,
-          }}
-        >
-          Etapa 2:
+      {/* TÍTULO — flutua livre na lente */}
+      <div style={{ position: 'absolute', top: 200, left: 40, right: 40, ...textExitStyle }}>
+        <div style={{ transform: `translateY(${float}px)` }}>
+          <TitleLine text="A Profundidade e" start={T.title} frame={frame} style={TITLE} />
+          <TitleLine text="o Impacto do 3D" start={T.title + T.titleStagger} frame={frame} style={TITLE} />
         </div>
-        <TitleLine text="A Profundidade e" start={T.title} frame={frame} style={{ fontSize: 80, fontWeight: 800, letterSpacing: -2, color: '#FFFFFF', lineHeight: 1.08 }} />
-        <TitleLine
-          text="o Impacto do 3D"
-          start={T.title + T.titleStagger}
-          frame={frame}
-          style={{ fontSize: 80, fontWeight: 800, letterSpacing: -2, color: '#FFFFFF', lineHeight: 1.08 }}
-        />
-        </div>
-      </div>
-
-      <div style={textExitStyle}>
-        <Hud frame={frame} />
       </div>
 
       {/* BLOCKOUT — a massa chumbo tapa a lente por completo */}

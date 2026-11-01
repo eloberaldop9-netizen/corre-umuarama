@@ -249,7 +249,7 @@ const RIM_FRAGMENT = `
   }
 `;
 
-const RimShell: React.FC<{ geometry: THREE.BufferGeometry; glow: number; dir: THREE.Vector3 }> = ({ geometry, glow, dir }) => {
+export const RimShell: React.FC<{ geometry: THREE.BufferGeometry; glow: number; dir: THREE.Vector3 }> = ({ geometry, glow, dir }) => {
   const material = useMemo(
     () =>
       new THREE.ShaderMaterial({
