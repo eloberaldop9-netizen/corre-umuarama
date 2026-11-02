@@ -17,6 +17,23 @@ export const P = {
 
 export const FONT = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
 
+// Paleta editorial das Cenas 1 e 2 — sóbria, profissional: osso, grafite,
+// azul-meia-noite e champanhe como único acento.
+export const ED = {
+  bone: '#F2EFE9', // C1 — papel quente
+  stone: '#DCD6CB', // trilhos, aros, divisórias
+  ink: '#141416', // tipografia principal
+  graphite: '#2B2B30', // barras, formas
+  muted: '#8A8780', // texto secundário
+  midnight: '#101A2C', // C2 — fundo
+  night: '#0A1220', // C2 — card escuro
+  champagne: '#C9A96E', // acento sobre fundo escuro
+  bronze: '#8C6A36', // acento sobre fundo claro (contraste)
+} as const;
+
+export const SANS = "'Inter', 'Helvetica Neue', Arial, sans-serif";
+export const SERIF = "'Playfair Display', Georgia, serif";
+
 export const SPRINGS = {
   text: { damping: 14, mass: 0.8 },
   morph: { damping: 12, mass: 1.5 }, // quadrado → esfera (C1)

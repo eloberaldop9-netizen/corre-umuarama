@@ -1,7 +1,7 @@
 import React, { CSSProperties } from 'react';
 import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { ci } from '../../lib/motion';
-import { FONT, P, SPRINGS } from '../theme';
+import { ED, P, SANS, SERIF, SPRINGS } from '../theme';
 
 // ─────────────────────────────────────────────────────────────────────────
 // CENA 2 — A Força do 2D na Informação (frames 293–750, local 0–457)
@@ -110,15 +110,15 @@ const Background: React.FC<{ frame: number }> = ({ frame }) => {
   const gridIn = ci(frame, [T.grid, T.grid + 24], [0, 1], ENTRY);
   return (
     <AbsoluteFill>
-      <AbsoluteFill style={{ backgroundColor: P.blueprint }} />
-      <AbsoluteFill style={{ background: 'radial-gradient(ellipse at 50% 35%, rgba(255,255,255,0.10) 0%, transparent 65%)' }} />
+      <AbsoluteFill style={{ backgroundColor: ED.midnight }} />
+      <AbsoluteFill style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(201,169,110,0.10) 0%, transparent 62%)' }} />
       <svg width={W} height={H} style={{ position: 'absolute', inset: 0, opacity: gridIn }}>
         <defs>
           <pattern id="c2-grid" width={40} height={40} patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#FFFFFF" strokeOpacity={0.1} strokeWidth={1} />
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#FFFFFF" strokeOpacity={0.05} strokeWidth={1} />
           </pattern>
           <pattern id="c2-cross" width={160} height={160} patternUnits="userSpaceOnUse">
-            <path d="M-6 0 H6 M0 -6 V6 M154 160 H166 M160 154 V166" stroke="#FFFFFF" strokeOpacity={0.35} strokeWidth={1.5} />
+            <path d="M-6 0 H6 M0 -6 V6 M154 160 H166 M160 154 V166" stroke={ED.champagne} strokeOpacity={0.35} strokeWidth={1.2} />
           </pattern>
         </defs>
         <rect width={W} height={H} fill="url(#c2-grid)" />
@@ -141,15 +141,22 @@ const TitleLine: React.FC<{ words: string[]; start: number; frame: number; accen
       const p = ci(frame, [s, s + 22], [0, 1], ENTRY);
       const bl = 12 * ci(frame, [s, s + 13], [1, 0]);
       return (
-        <span key={i} style={{ display: 'inline-block', overflow: 'hidden', paddingBottom: 10 }}>
+        // A máscara ganha folga à direita (compensada na margem): com tracking
+        // negativo / itálico o último glifo passava da caixa e era cortado.
+        <span
+          key={i}
+          style={{ display: 'inline-block', overflow: 'hidden', paddingBottom: 14, paddingRight: '0.18em', marginRight: '-0.18em' }}
+        >
           <span
             style={{
               display: 'inline-block',
               whiteSpace: 'nowrap',
-              fontWeight: 900,
-              letterSpacing: -4,
-              lineHeight: 1.02,
-              color: i === accent ? P.neon : P.paper,
+              fontFamily: i === accent ? SERIF : SANS,
+              fontStyle: i === accent ? 'italic' : 'normal',
+              fontWeight: i === accent ? 500 : 700,
+              letterSpacing: i === accent ? -1 : -3.5,
+              lineHeight: 1.06,
+              color: i === accent ? ED.champagne : ED.bone,
               opacity: ci(frame, [s, s + 12], [0, 1]),
               transform: `translateY(${(1 - p) * 70}px)`,
               filter: bl > 0.05 ? `blur(${bl}px)` : undefined,
@@ -171,7 +178,7 @@ export const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps })
   const square = ci(f, [44, 70], [0, 1], ENTRY);
   const spin = ci(frame, [120, 420], [0, 90]);
   return (
-    <div style={{ position: 'absolute', inset: 0, backgroundColor: P.paper, overflow: 'hidden' }}>
+    <div style={{ position: 'absolute', inset: 0, backgroundColor: ED.bone, overflow: 'hidden' }}>
       <div
         style={{
           position: 'absolute',
@@ -180,7 +187,7 @@ export const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps })
           width: 330,
           height: 330,
           borderRadius: '50%',
-          backgroundColor: P.neon,
+          backgroundColor: ED.champagne,
           transform: `scale(${circle})`,
         }}
       />
@@ -191,7 +198,7 @@ export const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps })
           top: 210,
           width: 64,
           height: 64,
-          backgroundColor: P.ink,
+          backgroundColor: ED.ink,
           opacity: square,
           transform: `translateY(${(1 - square) * 40}px) rotate(${spin}deg)`,
         }}
@@ -205,13 +212,13 @@ export const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps })
             top: 300 + i * 46,
             height: 26,
             width: [300, 380, 220][i],
-            backgroundColor: P.blueprint,
+            backgroundColor: ED.graphite,
             transform: `scaleX(${p})`,
             transformOrigin: 'left',
           }}
         />
       ))}
-      <div style={{ position: 'absolute', left: 30, bottom: 6, display: 'flex', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', left: 30, bottom: 6, paddingRight: 60, display: 'flex', overflow: 'hidden' }}>
         {['2', 'D'].map((ch, i) => {
           const p = ci(f, [30 + i * 4, 56 + i * 4], [0, 1], ENTRY);
           return (
@@ -220,10 +227,11 @@ export const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps })
               style={{
                 display: 'inline-block',
                 fontSize: 250,
-                fontWeight: 900,
-                letterSpacing: -16,
+                fontFamily: SANS,
+                fontWeight: 800,
+                letterSpacing: -14,
                 lineHeight: 0.9,
-                color: P.ink,
+                color: ED.ink,
                 transform: `translateY(${(1 - p) * 240}px)`,
               }}
             >
@@ -241,7 +249,7 @@ const BARS = [0.45, 0.7, 0.55, 0.88, 1];
 export const BarChart: React.FC<{ frame: number }> = ({ frame }) => {
   const f = frame - T.bars;
   return (
-    <div style={{ position: 'absolute', inset: 0, backgroundColor: P.paper }}>
+    <div style={{ position: 'absolute', inset: 0, backgroundColor: ED.bone }}>
       <div style={{ position: 'absolute', left: 40, right: 40, bottom: 40, top: 40, display: 'flex', alignItems: 'flex-end', gap: 20 }}>
         {BARS.map((b, i) => {
           const grow = ci(f, [24 + i * 4, 52 + i * 4], [0, 1], ENTRY);
@@ -249,7 +257,7 @@ export const BarChart: React.FC<{ frame: number }> = ({ frame }) => {
           return (
             <div
               key={i}
-              style={{ flex: 1, height: `${b * grow * breathe * 100}%`, backgroundColor: i === BARS.length - 1 ? P.neon : P.ink }}
+              style={{ flex: 1, height: `${b * grow * breathe * 100}%`, backgroundColor: i === BARS.length - 1 ? ED.champagne : ED.graphite }}
             />
           );
         })}
@@ -261,7 +269,7 @@ export const BarChart: React.FC<{ frame: number }> = ({ frame }) => {
           right: 40,
           bottom: 38,
           height: 3,
-          backgroundColor: P.blueprint,
+          backgroundColor: ED.stone,
           transform: `scaleX(${ci(f, [18, 42], [0, 1], ENTRY)})`,
           transformOrigin: 'left',
         }}
@@ -281,7 +289,7 @@ export const Donut: React.FC<{ frame: number }> = ({ frame }) => {
       style={{
         position: 'absolute',
         inset: 0,
-        backgroundColor: P.paper,
+        backgroundColor: ED.bone,
         display: 'flex',
         alignItems: 'center',
         gap: 28,
@@ -290,19 +298,19 @@ export const Donut: React.FC<{ frame: number }> = ({ frame }) => {
       }}
     >
       <svg width={200} height={200} viewBox="0 0 200 200" style={{ flexShrink: 0 }}>
-        <circle cx={100} cy={100} r={R} fill="none" stroke="#E5E7EB" strokeWidth={28} />
+        <circle cx={100} cy={100} r={R} fill="none" stroke={ED.stone} strokeWidth={28} />
         <circle
           cx={100}
           cy={100}
           r={R}
           fill="none"
-          stroke={P.blueprint}
+          stroke={ED.midnight}
           strokeWidth={28}
           strokeDasharray={`${C * fill} ${C}`}
           transform="rotate(-90 100 100)"
         />
       </svg>
-      <div style={{ fontSize: 76, fontWeight: 900, letterSpacing: -4, color: P.ink, fontVariantNumeric: 'tabular-nums' }}>
+      <div style={{ fontFamily: SANS, fontSize: 76, fontWeight: 700, letterSpacing: -3, color: ED.ink, fontVariantNumeric: 'tabular-nums' }}>
         {Math.round(fill * 100)}%
       </div>
     </div>
@@ -325,23 +333,23 @@ export const LineChart: React.FC<{ frame: number; box: Box }> = ({ frame, box })
   const fr = k - i0;
   const dot = [lerp(pts[i0][0], pts[i0 + 1][0], fr), lerp(pts[i0][1], pts[i0 + 1][1], fr)];
   return (
-    <div style={{ position: 'absolute', inset: 0, backgroundColor: P.ink }}>
+    <div style={{ position: 'absolute', inset: 0, backgroundColor: ED.night }}>
       <svg width={iw} height={ih} style={{ position: 'absolute', left: 40, top: 40, overflow: 'visible' }}>
         {[0.25, 0.5, 0.75].map((g) => (
-          <line key={g} x1={0} x2={iw} y1={g * ih} y2={g * ih} stroke="#FFFFFF" strokeOpacity={0.08} />
+          <line key={g} x1={0} x2={iw} y1={g * ih} y2={g * ih} stroke="#FFFFFF" strokeOpacity={0.06} />
         ))}
-        <path d={area} fill={P.neon} opacity={0.12 * ci(f, [60, 90], [0, 1])} />
+        <path d={area} fill={ED.champagne} opacity={0.12 * ci(f, [60, 90], [0, 1])} />
         <path
           d={d}
           fill="none"
-          stroke={P.neon}
-          strokeWidth={6}
+          stroke={ED.champagne}
+          strokeWidth={5}
           strokeLinejoin="round"
           pathLength={1}
           strokeDasharray={1}
           strokeDashoffset={1 - draw}
         />
-        <circle cx={dot[0]} cy={dot[1]} r={11} fill={P.paper} opacity={ci(frame, [150, 162], [0, 1])} />
+        <circle cx={dot[0]} cy={dot[1]} r={10} fill={ED.bone} opacity={ci(frame, [150, 162], [0, 1])} />
       </svg>
     </div>
   );
@@ -374,7 +382,7 @@ export const CineB: React.FC = () => {
         // existir, a Cena 2 o pinta; a partir do overlap, deixa a Cena 3 aparecer.
         backgroundColor: frame < T.c3Start ? P.void : 'transparent',
         overflow: 'hidden',
-        fontFamily: FONT,
+        fontFamily: SANS,
       }}
     >
       {/* LÂMINA BG */}

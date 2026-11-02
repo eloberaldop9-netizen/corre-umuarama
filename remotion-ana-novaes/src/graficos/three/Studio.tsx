@@ -130,9 +130,7 @@ const morphWeights = (t: number) => {
   });
 };
 
-const FLAT_BLUE = new THREE.Color(P.blueprint);
 const BLACK = new THREE.Color('#000000');
-const CHROME = new THREE.Color('#e9edf2');
 
 interface MorphShapeProps {
   /** 0→1: material chapado → cromo. */
@@ -141,15 +139,36 @@ interface MorphShapeProps {
   round?: number;
   /** Rotação (rad) — o cubo gira para revelar as faces. */
   rotation?: [number, number, number];
-  /** 0→1: o cromo "estoura" de volta no azul chapado (Z-dive → Cena 2). */
+  /** 0→1: o metal "estoura" de volta numa cor chapada (Z-dive → Cena 2). */
   flatten?: number;
+  /** Cor chapada do estado 2D (quadrado). */
+  flatColor?: string;
+  /** Cor chapada do estouro final (fundo da cena seguinte). */
+  popColor?: string;
+  /** Cor do metal no estado 3D. */
+  metalColor?: string;
+  /** Rugosidade do metal no estado 3D (0.07 = cromo espelhado, ~0.3 = acetinado). */
+  metalRoughness?: number;
   size: number;
   y: number;
   z?: number;
   scale: number;
 }
 
-export const MorphShape: React.FC<MorphShapeProps> = ({ morph, round, rotation = [0, 0, 0], flatten = 0, size, y, z = 0, scale }) => {
+export const MorphShape: React.FC<MorphShapeProps> = ({
+  morph,
+  round,
+  rotation = [0, 0, 0],
+  flatten = 0,
+  flatColor = P.blueprint,
+  popColor = P.blueprint,
+  metalColor = '#e9edf2',
+  metalRoughness = 0.07,
+  size,
+  y,
+  z = 0,
+  scale,
+}) => {
   const geometry = useMorphGeometry();
   const t = Math.min(1, Math.max(0, morph));
   const r = Math.min(1, Math.max(0, round ?? morph));
@@ -157,7 +176,8 @@ export const MorphShape: React.FC<MorphShapeProps> = ({ morph, round, rotation =
   const chrome = t * (1 - f);
   // Objeto novo a cada frame: o R3F só reaplica props cuja referência mudou.
   // (Mutar uma Color memoizada congelava a cor do primeiro frame no render.)
-  const color = BLACK.clone().lerp(CHROME, chrome);
+  const color = BLACK.clone().lerp(new THREE.Color(metalColor), chrome);
+  const emissive = new THREE.Color(f > 0 ? popColor : flatColor);
   return (
     <mesh
       geometry={geometry}
@@ -168,10 +188,10 @@ export const MorphShape: React.FC<MorphShapeProps> = ({ morph, round, rotation =
     >
       <meshStandardMaterial
         color={color}
-        emissive={FLAT_BLUE}
+        emissive={emissive}
         emissiveIntensity={1 - chrome}
         metalness={chrome}
-        roughness={1 - 0.93 * chrome}
+        roughness={1 - (1 - metalRoughness) * chrome}
         userData={{ envScale: chrome }}
         side={THREE.DoubleSide}
       />

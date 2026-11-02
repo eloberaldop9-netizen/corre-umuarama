@@ -4,7 +4,7 @@ import { useThree } from '@react-three/fiber';
 import { AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import * as THREE from 'three';
 import { ci } from '../../lib/motion';
-import { FONT, P, SPRINGS } from '../theme';
+import { ED, SANS, SERIF, SPRINGS } from '../theme';
 import { SpringWords } from '../SpringWords';
 import { MorphShape, StudioEnvironment } from '../three/Studio';
 
@@ -109,22 +109,27 @@ const World: React.FC = () => {
   const { fps } = useVideoConfig();
   const s = morphSpring(frame, fps);
   const y = (12 / pxPerUnit(450)) * floatWave(frame);
-  // 293→294: o brilho morre em corte seco — em 294 a superfície já é azul chapado.
+  // 293→294: o brilho morre em corte seco — em 294 a superfície já é o
+  // azul-meia-noite chapado do fundo da Cena 2.
   const flatten = ci(frame, [T.pop, T.pop + 1], [0, 1]);
-  // Luz e HDRI só existem no estado cromado: o 2D é emissivo puro (#1D4ED8 exato).
+  // Luz e HDRI só existem no estado metálico: o 2D é emissivo puro (cor exata).
   const chrome = Math.min(s, 1) * (1 - flatten);
   return (
     <>
       {/* "Luzes rodando fora de quadro": o HDRI de estúdio gira em Y */}
       <StudioEnvironment intensity={1.1} rotationY={frame * 0.012} />
       <pointLight position={[-260, 220, -300]} intensity={1.4 * chrome} decay={0} />
-      <pointLight position={[300, -120, -200]} intensity={0.5 * chrome} decay={0} color="#c7d2fe" />
+      <pointLight position={[300, -120, -200]} intensity={0.6 * chrome} decay={0} color="#F3DDB4" />
       <Camera frame={frame} />
       <MorphShape
         morph={Math.min(s, 1)}
         round={CUBE_BEVEL * Math.min(s, 1)}
         rotation={cubeRotation(frame, s)}
         flatten={flatten}
+        flatColor={ED.ink}
+        popColor={ED.midnight}
+        metalColor="#6B6E75"
+        metalRoughness={0.26}
         size={SIZE}
         y={y}
         z={-diveZ(frame)}
@@ -217,7 +222,7 @@ export const CineA: React.FC = () => {
   const handoff = ci(frame, [T.pop + 3, T.end], [1, 0]);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: P.paper, overflow: 'hidden', fontFamily: FONT, opacity: handoff }}>
+    <AbsoluteFill style={{ backgroundColor: ED.bone, overflow: 'hidden', fontFamily: SANS, opacity: handoff }}>
       {/* BACKGROUND VIVO — corte seco na base, grid + anéis em opacidade */}
       <AbsoluteFill style={{ opacity: bgIn }}>
         <ScrollingGrid frame={frame} />
@@ -258,14 +263,14 @@ export const CineA: React.FC = () => {
       </AbsoluteFill>
 
       {/* TIPOGRAFIA — abraça o objeto: cada linha num plano Z próprio */}
-      <AbsoluteFill style={{ ...textExit, color: P.ink }}>
+      <AbsoluteFill style={{ ...textExit, color: ED.ink }}>
         <DepthLayer frame={frame} zDepth={100}>
           <div style={{ position: 'absolute', top: 470, left: 40, right: 40 }}>
             <SpringWords
               text="Como o 2D e o 3D"
               start={T.text[0]}
               {...LINE_ENTRY}
-              style={{ fontSize: 72, fontWeight: 800, letterSpacing: -2, lineHeight: 1 }}
+              style={{ fontFamily: SANS, fontSize: 72, fontWeight: 600, letterSpacing: -2.5, lineHeight: 1 }}
             />
           </div>
         </DepthLayer>
@@ -275,7 +280,7 @@ export const CineA: React.FC = () => {
               text="transformam a"
               start={T.text[1]}
               {...LINE_ENTRY}
-              style={{ fontSize: 64, fontWeight: 300, color: P.gray, lineHeight: 1 }}
+              style={{ fontFamily: SANS, fontSize: 60, fontWeight: 300, color: ED.muted, lineHeight: 1 }}
             />
           </div>
         </DepthLayer>
@@ -285,7 +290,7 @@ export const CineA: React.FC = () => {
               text="Comunicação Visual?"
               start={T.text[2]}
               {...LINE_ENTRY}
-              style={{ fontSize: 80, fontWeight: 900, letterSpacing: -3, color: P.blueprint, lineHeight: 1.05 }}
+              style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 92, fontWeight: 500, letterSpacing: -1, color: ED.bronze, lineHeight: 1.1 }}
             />
           </div>
         </DepthLayer>
@@ -294,7 +299,7 @@ export const CineA: React.FC = () => {
   );
 };
 
-/** Badge topo "Gráficos 2D vs 3D!" — 48px 500, tracking +4, scale + bounce. */
+/** Badge topo "Gráficos 2D vs 3D" — selo editorial em caixa-alta, scale + bounce. */
 const BadgeTop: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const s = frame < T.badge ? 0 : spring({ frame: frame - T.badge, fps, config: SPRINGS.badge });
   // Linear no spring (sem interpolate) para manter o overshoot do bounce.
@@ -302,20 +307,22 @@ const BadgeTop: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   return (
     <div
       style={{
-        padding: '14px 34px',
-        border: `3px solid ${P.ink}`,
+        padding: '16px 34px',
+        border: `1.5px solid ${ED.ink}`,
         borderRadius: 999,
-        fontSize: 48,
+        fontFamily: SANS,
+        fontSize: 30,
         fontWeight: 500,
-        letterSpacing: 4,
-        color: P.ink,
-        backgroundColor: P.paper,
+        letterSpacing: 7,
+        textTransform: 'uppercase',
+        color: ED.ink,
+        backgroundColor: ED.bone,
         opacity: ci(frame - T.badge, [0, 8], [0, 1]),
         transform: `scale(${scale})`,
         filter: `blur(${ci(frame - T.badge, [0, 9], [6, 0])}px)`,
       }}
     >
-      Gráficos 2D vs 3D!
+      Gráficos 2D vs 3D
     </div>
   );
 };
