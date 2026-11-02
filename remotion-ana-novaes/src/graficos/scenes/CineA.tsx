@@ -4,7 +4,7 @@ import { useThree } from '@react-three/fiber';
 import { AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import * as THREE from 'three';
 import { ci } from '../../lib/motion';
-import { NV, SANS, SERIF, SPRINGS } from '../theme';
+import { FONT, NV, SPRINGS } from '../theme';
 import { SpringWords } from '../SpringWords';
 import { MorphShape, StudioEnvironment } from '../three/Studio';
 
@@ -74,9 +74,11 @@ const CUBE_BEVEL = 0.12; // 0.12 × 50% = raio de canto de 6% do lado
 const cubeFit = (s: number) => 1 - 0.3 * Math.min(s, 1);
 const cubeRotation = (frame: number, s: number): [number, number, number] => {
   const turn = Math.min(s, 1.1);
-  // Giro curto (0.72 → 1.12 rad): nunca volta a ficar de frente (π/2).
-  const spin = ci(frame, [T.hold - 30, T.end], [0, 0.4]);
-  return [-0.5 * turn, 0.72 * turn + spin, 0];
+  // Giro contínuo e lento no hold (curva do meio: linear) + um balanço sutil
+  // em X — o metal passa pelas luzes do estúdio e o volume nunca "congela".
+  const spin = ci(frame, [T.hold - 40, T.end], [0, 1.9]);
+  const sway = 0.07 * Math.sin(frame * 0.022) * ci(frame, [T.hold - 30, T.hold], [0, 1]);
+  return [-0.5 * turn + sway, 0.72 * turn + spin, 0];
 };
 
 /** Flutuação gravitacional: Math.sin(frame × 0.015), entra suave antes do hold. */
@@ -114,27 +116,42 @@ const World: React.FC = () => {
   const flatten = ci(frame, [T.pop, T.pop + 1], [0, 1]);
   // Luz e HDRI só existem no estado metálico: o 2D é emissivo puro (cor exata).
   const chrome = Math.min(s, 1) * (1 - flatten);
+  const scale = punchScale(s) * cubeFit(s) * diveScale(frame);
+  const cube = {
+    morph: Math.min(s, 1),
+    round: CUBE_BEVEL * Math.min(s, 1),
+    rotation: cubeRotation(frame, s),
+    flatten,
+    flatColor: NV.ice,
+    popColor: NV.midnight,
+    metalColor: '#C2D0EA',
+    metalRoughness: 0.14,
+    size: SIZE,
+    scale,
+  };
+  // Piso logo abaixo do vértice mais baixo do cubo em 3/4 (~0.8 do lado).
+  const cubeSize = SIZE * punchScale(s) * cubeFit(s);
+  const floor = -0.82 * cubeSize - 10 / pxPerUnit(450);
   return (
     <>
       {/* "Luzes rodando fora de quadro": o HDRI de estúdio gira em Y */}
-      <StudioEnvironment intensity={1.1} rotationY={frame * 0.012} />
-      <pointLight position={[-260, 220, -300]} intensity={1.4 * chrome} decay={0} />
-      <pointLight position={[300, -120, -200]} intensity={0.6 * chrome} decay={0} color="#BFD3FF" />
+      <StudioEnvironment intensity={1.15} rotationY={frame * 0.012} />
+      {/* key frio do alto + contra-luz azul-céu que desenha as arestas */}
+      <pointLight position={[-260, 260, -300]} intensity={1.5 * chrome} decay={0} />
+      <pointLight position={[320, 120, 260]} intensity={1.6 * chrome} decay={0} color={NV.sky} />
+      <pointLight position={[300, -160, -200]} intensity={0.5 * chrome} decay={0} color="#BFD3FF" />
       <Camera frame={frame} />
-      <MorphShape
-        morph={Math.min(s, 1)}
-        round={CUBE_BEVEL * Math.min(s, 1)}
-        rotation={cubeRotation(frame, s)}
-        flatten={flatten}
-        flatColor={NV.ice}
-        popColor={NV.midnight}
-        metalColor="#C3CFE6"
-        metalRoughness={0.2}
-        size={SIZE}
-        y={y}
-        z={-diveZ(frame)}
-        scale={punchScale(s) * cubeFit(s) * diveScale(frame)}
-      />
+      <MorphShape {...cube} y={y} z={-diveZ(frame)} />
+      {/* Reflexo no "chão" de estúdio: o mesmo cubo espelhado sob o piso, que
+          some em gradiente. Desaparece quando o Z-dive começa. */}
+      <group position={[0, floor, 0]} scale={[1, -1, 1]}>
+        <MorphShape
+          {...cube}
+          y={y - floor}
+          z={0}
+          reflection={{ fadeFloor: floor, fadeLength: cubeSize * 0.38, opacity: 0.3 * Math.min(s, 1) * ci(frame, [T.dive - 4, T.dive + 4], [1, 0]) }}
+        />
+      </group>
     </>
   );
 };
@@ -222,7 +239,7 @@ export const CineA: React.FC = () => {
   const handoff = ci(frame, [T.pop + 3, T.end], [1, 0]);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: NV.navy, overflow: 'hidden', fontFamily: SANS, opacity: handoff }}>
+    <AbsoluteFill style={{ backgroundColor: NV.navy, overflow: 'hidden', fontFamily: FONT, opacity: handoff }}>
       {/* Glow radial azul atrás do objeto + vinheta nas bordas */}
       <AbsoluteFill style={{ background: `radial-gradient(ellipse 70% 45% at 50% 50%, #1A2F5E 0%, ${NV.navy} 60%, ${NV.abyss} 100%)` }} />
       {/* BACKGROUND VIVO — corte seco na base, grid + anéis em opacidade */}
@@ -272,7 +289,7 @@ export const CineA: React.FC = () => {
               text="Como o 2D e o 3D"
               start={T.text[0]}
               {...LINE_ENTRY}
-              style={{ fontFamily: SANS, fontSize: 72, fontWeight: 600, letterSpacing: -2.5, lineHeight: 1 }}
+              style={{ fontFamily: FONT, fontSize: 72, fontWeight: 800, letterSpacing: -2, lineHeight: 1 }}
             />
           </div>
         </DepthLayer>
@@ -282,7 +299,7 @@ export const CineA: React.FC = () => {
               text="transformam a"
               start={T.text[1]}
               {...LINE_ENTRY}
-              style={{ fontFamily: SANS, fontSize: 60, fontWeight: 300, color: NV.muted, lineHeight: 1 }}
+              style={{ fontFamily: FONT, fontSize: 64, fontWeight: 300, color: NV.muted, lineHeight: 1 }}
             />
           </div>
         </DepthLayer>
@@ -292,7 +309,7 @@ export const CineA: React.FC = () => {
               text="Comunicação Visual?"
               start={T.text[2]}
               {...LINE_ENTRY}
-              style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 92, fontWeight: 500, letterSpacing: -1, color: NV.sky, lineHeight: 1.1 }}
+              style={{ fontFamily: FONT, fontSize: 80, fontWeight: 900, letterSpacing: -3, color: NV.sky, lineHeight: 1.05 }}
             />
           </div>
         </DepthLayer>
@@ -312,7 +329,7 @@ const BadgeTop: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
         padding: '16px 34px',
         border: `1.5px solid ${NV.line}`,
         borderRadius: 999,
-        fontFamily: SANS,
+        fontFamily: FONT,
         fontSize: 30,
         fontWeight: 500,
         letterSpacing: 7,

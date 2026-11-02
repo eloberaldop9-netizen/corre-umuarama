@@ -33,8 +33,7 @@ export const NV = {
   muted: '#8C9AB8', // texto secundário
 } as const;
 
-export const SANS = "'Inter', 'Helvetica Neue', Arial, sans-serif";
-export const SERIF = "'Playfair Display', Georgia, serif";
+
 
 export const SPRINGS = {
   text: { damping: 14, mass: 0.8 },

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useThree } from '@react-three/fiber';
 import { continueRender, delayRender } from 'remotion';
 import * as THREE from 'three';
-import { P } from '../theme';
+import { NV, P } from '../theme';
 import { RimShell } from './Studio';
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -81,15 +81,15 @@ const drawLabel = (c: HTMLCanvasElement) => {
     ctx.fillRect(0, 0, W, H);
 
     // rótulo
-    ctx.fillStyle = P.blueprint;
+    ctx.fillStyle = '#2E56A8'; // azul-aço (renderiza mais escuro sob o metal)
     ctx.fillRect(0, top, W, bh);
 
-    // faixa diagonal neon dando a volta
+    // faixa diagonal azul-céu dando a volta
     ctx.save();
     ctx.beginPath();
     ctx.rect(0, top, W, bh);
     ctx.clip();
-    ctx.fillStyle = P.neon;
+    ctx.fillStyle = NV.sky;
     ctx.beginPath();
     ctx.moveTo(0, top + bh * 0.78);
     ctx.lineTo(W, top + bh * 0.62);
@@ -97,25 +97,25 @@ const drawLabel = (c: HTMLCanvasElement) => {
     ctx.lineTo(0, top + bh * 0.86);
     ctx.closePath();
     ctx.fill();
-    // círculo ink atrás da tipografia (frente = u 0.5)
-    ctx.fillStyle = P.ink;
+    // círculo marinho atrás da tipografia (frente = u 0.5)
+    ctx.fillStyle = NV.navy;
     ctx.beginPath();
     ctx.arc(W * 0.5 + 150, top + bh * 0.3, bh * 0.2, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
     // filetes
-    ctx.fillStyle = P.neon;
+    ctx.fillStyle = NV.sky;
     ctx.fillRect(0, top + 18, W, 6);
     ctx.fillRect(0, bot - 24, W, 6);
 
     // FRENTE — tipografia
-    ctx.fillStyle = P.paper;
+    ctx.fillStyle = NV.ice;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.font = `900 ${Math.round(bh * 0.3)}px Montserrat, Arial, sans-serif`;
     ctx.fillText('2D', W * 0.5, top + bh * 0.38);
-    ctx.fillStyle = P.neon;
+    ctx.fillStyle = NV.sky;
     ctx.fillText('3D', W * 0.5, top + bh * 0.62);
 
     // VERSO — código de barras e linhas de "texto" (sem palavras)

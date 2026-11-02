@@ -21,10 +21,10 @@ const T = {
   title: 50,
   titleStagger: 15,
   orbit: [30, 570] as const,
-  solid: [200, 260] as const, // malha → lata cinza (clay)
-  label: [240, 300] as const, // o rótulo 2D é aplicado como textura
-  rim: [280, 320] as const,
-  fill: [320, 360] as const,
+  solid: [150, 200] as const, // malha → lata cinza (clay)
+  label: [185, 240] as const, // o rótulo 2D é aplicado como textura
+  rim: [225, 265] as const, // o estúdio acende: recorte
+  fill: [255, 295] as const, // ...e preenchimento quente
   textExit: 570,
   inflate: 575,
   end: 600,

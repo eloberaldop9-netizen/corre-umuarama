@@ -149,11 +149,40 @@ interface MorphShapeProps {
   metalColor?: string;
   /** Rugosidade do metal no estado 3D (0.07 = cromo espelhado, ~0.3 = acetinado). */
   metalRoughness?: number;
+  /**
+   * Reflexo no chão: a malha some gradualmente abaixo de `fadeFloor` (y de
+   * mundo) ao longo de `fadeLength` unidades, com opacidade máxima `opacity`.
+   */
+  reflection?: { fadeFloor: number; fadeLength: number; opacity: number };
   size: number;
   y: number;
   z?: number;
   scale: number;
 }
+
+/** Injeta no shader um fade de alfa pela distância (em y de mundo) até o chão. */
+const useReflectionFade = (enabled: boolean) => {
+  const uniforms = useMemo(() => ({ uFloor: { value: 0 }, uFadeLen: { value: 1 }, uMaxAlpha: { value: 1 } }), []);
+  const onBeforeCompile = useMemo(
+    () =>
+      enabled
+        ? (shader: THREE.WebGLProgramParametersWithUniforms) => {
+            Object.assign(shader.uniforms, uniforms);
+            shader.vertexShader = shader.vertexShader
+              .replace('#include <common>', '#include <common>\nvarying float vFadeY;')
+              .replace('#include <project_vertex>', '#include <project_vertex>\nvFadeY = (modelMatrix * vec4(transformed, 1.0)).y;');
+            shader.fragmentShader = shader.fragmentShader
+              .replace('#include <common>', '#include <common>\nvarying float vFadeY;\nuniform float uFloor;\nuniform float uFadeLen;\nuniform float uMaxAlpha;')
+              .replace(
+                '#include <dithering_fragment>',
+                'gl_FragColor.a *= uMaxAlpha * clamp(1.0 - (uFloor - vFadeY) / uFadeLen, 0.0, 1.0);\n#include <dithering_fragment>'
+              );
+          }
+        : undefined,
+    [enabled, uniforms]
+  );
+  return { uniforms, onBeforeCompile };
+};
 
 export const MorphShape: React.FC<MorphShapeProps> = ({
   morph,
@@ -164,6 +193,7 @@ export const MorphShape: React.FC<MorphShapeProps> = ({
   popColor = P.blueprint,
   metalColor = '#e9edf2',
   metalRoughness = 0.07,
+  reflection,
   size,
   y,
   z = 0,
@@ -178,6 +208,12 @@ export const MorphShape: React.FC<MorphShapeProps> = ({
   // (Mutar uma Color memoizada congelava a cor do primeiro frame no render.)
   const color = BLACK.clone().lerp(new THREE.Color(metalColor), chrome);
   const emissive = new THREE.Color(f > 0 ? popColor : flatColor);
+  const fade = useReflectionFade(Boolean(reflection));
+  if (reflection) {
+    fade.uniforms.uFloor.value = reflection.fadeFloor;
+    fade.uniforms.uFadeLen.value = reflection.fadeLength;
+    fade.uniforms.uMaxAlpha.value = reflection.opacity;
+  }
   return (
     <mesh
       geometry={geometry}
@@ -194,6 +230,9 @@ export const MorphShape: React.FC<MorphShapeProps> = ({
         roughness={1 - (1 - metalRoughness) * chrome}
         userData={{ envScale: chrome }}
         side={THREE.DoubleSide}
+        transparent={Boolean(reflection)}
+        depthWrite={!reflection}
+        onBeforeCompile={fade.onBeforeCompile}
       />
     </mesh>
   );

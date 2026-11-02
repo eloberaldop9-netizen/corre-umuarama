@@ -1,7 +1,7 @@
 import React, { CSSProperties } from 'react';
 import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { ci } from '../../lib/motion';
-import { NV, P, SANS, SERIF, SPRINGS } from '../theme';
+import { FONT, NV, P, SPRINGS } from '../theme';
 
 // ─────────────────────────────────────────────────────────────────────────
 // CENA 2 — A Força do 2D na Informação (frames 293–750, local 0–457)
@@ -27,6 +27,7 @@ const T = {
   donut: 60,
   line: 70,
   reflow: [210, 246] as const, // reorganização do layout
+  refresh: [300, 340] as const, // os dados se atualizam (barras + rosca)
   bladeTop: 420,
   bladeMid: 424,
   bladeLow: 428,
@@ -151,10 +152,9 @@ const TitleLine: React.FC<{ words: string[]; start: number; frame: number; accen
             style={{
               display: 'inline-block',
               whiteSpace: 'nowrap',
-              fontFamily: i === accent ? SERIF : SANS,
-              fontStyle: i === accent ? 'italic' : 'normal',
-              fontWeight: i === accent ? 500 : 700,
-              letterSpacing: i === accent ? -1 : -3.5,
+              fontFamily: FONT,
+              fontWeight: 900,
+              letterSpacing: -4,
               lineHeight: 1.06,
               color: i === accent ? NV.sky : NV.ice,
               opacity: ci(frame, [s, s + 12], [0, 1]),
@@ -171,7 +171,7 @@ const TitleLine: React.FC<{ words: string[]; start: number; frame: number; accen
 );
 
 // ── CARTAZ — composição geométrica: dois círculos que se desenham e se
-// sobrepõem, um ponto em órbita, filetes finos e "2D" em serifa itálica ────
+// sobrepõem, um ponto em órbita, filetes finos e "2D" em tipografia pesada ────
 export const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const f = frame - T.poster;
   const ringA = ci(f, [20, 62], [0, 1], MORPH);
@@ -239,13 +239,12 @@ export const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps })
           />
         ))}
       </svg>
-      {/* "2D" — serifa itálica saindo da máscara (folga lateral evita corte) */}
+      {/* "2D" saindo da máscara (folga lateral evita corte) */}
       <div style={{ position: 'absolute', right: 30, bottom: 10, overflow: 'hidden', padding: '0 24px 10px 24px' }}>
         <div
           style={{
-            fontFamily: SERIF,
-            fontStyle: 'italic',
-            fontWeight: 500,
+            fontFamily: FONT,
+            fontWeight: 900,
             fontSize: 150,
             lineHeight: 1,
             letterSpacing: -2,
@@ -262,13 +261,16 @@ export const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps })
 
 // ── INFOGRÁFICO 1 — barras crescendo ─────────────────────────────────────
 const BARS = [0.45, 0.7, 0.55, 0.88, 1];
+const BARS_2 = [0.6, 0.52, 0.8, 0.7, 0.96]; // valores após a atualização
 export const BarChart: React.FC<{ frame: number }> = ({ frame }) => {
   const f = frame - T.bars;
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
       <div style={{ position: 'absolute', left: 40, right: 40, bottom: 40, top: 40, display: 'flex', alignItems: 'flex-end', gap: 20 }}>
-        {BARS.map((b, i) => {
+        {BARS.map((b0, i) => {
           const grow = ci(f, [24 + i * 4, 52 + i * 4], [0, 1], ENTRY);
+          const upd = ci(frame, [T.refresh[0] + i * 3, T.refresh[1] + i * 3], [0, 1], MORPH);
+          const b = lerp(b0, BARS_2[i], upd);
           const breathe = 1 + 0.04 * Math.sin(frame * 0.05 + i) * ci(frame, [130, 160], [0, 1]);
           return (
             <div
@@ -297,7 +299,7 @@ export const BarChart: React.FC<{ frame: number }> = ({ frame }) => {
 // ── INFOGRÁFICO 2 — rosca preenchendo + contador ─────────────────────────
 export const Donut: React.FC<{ frame: number }> = ({ frame }) => {
   const f = frame - T.donut;
-  const fill = ci(f, [26, 70], [0, 0.72], ENTRY);
+  const fill = ci(f, [26, 70], [0, 0.72], ENTRY) + ci(frame, [T.refresh[0] + 6, T.refresh[1] + 10], [0, 0.22], MORPH);
   const R = 82;
   const C = 2 * Math.PI * R;
   return (
@@ -327,7 +329,7 @@ export const Donut: React.FC<{ frame: number }> = ({ frame }) => {
           transform="rotate(-90 100 100)"
         />
       </svg>
-      <div style={{ fontFamily: SANS, fontSize: 76, fontWeight: 700, letterSpacing: -3, color: NV.ice, fontVariantNumeric: 'tabular-nums' }}>
+      <div style={{ fontFamily: FONT, fontSize: 76, fontWeight: 900, letterSpacing: -4, color: NV.ice, fontVariantNumeric: 'tabular-nums' }}>
         {Math.round(fill * 100)}%
       </div>
     </div>
@@ -412,7 +414,7 @@ export const CineB: React.FC = () => {
         // existir, a Cena 2 o pinta; a partir do overlap, deixa a Cena 3 aparecer.
         backgroundColor: frame < T.c3Start ? P.void : 'transparent',
         overflow: 'hidden',
-        fontFamily: SANS,
+        fontFamily: FONT,
       }}
     >
       {/* LÂMINA BG */}
