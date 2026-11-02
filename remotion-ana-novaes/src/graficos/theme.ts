@@ -17,18 +17,20 @@ export const P = {
 
 export const FONT = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
 
-// Paleta editorial das Cenas 1 e 2 — sóbria, profissional: osso, grafite,
-// azul-meia-noite e champanhe como único acento.
-export const ED = {
-  bone: '#F2EFE9', // C1 — papel quente
-  stone: '#DCD6CB', // trilhos, aros, divisórias
-  ink: '#141416', // tipografia principal
-  graphite: '#2B2B30', // barras, formas
-  muted: '#8A8780', // texto secundário
-  midnight: '#101A2C', // C2 — fundo
-  night: '#0A1220', // C2 — card escuro
-  champagne: '#C9A96E', // acento sobre fundo escuro
-  bronze: '#8C6A36', // acento sobre fundo claro (contraste)
+// Paleta das Cenas 1 e 2 — tons de azul-escuro, um só acento azul-céu.
+export const NV = {
+  abyss: '#060B18', // vinheta / sombra
+  navy: '#0A1430', // C1 — fundo
+  midnight: '#0D1A3A', // C2 — fundo
+  card: '#12234A', // cards (base do gradiente)
+  cardHi: '#1A2F5E', // cards (topo do gradiente)
+  steel: '#2B4A86', // barras, formas
+  track: '#1E3566', // trilhos (rosca)
+  line: 'rgba(143,179,255,0.16)', // bordas e filetes
+  sky: '#8FB3FF', // acento
+  azure: '#4F7CFF', // acento forte (gradientes)
+  ice: '#E8EEFA', // texto principal
+  muted: '#8C9AB8', // texto secundário
 } as const;
 
 export const SANS = "'Inter', 'Helvetica Neue', Arial, sans-serif";

@@ -4,7 +4,7 @@ import { useThree } from '@react-three/fiber';
 import { AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import * as THREE from 'three';
 import { ci } from '../../lib/motion';
-import { ED, SANS, SERIF, SPRINGS } from '../theme';
+import { NV, SANS, SERIF, SPRINGS } from '../theme';
 import { SpringWords } from '../SpringWords';
 import { MorphShape, StudioEnvironment } from '../three/Studio';
 
@@ -119,17 +119,17 @@ const World: React.FC = () => {
       {/* "Luzes rodando fora de quadro": o HDRI de estúdio gira em Y */}
       <StudioEnvironment intensity={1.1} rotationY={frame * 0.012} />
       <pointLight position={[-260, 220, -300]} intensity={1.4 * chrome} decay={0} />
-      <pointLight position={[300, -120, -200]} intensity={0.6 * chrome} decay={0} color="#F3DDB4" />
+      <pointLight position={[300, -120, -200]} intensity={0.6 * chrome} decay={0} color="#BFD3FF" />
       <Camera frame={frame} />
       <MorphShape
         morph={Math.min(s, 1)}
         round={CUBE_BEVEL * Math.min(s, 1)}
         rotation={cubeRotation(frame, s)}
         flatten={flatten}
-        flatColor={ED.ink}
-        popColor={ED.midnight}
-        metalColor="#6B6E75"
-        metalRoughness={0.26}
+        flatColor={NV.ice}
+        popColor={NV.midnight}
+        metalColor="#C3CFE6"
+        metalRoughness={0.2}
         size={SIZE}
         y={y}
         z={-diveZ(frame)}
@@ -151,16 +151,16 @@ const PulseRings: React.FC<{ frame: number }> = ({ frame }) => (
           cy={960}
           r={260 + t * 520}
           fill="none"
-          stroke="#000"
+          stroke={NV.sky}
           strokeWidth={1.5}
-          opacity={0.07 * (1 - t)}
+          opacity={0.12 * (1 - t)}
         />
       );
     })}
   </svg>
 );
 
-/** Grid SVG 50×50, stroke #000 @ 0.04, rolando -1px/frame. */
+/** Grid SVG 50×50, azul-céu @ 0.06, rolando -1px/frame. */
 const ScrollingGrid: React.FC<{ frame: number }> = ({ frame }) => (
   <svg width={1080} height={1920} style={{ position: 'absolute', inset: 0 }}>
     <defs>
@@ -171,7 +171,7 @@ const ScrollingGrid: React.FC<{ frame: number }> = ({ frame }) => (
         patternUnits="userSpaceOnUse"
         patternTransform={`translate(15 ${-(frame % 50)})`}
       >
-        <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#000" strokeOpacity={0.04} strokeWidth={1} />
+        <path d="M 50 0 L 0 0 0 50" fill="none" stroke={NV.sky} strokeOpacity={0.06} strokeWidth={1} />
       </pattern>
     </defs>
     <rect width={1080} height={1920} fill="url(#c1-grid)" />
@@ -222,7 +222,9 @@ export const CineA: React.FC = () => {
   const handoff = ci(frame, [T.pop + 3, T.end], [1, 0]);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: ED.bone, overflow: 'hidden', fontFamily: SANS, opacity: handoff }}>
+    <AbsoluteFill style={{ backgroundColor: NV.navy, overflow: 'hidden', fontFamily: SANS, opacity: handoff }}>
+      {/* Glow radial azul atrás do objeto + vinheta nas bordas */}
+      <AbsoluteFill style={{ background: `radial-gradient(ellipse 70% 45% at 50% 50%, #1A2F5E 0%, ${NV.navy} 60%, ${NV.abyss} 100%)` }} />
       {/* BACKGROUND VIVO — corte seco na base, grid + anéis em opacidade */}
       <AbsoluteFill style={{ opacity: bgIn }}>
         <ScrollingGrid frame={frame} />
@@ -238,7 +240,7 @@ export const CineA: React.FC = () => {
           width: diameter,
           height: diameter,
           borderRadius: '50%',
-          backgroundColor: `rgba(0,0,0,${shadowAlpha})`,
+          backgroundColor: `rgba(2,5,14,${Math.min(1, shadowAlpha * 2)})`,
           filter: 'blur(60px)',
           transform: `translateY(${80 * shadowIn}px) scale(${shadowScale})`,
         }}
@@ -263,7 +265,7 @@ export const CineA: React.FC = () => {
       </AbsoluteFill>
 
       {/* TIPOGRAFIA — abraça o objeto: cada linha num plano Z próprio */}
-      <AbsoluteFill style={{ ...textExit, color: ED.ink }}>
+      <AbsoluteFill style={{ ...textExit, color: NV.ice }}>
         <DepthLayer frame={frame} zDepth={100}>
           <div style={{ position: 'absolute', top: 470, left: 40, right: 40 }}>
             <SpringWords
@@ -280,7 +282,7 @@ export const CineA: React.FC = () => {
               text="transformam a"
               start={T.text[1]}
               {...LINE_ENTRY}
-              style={{ fontFamily: SANS, fontSize: 60, fontWeight: 300, color: ED.muted, lineHeight: 1 }}
+              style={{ fontFamily: SANS, fontSize: 60, fontWeight: 300, color: NV.muted, lineHeight: 1 }}
             />
           </div>
         </DepthLayer>
@@ -290,7 +292,7 @@ export const CineA: React.FC = () => {
               text="Comunicação Visual?"
               start={T.text[2]}
               {...LINE_ENTRY}
-              style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 92, fontWeight: 500, letterSpacing: -1, color: ED.bronze, lineHeight: 1.1 }}
+              style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 92, fontWeight: 500, letterSpacing: -1, color: NV.sky, lineHeight: 1.1 }}
             />
           </div>
         </DepthLayer>
@@ -308,15 +310,15 @@ const BadgeTop: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
     <div
       style={{
         padding: '16px 34px',
-        border: `1.5px solid ${ED.ink}`,
+        border: `1.5px solid ${NV.line}`,
         borderRadius: 999,
         fontFamily: SANS,
         fontSize: 30,
         fontWeight: 500,
         letterSpacing: 7,
         textTransform: 'uppercase',
-        color: ED.ink,
-        backgroundColor: ED.bone,
+        color: NV.ice,
+        backgroundColor: 'rgba(26,47,94,0.45)',
         opacity: ci(frame - T.badge, [0, 8], [0, 1]),
         transform: `scale(${scale})`,
         filter: `blur(${ci(frame - T.badge, [0, 9], [6, 0])}px)`,

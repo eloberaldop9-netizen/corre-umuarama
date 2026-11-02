@@ -1,7 +1,7 @@
 import React, { CSSProperties } from 'react';
 import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { ci } from '../../lib/motion';
-import { ED, P, SANS, SERIF, SPRINGS } from '../theme';
+import { NV, P, SANS, SERIF, SPRINGS } from '../theme';
 
 // ─────────────────────────────────────────────────────────────────────────
 // CENA 2 — A Força do 2D na Informação (frames 293–750, local 0–457)
@@ -110,15 +110,15 @@ const Background: React.FC<{ frame: number }> = ({ frame }) => {
   const gridIn = ci(frame, [T.grid, T.grid + 24], [0, 1], ENTRY);
   return (
     <AbsoluteFill>
-      <AbsoluteFill style={{ backgroundColor: ED.midnight }} />
-      <AbsoluteFill style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(201,169,110,0.10) 0%, transparent 62%)' }} />
+      <AbsoluteFill style={{ backgroundColor: NV.midnight }} />
+      <AbsoluteFill style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(79,124,255,0.16) 0%, transparent 62%)' }} />
       <svg width={W} height={H} style={{ position: 'absolute', inset: 0, opacity: gridIn }}>
         <defs>
           <pattern id="c2-grid" width={40} height={40} patternUnits="userSpaceOnUse">
             <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#FFFFFF" strokeOpacity={0.05} strokeWidth={1} />
           </pattern>
           <pattern id="c2-cross" width={160} height={160} patternUnits="userSpaceOnUse">
-            <path d="M-6 0 H6 M0 -6 V6 M154 160 H166 M160 154 V166" stroke={ED.champagne} strokeOpacity={0.35} strokeWidth={1.2} />
+            <path d="M-6 0 H6 M0 -6 V6 M154 160 H166 M160 154 V166" stroke={NV.sky} strokeOpacity={0.3} strokeWidth={1.2} />
           </pattern>
         </defs>
         <rect width={W} height={H} fill="url(#c2-grid)" />
@@ -156,7 +156,7 @@ const TitleLine: React.FC<{ words: string[]; start: number; frame: number; accen
               fontWeight: i === accent ? 500 : 700,
               letterSpacing: i === accent ? -1 : -3.5,
               lineHeight: 1.06,
-              color: i === accent ? ED.champagne : ED.bone,
+              color: i === accent ? NV.sky : NV.ice,
               opacity: ci(frame, [s, s + 12], [0, 1]),
               transform: `translateY(${(1 - p) * 70}px)`,
               filter: bl > 0.05 ? `blur(${bl}px)` : undefined,
@@ -170,75 +170,91 @@ const TitleLine: React.FC<{ words: string[]; start: number; frame: number; accen
   </div>
 );
 
-// ── CARTAZ SUÍÇO — formas planas que se organizam ────────────────────────
+// ── CARTAZ — composição geométrica: dois círculos que se desenham e se
+// sobrepõem, um ponto em órbita, filetes finos e "2D" em serifa itálica ────
 export const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
   const f = frame - T.poster;
-  const circle = f < 26 ? 0 : spring({ frame: f - 26, fps, config: SPRINGS.badge });
-  const stripes = [0, 1, 2].map((i) => ci(f, [34 + i * 4, 58 + i * 4], [0, 1], ENTRY));
-  const square = ci(f, [44, 70], [0, 1], ENTRY);
-  const spin = ci(frame, [120, 420], [0, 90]);
+  const ringA = ci(f, [20, 62], [0, 1], MORPH);
+  const fillA = ci(f, [44, 76], [0, 1], ENTRY);
+  const ringB = ci(f, [30, 72], [0, 1], MORPH);
+  const rules = [0, 1, 2].map((i) => ci(f, [48 + i * 4, 72 + i * 4], [0, 1], ENTRY));
+  const type = ci(f, [40, 64], [0, 1], ENTRY);
+  const dotIn = f < 70 ? 0 : spring({ frame: f - 70, fps, config: SPRINGS.badge });
+  const orbit = -Math.PI / 2 + Math.max(0, f - 70) * 0.018;
+  const drift = Math.sin(frame * 0.02) * 6 * ci(frame, [100, 130], [0, 1]);
   return (
-    <div style={{ position: 'absolute', inset: 0, backgroundColor: ED.bone, overflow: 'hidden' }}>
-      <div
-        style={{
-          position: 'absolute',
-          right: -70,
-          top: -70,
-          width: 330,
-          height: 330,
-          borderRadius: '50%',
-          backgroundColor: ED.champagne,
-          transform: `scale(${circle})`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          right: 120,
-          top: 210,
-          width: 64,
-          height: 64,
-          backgroundColor: ED.ink,
-          opacity: square,
-          transform: `translateY(${(1 - square) * 40}px) rotate(${spin}deg)`,
-        }}
-      />
-      {stripes.map((p, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 300 + i * 46,
-            height: 26,
-            width: [300, 380, 220][i],
-            backgroundColor: ED.graphite,
-            transform: `scaleX(${p})`,
-            transformOrigin: 'left',
-          }}
+    <div style={{ position: 'absolute', inset: 0 }}>
+      <svg width={448} height={640} viewBox="0 0 448 640" style={{ position: 'absolute', inset: 0 }}>
+        <defs>
+          <linearGradient id="c2-orb" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={NV.sky} />
+            <stop offset="100%" stopColor={NV.azure} />
+          </linearGradient>
+        </defs>
+        {/* círculo principal: contorno desenha, depois preenche em gradiente */}
+        <circle cx={196} cy={230 + drift} r={140} fill="url(#c2-orb)" opacity={0.92 * fillA} />
+        <circle
+          cx={196}
+          cy={230 + drift}
+          r={140}
+          fill="none"
+          stroke={NV.sky}
+          strokeWidth={2}
+          pathLength={1}
+          strokeDasharray={1}
+          strokeDashoffset={1 - ringA}
+          transform={`rotate(-90 196 ${230 + drift})`}
         />
-      ))}
-      <div style={{ position: 'absolute', left: 30, bottom: 6, paddingRight: 60, display: 'flex', overflow: 'hidden' }}>
-        {['2', 'D'].map((ch, i) => {
-          const p = ci(f, [30 + i * 4, 56 + i * 4], [0, 1], ENTRY);
-          return (
-            <span
-              key={ch}
-              style={{
-                display: 'inline-block',
-                fontSize: 250,
-                fontFamily: SANS,
-                fontWeight: 800,
-                letterSpacing: -14,
-                lineHeight: 0.9,
-                color: ED.ink,
-                transform: `translateY(${(1 - p) * 240}px)`,
-              }}
-            >
-              {ch}
-            </span>
-          );
-        })}
+        {/* círculo secundário só em contorno, sobreposto */}
+        <circle
+          cx={290}
+          cy={318 - drift}
+          r={104}
+          fill="none"
+          stroke={NV.ice}
+          strokeOpacity={0.45}
+          strokeWidth={1.5}
+          pathLength={1}
+          strokeDasharray={1}
+          strokeDashoffset={1 - ringB}
+          transform={`rotate(90 290 ${318 - drift})`}
+        />
+        {/* ponto em órbita do círculo principal */}
+        <circle
+          cx={196 + Math.cos(orbit) * 140}
+          cy={230 + drift + Math.sin(orbit) * 140}
+          r={9 * dotIn}
+          fill={NV.ice}
+        />
+        {/* filetes — "linhas de texto" */}
+        {rules.map((p, i) => (
+          <rect
+            key={i}
+            x={36}
+            y={470 + i * 22}
+            width={[220, 300, 160][i] * p}
+            height={3}
+            fill={NV.ice}
+            opacity={0.28}
+          />
+        ))}
+      </svg>
+      {/* "2D" — serifa itálica saindo da máscara (folga lateral evita corte) */}
+      <div style={{ position: 'absolute', right: 30, bottom: 10, overflow: 'hidden', padding: '0 24px 10px 24px' }}>
+        <div
+          style={{
+            fontFamily: SERIF,
+            fontStyle: 'italic',
+            fontWeight: 500,
+            fontSize: 150,
+            lineHeight: 1,
+            letterSpacing: -2,
+            color: NV.ice,
+            transform: `translateY(${(1 - type) * 170}px)`,
+          }}
+        >
+          2D
+        </div>
       </div>
     </div>
   );
@@ -249,7 +265,7 @@ const BARS = [0.45, 0.7, 0.55, 0.88, 1];
 export const BarChart: React.FC<{ frame: number }> = ({ frame }) => {
   const f = frame - T.bars;
   return (
-    <div style={{ position: 'absolute', inset: 0, backgroundColor: ED.bone }}>
+    <div style={{ position: 'absolute', inset: 0 }}>
       <div style={{ position: 'absolute', left: 40, right: 40, bottom: 40, top: 40, display: 'flex', alignItems: 'flex-end', gap: 20 }}>
         {BARS.map((b, i) => {
           const grow = ci(f, [24 + i * 4, 52 + i * 4], [0, 1], ENTRY);
@@ -257,7 +273,7 @@ export const BarChart: React.FC<{ frame: number }> = ({ frame }) => {
           return (
             <div
               key={i}
-              style={{ flex: 1, height: `${b * grow * breathe * 100}%`, backgroundColor: i === BARS.length - 1 ? ED.champagne : ED.graphite }}
+              style={{ flex: 1, height: `${b * grow * breathe * 100}%`, backgroundColor: i === BARS.length - 1 ? NV.sky : NV.steel, borderRadius: '6px 6px 0 0' }}
             />
           );
         })}
@@ -269,7 +285,7 @@ export const BarChart: React.FC<{ frame: number }> = ({ frame }) => {
           right: 40,
           bottom: 38,
           height: 3,
-          backgroundColor: ED.stone,
+          backgroundColor: NV.line,
           transform: `scaleX(${ci(f, [18, 42], [0, 1], ENTRY)})`,
           transformOrigin: 'left',
         }}
@@ -289,7 +305,7 @@ export const Donut: React.FC<{ frame: number }> = ({ frame }) => {
       style={{
         position: 'absolute',
         inset: 0,
-        backgroundColor: ED.bone,
+        backgroundColor: 'transparent',
         display: 'flex',
         alignItems: 'center',
         gap: 28,
@@ -298,19 +314,20 @@ export const Donut: React.FC<{ frame: number }> = ({ frame }) => {
       }}
     >
       <svg width={200} height={200} viewBox="0 0 200 200" style={{ flexShrink: 0 }}>
-        <circle cx={100} cy={100} r={R} fill="none" stroke={ED.stone} strokeWidth={28} />
+        <circle cx={100} cy={100} r={R} fill="none" stroke={NV.track} strokeWidth={28} />
         <circle
           cx={100}
           cy={100}
           r={R}
           fill="none"
-          stroke={ED.midnight}
+          stroke={NV.sky}
+          strokeLinecap="round"
           strokeWidth={28}
           strokeDasharray={`${C * fill} ${C}`}
           transform="rotate(-90 100 100)"
         />
       </svg>
-      <div style={{ fontFamily: SANS, fontSize: 76, fontWeight: 700, letterSpacing: -3, color: ED.ink, fontVariantNumeric: 'tabular-nums' }}>
+      <div style={{ fontFamily: SANS, fontSize: 76, fontWeight: 700, letterSpacing: -3, color: NV.ice, fontVariantNumeric: 'tabular-nums' }}>
         {Math.round(fill * 100)}%
       </div>
     </div>
@@ -333,23 +350,23 @@ export const LineChart: React.FC<{ frame: number; box: Box }> = ({ frame, box })
   const fr = k - i0;
   const dot = [lerp(pts[i0][0], pts[i0 + 1][0], fr), lerp(pts[i0][1], pts[i0 + 1][1], fr)];
   return (
-    <div style={{ position: 'absolute', inset: 0, backgroundColor: ED.night }}>
+    <div style={{ position: 'absolute', inset: 0 }}>
       <svg width={iw} height={ih} style={{ position: 'absolute', left: 40, top: 40, overflow: 'visible' }}>
         {[0.25, 0.5, 0.75].map((g) => (
           <line key={g} x1={0} x2={iw} y1={g * ih} y2={g * ih} stroke="#FFFFFF" strokeOpacity={0.06} />
         ))}
-        <path d={area} fill={ED.champagne} opacity={0.12 * ci(f, [60, 90], [0, 1])} />
+        <path d={area} fill={NV.sky} opacity={0.12 * ci(f, [60, 90], [0, 1])} />
         <path
           d={d}
           fill="none"
-          stroke={ED.champagne}
+          stroke={NV.sky}
           strokeWidth={5}
           strokeLinejoin="round"
           pathLength={1}
           strokeDasharray={1}
           strokeDashoffset={1 - draw}
         />
-        <circle cx={dot[0]} cy={dot[1]} r={10} fill={ED.bone} opacity={ci(frame, [150, 162], [0, 1])} />
+        <circle cx={dot[0]} cy={dot[1]} r={10} fill={NV.ice} opacity={ci(frame, [150, 162], [0, 1])} />
       </svg>
     </div>
   );
@@ -365,7 +382,20 @@ const Slot: React.FC<{
   children: React.ReactNode;
 }> = ({ box, frame, enter, open, phase, children }) => (
   <div style={{ position: 'absolute', left: box.x, top: box.y + hover(frame, phase), width: box.w, height: box.h, ...enter }}>
-    <div style={{ position: 'absolute', inset: 0, transform: `scaleY(${open})`, overflow: 'hidden' }}>{children}</div>
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        transform: `scaleY(${open})`,
+        overflow: 'hidden',
+        borderRadius: 20,
+        background: `linear-gradient(160deg, ${NV.cardHi} 0%, ${NV.card} 100%)`,
+        border: `1px solid ${NV.line}`,
+        boxSizing: 'border-box',
+      }}
+    >
+      {children}
+    </div>
   </div>
 );
 
