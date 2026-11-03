@@ -2,11 +2,13 @@ import React, { CSSProperties } from 'react';
 import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { ci } from '../../lib/motion';
 import { FONT, NV, P, SPRINGS } from '../theme';
+import { Beats, LabelArt } from '../LabelArt';
 
 // ─────────────────────────────────────────────────────────────────────────
 // CENA 2 — A Força do 2D na Informação (frames 293–750, local 0–457)
 // Roteiro: "elementos planos, tipografias dinâmicas, cartazes e infográficos
-// limpos sendo organizados na tela". Blueprint azul, flat absoluto (zero
+// limpos sendo organizados na tela". O cartaz é a arte do rótulo da lata que
+// vira textura na Cena 3 — o 2D prepara a peça que o 3D vai dar volume. Blueprint azul, flat absoluto (zero
 // sombra, zero eixo Z). Um cartaz e três infográficos entram de direções
 // diferentes e se encaixam num grid; no meio da cena o layout se reorganiza
 // (morph de posições) — o 2D organizando a informação. Movimento suave:
@@ -170,94 +172,8 @@ const TitleLine: React.FC<{ words: string[]; start: number; frame: number; accen
   </div>
 );
 
-// ── CARTAZ — composição geométrica: dois círculos que se desenham e se
-// sobrepõem, um ponto em órbita, filetes finos e "2D" em tipografia pesada ────
-export const Poster: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
-  const f = frame - T.poster;
-  const ringA = ci(f, [20, 62], [0, 1], MORPH);
-  const fillA = ci(f, [44, 76], [0, 1], ENTRY);
-  const ringB = ci(f, [30, 72], [0, 1], MORPH);
-  const rules = [0, 1, 2].map((i) => ci(f, [48 + i * 4, 72 + i * 4], [0, 1], ENTRY));
-  const type = ci(f, [40, 64], [0, 1], ENTRY);
-  const dotIn = f < 70 ? 0 : spring({ frame: f - 70, fps, config: SPRINGS.badge });
-  const orbit = -Math.PI / 2 + Math.max(0, f - 70) * 0.018;
-  const drift = Math.sin(frame * 0.02) * 6 * ci(frame, [100, 130], [0, 1]);
-  return (
-    <div style={{ position: 'absolute', inset: 0 }}>
-      <svg width={448} height={640} viewBox="0 0 448 640" style={{ position: 'absolute', inset: 0 }}>
-        <defs>
-          <linearGradient id="c2-orb" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={NV.sky} />
-            <stop offset="100%" stopColor={NV.azure} />
-          </linearGradient>
-        </defs>
-        {/* círculo principal: contorno desenha, depois preenche em gradiente */}
-        <circle cx={196} cy={230 + drift} r={140} fill="url(#c2-orb)" opacity={0.92 * fillA} />
-        <circle
-          cx={196}
-          cy={230 + drift}
-          r={140}
-          fill="none"
-          stroke={NV.sky}
-          strokeWidth={2}
-          pathLength={1}
-          strokeDasharray={1}
-          strokeDashoffset={1 - ringA}
-          transform={`rotate(-90 196 ${230 + drift})`}
-        />
-        {/* círculo secundário só em contorno, sobreposto */}
-        <circle
-          cx={290}
-          cy={318 - drift}
-          r={104}
-          fill="none"
-          stroke={NV.ice}
-          strokeOpacity={0.45}
-          strokeWidth={1.5}
-          pathLength={1}
-          strokeDasharray={1}
-          strokeDashoffset={1 - ringB}
-          transform={`rotate(90 290 ${318 - drift})`}
-        />
-        {/* ponto em órbita do círculo principal */}
-        <circle
-          cx={196 + Math.cos(orbit) * 140}
-          cy={230 + drift + Math.sin(orbit) * 140}
-          r={9 * dotIn}
-          fill={NV.ice}
-        />
-        {/* filetes — "linhas de texto" */}
-        {rules.map((p, i) => (
-          <rect
-            key={i}
-            x={36}
-            y={470 + i * 22}
-            width={[220, 300, 160][i] * p}
-            height={3}
-            fill={NV.ice}
-            opacity={0.28}
-          />
-        ))}
-      </svg>
-      {/* "2D" saindo da máscara (folga lateral evita corte) */}
-      <div style={{ position: 'absolute', right: 30, bottom: 10, overflow: 'hidden', padding: '0 24px 10px 24px' }}>
-        <div
-          style={{
-            fontFamily: FONT,
-            fontWeight: 900,
-            fontSize: 150,
-            lineHeight: 1,
-            letterSpacing: -2,
-            color: NV.ice,
-            transform: `translateY(${(1 - type) * 170}px)`,
-          }}
-        >
-          2D
-        </div>
-      </div>
-    </div>
-  );
-};
+// ── CARTAZ — a arte 2D do rótulo da lata (o fio condutor do vídeo) ───────
+export const Poster: React.FC<{ frame: number }> = ({ frame }) => <LabelArt build={frame - T.poster - 18} />;
 
 // ── INFOGRÁFICO 1 — barras crescendo ─────────────────────────────────────
 const BARS = [0.45, 0.7, 0.55, 0.88, 1];
@@ -432,7 +348,7 @@ export const CineB: React.FC = () => {
       {/* LÂMINA — cartaz + infográficos */}
       <AbsoluteFill style={blade(frame, T.bladeMid, 1)}>
         <Slot box={boxAt('poster', frame)} frame={frame} enter={entryFrom(frame, T.poster, -360, 0)} open={open(T.poster)} phase={0}>
-          <Poster frame={frame} fps={fps} />
+          <Poster frame={frame} />
         </Slot>
         <Slot box={boxAt('bars', frame)} frame={frame} enter={entryFrom(frame, T.bars, 360, 0)} open={open(T.bars)} phase={0.8}>
           <BarChart frame={frame} />
@@ -447,6 +363,16 @@ export const CineB: React.FC = () => {
         <div style={{ position: 'absolute', left: 80, right: 60, top: 190 }}>
           <TitleLine words={['A', 'Força', 'do', '2D']} start={T.title[0]} frame={frame} />
           <TitleLine words={['na', 'Informação']} start={T.title[1]} frame={frame} accent={1} />
+          {/* a resposta: o que o 2D faz pela informação, no ritmo da cena */}
+          <Beats
+            frame={frame}
+            items={[
+              { text: 'organiza', at: 70 },
+              { text: 'explica', at: 130 },
+              { text: 'dá clareza', at: 226 },
+            ]}
+            style={{ marginTop: 14, fontSize: 46, fontWeight: 600, letterSpacing: 0.5, color: NV.sky }}
+          />
         </div>
       </AbsoluteFill>
     </AbsoluteFill>

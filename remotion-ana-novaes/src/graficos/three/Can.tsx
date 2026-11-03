@@ -32,6 +32,8 @@ const PROFILE: [number, number][] = [
   [0, 110],
 ];
 const BODY = [5, 6] as const; // índices do segmento cilíndrico (onde fica o rótulo)
+/** u da 2ª face da marca: o que a câmera vê no meio do wipe do rótulo (órbita ≈ 0.55 rad). */
+const BACK_U = 0.087;
 export const CAN_HEIGHT = 226;
 
 /** Comprimento de arco acumulado (0..1) por ponto do perfil. */
@@ -97,11 +99,13 @@ const drawLabel = (c: HTMLCanvasElement) => {
     ctx.lineTo(0, top + bh * 0.86);
     ctx.closePath();
     ctx.fill();
-    // círculo marinho atrás da tipografia (frente = u 0.5)
+    // círculo marinho atrás da tipografia — nas duas faces da marca
     ctx.fillStyle = NV.navy;
-    ctx.beginPath();
-    ctx.arc(W * 0.5 + 150, top + bh * 0.3, bh * 0.2, 0, Math.PI * 2);
-    ctx.fill();
+    for (const cx of [W * 0.5 + 150, BACK_U * W + 150]) {
+      ctx.beginPath();
+      ctx.arc(cx, top + bh * 0.3, bh * 0.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.restore();
 
     // filetes
@@ -109,17 +113,21 @@ const drawLabel = (c: HTMLCanvasElement) => {
     ctx.fillRect(0, top + 18, W, 6);
     ctx.fillRect(0, bot - 24, W, 6);
 
-    // FRENTE — tipografia
-    ctx.fillStyle = NV.ice;
+    // MARCA "2D / 3D" — na frente (u 0.5) e no verso (BACK_U): o rótulo é
+    // aplicado com a câmera vendo u≈BACK_U e a órbita termina em u 0.5.
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.font = `900 ${Math.round(bh * 0.3)}px Montserrat, Arial, sans-serif`;
-    ctx.fillText('2D', W * 0.5, top + bh * 0.38);
-    ctx.fillStyle = NV.sky;
-    ctx.fillText('3D', W * 0.5, top + bh * 0.62);
+    for (const cx of [W * 0.5, BACK_U * W]) {
+      ctx.fillStyle = NV.ice;
+      ctx.fillText('2D', cx, top + bh * 0.38);
+      ctx.fillStyle = NV.sky;
+      ctx.fillText('3D', cx, top + bh * 0.62);
+    }
 
-    // VERSO — código de barras e linhas de "texto" (sem palavras)
-    const bx = 120;
+    // LATERAIS — código de barras (u 0.79) e linhas de "texto" (u 0.29), entre as
+    // duas faces da marca e longe de ambas; sem palavras
+    const bx = W * 0.79 - 125;
     let x = bx;
     let k = 0;
     ctx.fillStyle = P.paper;
@@ -132,7 +140,7 @@ const drawLabel = (c: HTMLCanvasElement) => {
       k++;
     }
     ctx.fillStyle = 'rgba(250,250,250,0.55)';
-    for (let i = 0; i < 6; i++) ctx.fillRect(1640, top + bh * 0.22 + i * 34, 300 - (i % 3) * 60, 12);
+    for (let i = 0; i < 6; i++) ctx.fillRect(W * 0.29 - 150, top + bh * 0.22 + i * 34, 300 - (i % 3) * 60, 12);
 
 };
 

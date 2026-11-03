@@ -4,15 +4,17 @@ import { useThree } from '@react-three/fiber';
 import { AbsoluteFill, Easing, random, useCurrentFrame, useVideoConfig } from 'remotion';
 import * as THREE from 'three';
 import { ci } from '../../lib/motion';
-import { FONT, P } from '../theme';
+import { FONT, NV, P } from '../theme';
 import { Dust, StudioEnvironment } from '../three/Studio';
 import { ProductCan } from '../three/Can';
+import { Beats, LABEL_H, LABEL_W, LabelArt } from '../LabelArt';
 
 // ─────────────────────────────────────────────────────────────────────────
 // CENA 3 — A Profundidade do 3D (frames 743–1350, local 0–607)
 // Objeto de destaque: uma LATA (o mockup 3D clássico da produção gráfica).
 // Wireframe ciano se desenha no vazio → órbita 180° → malha vira lata cinza →
-// o rótulo 2D é aplicado como textura → Rim Light acende → Fill quente.
+// a arte 2D da Cena 2 voa e embrulha a lata (vira textura) → Rim Light →
+// Fill quente. A linha de apoio nomeia cada etapa: volume · luz · realismo.
 // Saída: WIPE VOLUMÉTRICO — órbita vertiginosa + escala 1→40 (blockout).
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -22,7 +24,8 @@ const T = {
   titleStagger: 15,
   orbit: [30, 570] as const,
   solid: [150, 200] as const, // malha → lata cinza (clay)
-  label: [185, 240] as const, // o rótulo 2D é aplicado como textura
+  cardIn: [162, 192] as const, // a arte 2D da Cena 2 entra voando
+  label: [195, 245] as const, // ...e embrulha a lata (o rótulo vira textura)
   rim: [225, 265] as const, // o estúdio acende: recorte
   fill: [255, 295] as const, // ...e preenchimento quente
   textExit: 570,
@@ -181,6 +184,51 @@ const TitleLine: React.FC<{ text: string; start: number; frame: number; style: R
   </div>
 );
 
+/**
+ * O cartaz 2D da Cena 2 entra voando e pousa sobre a lata; enquanto o rótulo
+ * 3D é aplicado de baixo para cima, o cartaz some na mesma direção — a arte
+ * plana "passa" para o volume. Sombreado cilíndrico ao pousar.
+ */
+const LABEL_SCREEN = { x: 540, y: 1160, w: 527 }; // frente do rótulo na tela durante o wipe
+const FlyingLabel: React.FC<{ frame: number }> = ({ frame }) => {
+  if (frame < T.cardIn[0] || frame > T.label[1] + 2) return null;
+  const p = ci(frame, [T.cardIn[0], T.cardIn[1]], [0, 1], Easing.out(Easing.cubic));
+  const wipe = ci(frame, [T.label[0], T.label[1]], [0, 1], Easing.inOut(Easing.cubic));
+  const k = LABEL_SCREEN.w / LABEL_W;
+  const x = 1250 + (LABEL_SCREEN.x - 1250) * p;
+  const y = 420 + (LABEL_SCREEN.y - 420) * p;
+  const scale = 0.62 + (k - 0.62) * p;
+  const rot = 14 + (-5.7 - 14) * p;
+  const bl = 12 * (1 - p);
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: x - LABEL_W / 2,
+        top: y - LABEL_H / 2,
+        width: LABEL_W,
+        height: LABEL_H,
+        transform: `rotate(${rot}deg) scale(${scale})`,
+        opacity: ci(frame, [T.cardIn[0], T.cardIn[0] + 8], [0, 1]),
+        filter: bl > 0.05 ? `blur(${bl}px)` : undefined,
+        clipPath: `inset(0 0 ${wipe * 100}% 0)`,
+        borderRadius: 8,
+        overflow: 'hidden',
+      }}
+    >
+      <LabelArt build={999} />
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(90deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 30%, rgba(255,255,255,0.08) 50%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.45) 100%)',
+          opacity: p,
+        }}
+      />
+    </div>
+  );
+};
+
 const TITLE: React.CSSProperties = { fontSize: 88, fontWeight: 800, letterSpacing: -2, color: '#FFFFFF', lineHeight: 1.08 };
 
 export const CineC: React.FC = () => {
@@ -215,8 +263,20 @@ export const CineC: React.FC = () => {
         <div style={{ transform: `translateY(${float}px)` }}>
           <TitleLine text="A Profundidade e" start={T.title} frame={frame} style={TITLE} />
           <TitleLine text="o Impacto do 3D" start={T.title + T.titleStagger} frame={frame} style={TITLE} />
+          {/* a resposta: o que o 3D acrescenta, cada palavra no seu estágio */}
+          <Beats
+            frame={frame}
+            items={[
+              { text: 'volume', at: T.solid[0] },
+              { text: 'luz', at: T.rim[0] },
+              { text: 'realismo', at: T.fill[0] + 10 },
+            ]}
+            style={{ justifyContent: 'center', marginTop: 16, fontSize: 46, fontWeight: 600, letterSpacing: 0.5, color: NV.sky }}
+          />
         </div>
       </div>
+
+      <FlyingLabel frame={frame} />
 
       {/* BLOCKOUT — a massa chumbo tapa a lente por completo */}
       <AbsoluteFill style={{ backgroundColor: P.lead, opacity: blockout }} />
