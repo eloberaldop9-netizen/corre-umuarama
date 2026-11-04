@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, spring, useCurrentFrame, useVideoConfig } from 'r
 import { ci } from '../../lib/motion';
 import { FONT, NV, P, SPRINGS } from '../theme';
 import { Beats, LabelArt } from '../LabelArt';
+import { AppBadge } from '../AppBadge';
 
 // ─────────────────────────────────────────────────────────────────────────
 // CENA 2 — A Força do 2D na Informação (frames 293–750, local 0–457)
@@ -30,6 +31,7 @@ const T = {
   line: 70,
   reflow: [210, 246] as const, // reorganização do layout
   refresh: [300, 340] as const, // os dados se atualizam (barras + rosca)
+  app: 112, // selo "Feito no After Effects"
   bladeTop: 420,
   bladeMid: 424,
   bladeLow: 428,
@@ -358,6 +360,13 @@ export const CineB: React.FC = () => {
         </Slot>
       </AbsoluteFill>
 
+      {/* LÂMINA — selo do software 2D */}
+      <AbsoluteFill style={blade(frame, T.bladeLow, -1)}>
+        <div style={{ position: 'absolute', left: 0, right: 0, top: 1650, display: 'flex', justifyContent: 'center', ...entryFrom(frame, T.app, 0, 90) }}>
+          <AppBadge app="ae" variant="glass" size={68} kicker="Feito no" />
+        </div>
+      </AbsoluteFill>
+
       {/* LÂMINA TOPO — título */}
       <AbsoluteFill style={blade(frame, T.bladeTop, -1)}>
         <div style={{ position: 'absolute', left: 80, right: 60, top: 190 }}>
@@ -367,9 +376,9 @@ export const CineB: React.FC = () => {
           <Beats
             frame={frame}
             items={[
-              { text: 'organiza', at: 70 },
-              { text: 'explica', at: 130 },
-              { text: 'dá clareza', at: 226 },
+              { text: 'organiza', at: 62 },
+              { text: 'explica', at: 82 },
+              { text: 'dá clareza', at: 102 },
             ]}
             style={{ marginTop: 14, fontSize: 46, fontWeight: 600, letterSpacing: 0.5, color: NV.sky }}
           />

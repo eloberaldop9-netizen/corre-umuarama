@@ -9,6 +9,7 @@ import { StudioEnvironment } from '../three/Studio';
 import { ProductCan } from '../three/Can';
 import { LabelArt, LABEL_H, LABEL_W } from '../LabelArt';
 import { BarChart, Donut, LineChart } from './CineB';
+import { AppBadge, AppId } from '../AppBadge';
 
 // ─────────────────────────────────────────────────────────────────────────
 // CENA 4 — Comunicação de Outro Nível (frames 1343–1800, local 0–456)
@@ -26,6 +27,8 @@ const T = {
   can: 14,
   cards: [34, 44, 54, 64] as const, // cartaz, barras, rosca, linha
   title: [56, 64] as const,
+  credits: 96, // "Criado com" — os softwares da atividade
+  creditsOut: 222,
   settle: [232, 264] as const, // a peça recua para abrir espaço ao CTA
   cta: 250,
   buttons: [272, 278] as const,
@@ -306,6 +309,50 @@ const Cursor: React.FC<{ frame: number; like: { x: number; y: number }; share: {
   );
 };
 
+/** Créditos da atividade: os softwares, em linha, antes do CTA. */
+const CREDITS: { app: AppId; role: string }[] = [
+  { app: 'ae', role: 'Motion 2D' },
+  { app: 'blender', role: 'Modelagem 3D' },
+  { app: 'pr', role: 'Montagem' },
+];
+
+const Credits: React.FC<{ frame: number }> = ({ frame }) => {
+  const out = ci(frame, [T.creditsOut, T.creditsOut + 14], [0, 1], Easing.in(Easing.exp));
+  const label = ci(frame, [T.credits, T.credits + 18], [0, 1], ENTRY);
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 1560,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 18,
+        opacity: ci(out, [0.3, 1], [1, 0]),
+        transform: `translateY(${60 * out}px) scale(${1 - 0.05 * out})`,
+        filter: out > 0.01 ? `blur(${16 * out}px)` : undefined,
+      }}
+    >
+      <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: 6, textTransform: 'uppercase', color: NV.muted, opacity: label }}>
+        Criado com
+      </div>
+      <div style={{ display: 'flex', gap: 12 }}>
+        {CREDITS.map(({ app, role }, i) => {
+          const at = T.credits + 6 + i * 4;
+          const p = ci(frame, [at, at + 22], [0, 1], ENTRY);
+          return (
+            <div key={app} style={{ opacity: ci(frame, [at, at + 10], [0, 1]), transform: `translateY(${(1 - p) * 50}px)` }}>
+              <AppBadge app={app} variant="glass" size={54} kicker={role} compact />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 // geometria do CTA (px absolutos)
 const PANEL = { x: 100, y: 1400, w: 880, h: 380 };
 const BTN_Y = PANEL.y + 170;
@@ -403,6 +450,8 @@ export const CineD: React.FC = () => {
           <Words text="Comunicação de" start={T.title[0]} frame={frame} style={{ fontSize: 92, fontWeight: 900, letterSpacing: -3, lineHeight: 1.05, color: NV.ice }} />
           <Words text="Outro Nível!" start={T.title[1]} frame={frame} style={{ fontSize: 92, fontWeight: 900, letterSpacing: -3, lineHeight: 1.05, color: NV.sky }} />
         </div>
+
+        <Credits frame={frame} />
 
         {/* painel de vidro escuro do CTA */}
         <div

@@ -8,6 +8,7 @@ import { FONT, NV, P } from '../theme';
 import { Dust, StudioEnvironment } from '../three/Studio';
 import { ProductCan } from '../three/Can';
 import { Beats, LABEL_H, LABEL_W, LabelArt } from '../LabelArt';
+import { AppBadge } from '../AppBadge';
 
 // ─────────────────────────────────────────────────────────────────────────
 // CENA 3 — A Profundidade do 3D (frames 743–1350, local 0–607)
@@ -28,6 +29,7 @@ const T = {
   label: [195, 245] as const, // ...e embrulha a lata (o rótulo vira textura)
   rim: [225, 265] as const, // o estúdio acende: recorte
   fill: [255, 295] as const, // ...e preenchimento quente
+  app: 120, // selo "Modelado no Blender"
   textExit: 570,
   inflate: 575,
   end: 600,
@@ -277,6 +279,20 @@ export const CineC: React.FC = () => {
       </div>
 
       <FlyingLabel frame={frame} />
+
+      {/* selo do software 3D — entre o título e a lata */}
+      <div style={{ position: 'absolute', left: 0, right: 0, top: 520, ...textExitStyle }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            opacity: ci(frame, [T.app, T.app + 16], [0, 1]),
+            transform: `translateY(${ci(frame, [T.app, T.app + 24], [70, 0], Easing.out(Easing.cubic))}px)`,
+          }}
+        >
+          <AppBadge app="blender" variant="glass" size={64} kicker="Modelado no" />
+        </div>
+      </div>
 
       {/* BLOCKOUT — a massa chumbo tapa a lente por completo */}
       <AbsoluteFill style={{ backgroundColor: P.lead, opacity: blockout }} />

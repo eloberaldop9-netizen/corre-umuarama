@@ -69,6 +69,7 @@ const punchScale = (s: number) => {
  * o volume gira para revelar três faces — de frente era só o quadrado 2D.
  * No hold, o cubo segue girando bem devagar em Y para o cromo reagir à luz.
  */
+const CUBE_LIFT = 17; // px
 const CUBE_BEVEL = 0.12; // 0.12 × 50% = raio de canto de 6% do lado
 /** Visto em 3/4 o cubo ocupa ~1.6× o lado; ele "assenta" menor para abraçar o texto. */
 const cubeFit = (s: number) => 1 - 0.3 * Math.min(s, 1);
@@ -110,7 +111,9 @@ const World: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const s = morphSpring(frame, fps);
-  const y = (12 / pxPerUnit(450)) * floatWave(frame);
+  // CUBE_LIFT: em 3/4 o cubo aparece ~17px abaixo do centro; compensa para o
+  // centro visual cair exatamente em y = 960.
+  const y = (CUBE_LIFT + 12 * floatWave(frame)) / pxPerUnit(450);
   // 293→294: o brilho morre em corte seco — em 294 a superfície já é o
   // azul-meia-noite chapado do fundo da Cena 2.
   const flatten = ci(frame, [T.pop, T.pop + 1], [0, 1]);
@@ -253,7 +256,7 @@ export const CineA: React.FC = () => {
         style={{
           position: 'absolute',
           left: 540 - diameter / 2,
-          top: 960 - diameter / 2,
+          top: 960 - CUBE_LIFT - diameter / 2,
           width: diameter,
           height: diameter,
           borderRadius: '50%',
@@ -284,7 +287,7 @@ export const CineA: React.FC = () => {
       {/* TIPOGRAFIA — abraça o objeto: cada linha num plano Z próprio */}
       <AbsoluteFill style={{ ...textExit, color: NV.ice }}>
         <DepthLayer frame={frame} zDepth={100}>
-          <div style={{ position: 'absolute', top: 470, left: 40, right: 40 }}>
+          <div style={{ position: 'absolute', top: 462, left: 40, right: 40 }}>
             <SpringWords
               text="Como o 2D e o 3D"
               start={T.text[0]}
@@ -294,7 +297,7 @@ export const CineA: React.FC = () => {
           </div>
         </DepthLayer>
         <DepthLayer frame={frame} zDepth={50}>
-          <div style={{ position: 'absolute', top: 1400, left: 40, right: 40 }}>
+          <div style={{ position: 'absolute', top: 1371, left: 40, right: 40 }}>
             <SpringWords
               text="transformam a"
               start={T.text[1]}
@@ -304,7 +307,7 @@ export const CineA: React.FC = () => {
           </div>
         </DepthLayer>
         <DepthLayer frame={frame} zDepth={120}>
-          <div style={{ position: 'absolute', top: 1490, left: 40, right: 40 }}>
+          <div style={{ position: 'absolute', top: 1458, left: 40, right: 40 }}>
             <SpringWords
               text="Comunicação Visual?"
               start={T.text[2]}

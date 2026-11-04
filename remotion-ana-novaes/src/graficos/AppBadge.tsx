@@ -1,5 +1,5 @@
 import React, { CSSProperties } from 'react';
-import { FONT } from './theme';
+import { FONT, NV } from './theme';
 
 // Selos dos softwares citados no roteiro: After Effects (2D), Blender (3D) e
 // Premiere Pro (montagem). Tiles desenhados em código — nada de arquivo externo.
@@ -60,11 +60,13 @@ interface AppBadgeProps {
   variant: 'brutal' | 'glass' | 'flat';
   /** Linha pequena acima do nome. */
   kicker?: string;
+  /** Tipografia reduzida (créditos em linha). */
+  compact?: boolean;
   style?: CSSProperties;
 }
 
 /** Selo "Feito no ..." — versão brutalista (Cena 2) ou vidro (Cenas 3/4). */
-export const AppBadge: React.FC<AppBadgeProps> = ({ app, size = 72, variant, kicker, style }) => {
+export const AppBadge: React.FC<AppBadgeProps> = ({ app, size = 72, variant, kicker, compact, style }) => {
   const brutal = variant === 'brutal' || variant === 'flat';
   const flat = variant === 'flat';
   return (
@@ -72,13 +74,13 @@ export const AppBadge: React.FC<AppBadgeProps> = ({ app, size = 72, variant, kic
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 16,
-        padding: brutal ? '12px 26px 12px 12px' : '10px 24px 10px 10px',
+        gap: compact ? 12 : 16,
+        padding: brutal ? '12px 26px 12px 12px' : compact ? '8px 20px 8px 8px' : '10px 24px 10px 10px',
         fontFamily: FONT,
         borderRadius: brutal ? 0 : 999,
-        backgroundColor: brutal ? '#FFFFFF' : 'rgba(20,20,22,0.6)',
-        border: brutal ? `${flat ? 3 : 4}px solid #0A0A0C` : '1px solid rgba(255,255,255,0.16)',
-        boxShadow: flat ? 'none' : brutal ? '8px 8px 0 0 #0A0A0C' : '0 12px 40px rgba(0,0,0,0.45)',
+        backgroundColor: brutal ? '#FFFFFF' : 'rgba(18,35,74,0.7)',
+        border: brutal ? `${flat ? 3 : 4}px solid #0A0A0C` : `1px solid ${NV.line}`,
+        boxShadow: flat ? 'none' : brutal ? '8px 8px 0 0 #0A0A0C' : '0 14px 40px rgba(2,5,14,0.5)',
         backdropFilter: brutal ? undefined : 'blur(16px)',
         ...style,
       }}
@@ -87,16 +89,16 @@ export const AppBadge: React.FC<AppBadgeProps> = ({ app, size = 72, variant, kic
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <span
           style={{
-            fontSize: 16,
+            fontSize: compact ? 13 : 16,
             fontWeight: 600,
             letterSpacing: 2.5,
             textTransform: 'uppercase',
-            color: flat ? '#1D4ED8' : brutal ? '#4F46E5' : 'rgba(255,255,255,0.55)',
+            color: flat ? '#1D4ED8' : brutal ? '#4F46E5' : NV.sky,
           }}
         >
           {kicker ?? APPS[app].role}
         </span>
-        <span style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.5, color: brutal ? '#111827' : '#FFFFFF' }}>
+        <span style={{ fontSize: compact ? 22 : 28, fontWeight: 800, letterSpacing: -0.5, color: brutal ? '#111827' : NV.ice }}>
           {APPS[app].name}
         </span>
       </div>
