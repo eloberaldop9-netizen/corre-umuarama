@@ -2,3 +2,4 @@ node_modules/
 out/
 .DS_Store
 *.log
+public/assets/graficos-trilha.wav

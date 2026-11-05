@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, Sequence } from 'remotion';
+import { AbsoluteFill, Audio, Sequence, staticFile } from 'remotion';
 import { CineA } from './scenes/CineA';
 import { CineB } from './scenes/CineB';
 import { CineC } from './scenes/CineC';
@@ -45,5 +45,7 @@ export const VideoGraficos2D3D: React.FC = () => (
       <CineD />
     </Sequence>
     <Grain opacity={0.04} />
+    {/* Trilha + efeitos sincronizados aos frames (scripts/gerar-audio-graficos.py) */}
+    <Audio src={staticFile('assets/graficos-trilha.mp3')} />
   </AbsoluteFill>
 );
