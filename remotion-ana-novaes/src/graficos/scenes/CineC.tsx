@@ -36,8 +36,8 @@ const T = {
 } as const;
 
 const ORBIT_RADIUS = 800;
-const LOOK_AT = new THREE.Vector3(0, 70, 0);
-const OBJ_SCALE = 1.4; // lata ~940px de altura no hold
+const LOOK_AT = new THREE.Vector3(0, 45, 0); // lata um pouco mais alta: libera a base para o selo
+const OBJ_SCALE = 1.35; // lata ~900px de altura no hold
 
 const orbitAngle = (frame: number) =>
   ci(frame, [T.orbit[0], T.orbit[1]], [0, Math.PI], Easing.inOut(Easing.cubic)) +
@@ -191,7 +191,7 @@ const TitleLine: React.FC<{ text: string; start: number; frame: number; style: R
  * 3D é aplicado de baixo para cima, o cartaz some na mesma direção — a arte
  * plana "passa" para o volume. Sombreado cilíndrico ao pousar.
  */
-const LABEL_SCREEN = { x: 540, y: 1160, w: 527 }; // frente do rótulo na tela durante o wipe
+const LABEL_SCREEN = { x: 540, y: 1088, w: 508 }; // frente do rótulo na tela durante o wipe
 const FlyingLabel: React.FC<{ frame: number }> = ({ frame }) => {
   if (frame < T.cardIn[0] || frame > T.label[1] + 2) return null;
   const p = ci(frame, [T.cardIn[0], T.cardIn[1]], [0, 1], Easing.out(Easing.cubic));
@@ -280,8 +280,8 @@ export const CineC: React.FC = () => {
 
       <FlyingLabel frame={frame} />
 
-      {/* selo do software 3D — entre o título e a lata */}
-      <div style={{ position: 'absolute', left: 0, right: 0, top: 520, ...textExitStyle }}>
+      {/* selo do software 3D — embaixo, na mesma altura do selo da Cena 2 */}
+      <div style={{ position: 'absolute', left: 0, right: 0, top: 1650, ...textExitStyle }}>
         <div
           style={{
             display: 'flex',
@@ -290,7 +290,7 @@ export const CineC: React.FC = () => {
             transform: `translateY(${ci(frame, [T.app, T.app + 24], [70, 0], Easing.out(Easing.cubic))}px)`,
           }}
         >
-          <AppBadge app="blender" variant="glass" size={64} kicker="Modelado no" />
+          <AppBadge app="blender" variant="glass" size={68} kicker="Modelado no" />
         </div>
       </div>
 
