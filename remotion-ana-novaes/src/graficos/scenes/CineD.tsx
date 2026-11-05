@@ -335,16 +335,16 @@ const Credits: React.FC<{ frame: number }> = ({ frame }) => {
         filter: out > 0.01 ? `blur(${16 * out}px)` : undefined,
       }}
     >
-      <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: 6, textTransform: 'uppercase', color: NV.muted, opacity: label }}>
+      <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: 6, textTransform: 'uppercase', color: NV.muted, opacity: label }}>
         Criado com
       </div>
-      <div style={{ display: 'flex', gap: 12 }}>
-        {CREDITS.map(({ app, role }, i) => {
+      <div style={{ display: 'flex', gap: 10 }}>
+        {CREDITS.map(({ app }, i) => {
           const at = T.credits + 6 + i * 4;
           const p = ci(frame, [at, at + 22], [0, 1], ENTRY);
           return (
             <div key={app} style={{ opacity: ci(frame, [at, at + 10], [0, 1]), transform: `translateY(${(1 - p) * 50}px)` }}>
-              <AppBadge app={app} variant="glass" size={54} kicker={role} compact />
+              <AppBadge app={app} variant="glass" size={64} kicker="" compact />
             </div>
           );
         })}

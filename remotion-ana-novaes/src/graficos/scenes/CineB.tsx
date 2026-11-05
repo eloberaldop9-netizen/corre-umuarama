@@ -363,7 +363,7 @@ export const CineB: React.FC = () => {
       {/* LÂMINA — selo do software 2D */}
       <AbsoluteFill style={blade(frame, T.bladeLow, -1)}>
         <div style={{ position: 'absolute', left: 0, right: 0, top: 1650, display: 'flex', justifyContent: 'center', ...entryFrom(frame, T.app, 0, 90) }}>
-          <AppBadge app="ae" variant="glass" size={68} kicker="Feito no" />
+          <AppBadge app="ae" variant="glass" size={84} kicker="Feito no" />
         </div>
       </AbsoluteFill>
 

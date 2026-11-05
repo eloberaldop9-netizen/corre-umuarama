@@ -63,7 +63,7 @@ interface AppBadgeProps {
   app: AppId;
   size?: number;
   variant: 'brutal' | 'glass' | 'flat';
-  /** Linha pequena acima do nome. */
+  /** Linha pequena acima do nome ('' = sem linha). */
   kicker?: string;
   /** Tipografia reduzida (créditos em linha). */
   compact?: boolean;
@@ -79,8 +79,8 @@ export const AppBadge: React.FC<AppBadgeProps> = ({ app, size = 72, variant, kic
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: compact ? 12 : 16,
-        padding: brutal ? '12px 26px 12px 12px' : compact ? '8px 20px 8px 8px' : '10px 24px 10px 10px',
+        gap: compact ? 12 : 18,
+        padding: brutal ? '12px 26px 12px 12px' : compact ? '8px 18px 8px 8px' : '12px 30px 12px 12px',
         fontFamily: FONT,
         borderRadius: brutal ? 0 : 999,
         backgroundColor: brutal ? '#FFFFFF' : 'rgba(18,35,74,0.7)',
@@ -92,9 +92,9 @@ export const AppBadge: React.FC<AppBadgeProps> = ({ app, size = 72, variant, kic
     >
       <AppTile app={app} size={size} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <span
+        {kicker === '' ? null : <span
           style={{
-            fontSize: compact ? 13 : 16,
+            fontSize: compact ? 17 : 24,
             fontWeight: 600,
             letterSpacing: 2.5,
             textTransform: 'uppercase',
@@ -102,8 +102,8 @@ export const AppBadge: React.FC<AppBadgeProps> = ({ app, size = 72, variant, kic
           }}
         >
           {kicker ?? APPS[app].role}
-        </span>
-        <span style={{ fontSize: compact ? 22 : 28, fontWeight: 800, letterSpacing: -0.5, color: brutal ? '#111827' : NV.ice }}>
+        </span>}
+        <span style={{ fontSize: compact ? 32 : 36, fontWeight: 800, letterSpacing: -0.5, color: brutal ? '#111827' : NV.ice }}>
           {APPS[app].name}
         </span>
       </div>

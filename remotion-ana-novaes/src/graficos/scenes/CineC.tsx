@@ -30,6 +30,8 @@ const T = {
   rim: [225, 265] as const, // o estúdio acende: recorte
   fill: [255, 295] as const, // ...e preenchimento quente
   app: 120, // selo "Modelado no Blender"
+  closeUp: [300, 340, 372, 410] as const, // plano 2: close na textura + luz varrendo
+  lowAngle: [382, 422, 458, 500] as const, // plano 3: contra-plongée (herói)
   textExit: 570,
   inflate: 575,
   end: 600,
@@ -43,16 +45,31 @@ const orbitAngle = (frame: number) =>
   ci(frame, [T.orbit[0], T.orbit[1]], [0, Math.PI], Easing.inOut(Easing.cubic)) +
   ci(frame, [T.textExit, T.end], [0, Math.PI * 0.9], Easing.in(Easing.exp)); // acelera vertiginosamente
 
+/** Peso (0→1→0) de um plano: entra e sai em in-out-cubic, sem cortes. */
+const shot = (frame: number, [a, b, c, d]: readonly [number, number, number, number]) =>
+  ci(frame, [a, b], [0, 1], Easing.inOut(Easing.cubic)) - ci(frame, [c, d], [0, 1], Easing.inOut(Easing.cubic));
+
+/**
+ * Planos encadeados sobre a órbita: aberto → close na textura do rótulo →
+ * contra-plongée de herói → aberto de novo (a órbita de 180° segue por baixo).
+ */
 const camPosition = (frame: number) => {
   const a = orbitAngle(frame);
-  return new THREE.Vector3(Math.sin(a) * ORBIT_RADIUS, 150, Math.cos(a) * ORBIT_RADIUS);
+  const close = shot(frame, T.closeUp);
+  const low = shot(frame, T.lowAngle);
+  const r = ORBIT_RADIUS - 400 * close - 140 * low;
+  const y = 150 - 110 * close - 330 * low;
+  return new THREE.Vector3(Math.sin(a) * r, y, Math.cos(a) * r);
 };
+
+const lookAt = (frame: number) =>
+  new THREE.Vector3(0, LOOK_AT.y - 45 * shot(frame, T.closeUp) - 25 * shot(frame, T.lowAngle), 0);
 
 const Rig: React.FC<{ frame: number }> = ({ frame }) => {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   useLayoutEffect(() => {
     camera.position.copy(camPosition(frame));
-    camera.lookAt(LOOK_AT);
+    camera.lookAt(lookAt(frame));
     camera.updateProjectionMatrix();
   }, [camera, frame]);
   return null;
@@ -76,11 +93,17 @@ const StudioLights: React.FC<{ frame: number }> = ({ frame }) => {
   const fillA = a + 1.2;
   const rimPos = rimDirection(frame).multiplyScalar(890);
   const fillPos: [number, number, number] = [Math.sin(fillA) * 650, 120, Math.cos(fillA) * 650];
+  // Durante o close, uma luz de estúdio varre o rótulo da esquerda para a
+  // direita: o brilho correndo pela superfície mostra textura e volume.
+  const close = shot(frame, T.closeUp);
+  const sweepA = a + ci(frame, [T.closeUp[0], T.closeUp[3]], [-1.1, 1.1], Easing.inOut(Easing.sin));
+  const sweepPos: [number, number, number] = [Math.sin(sweepA) * 420, 60, Math.cos(sweepA) * 420];
   return (
     <>
       <ambientLight intensity={0.05} />
       <directionalLight position={rimPos} intensity={rim} color="#ffffff" />
       <pointLight position={fillPos} intensity={fill} color="#FFB37A" decay={0} />
+      <pointLight position={sweepPos} intensity={2.6 * close} color="#DCE8FF" decay={0} />
     </>
   );
 };
@@ -260,6 +283,8 @@ export const CineC: React.FC = () => {
         <World />
       </ThreeCanvas>
 
+      {/* véu escuro no topo: mantém o título legível quando a lata enche o quadro */}
+      <AbsoluteFill style={{ background: 'linear-gradient(180deg, rgba(5,5,10,0.85) 0%, rgba(5,5,10,0.55) 22%, rgba(5,5,10,0) 36%)', ...textExitStyle }} />
       {/* TÍTULO — flutua livre na lente */}
       <div style={{ position: 'absolute', top: 200, left: 40, right: 40, ...textExitStyle }}>
         <div style={{ transform: `translateY(${float}px)` }}>
@@ -290,7 +315,7 @@ export const CineC: React.FC = () => {
             transform: `translateY(${ci(frame, [T.app, T.app + 24], [70, 0], Easing.out(Easing.cubic))}px)`,
           }}
         >
-          <AppBadge app="blender" variant="glass" size={68} kicker="Modelado no" />
+          <AppBadge app="blender" variant="glass" size={84} kicker="Modelado no" />
         </div>
       </div>
 
