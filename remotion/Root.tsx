@@ -9,6 +9,7 @@ import { UaiTofuDashboard, DURATION as UAI_DASHBOARD_DURATION, FPS as UAI_DASHBO
 import { UaiTofuBrandIntro, DURATION as UAI_BRAND_INTRO_DURATION, FPS as UAI_BRAND_INTRO_FPS, WIDTH as UAI_BRAND_INTRO_WIDTH, HEIGHT as UAI_BRAND_INTRO_HEIGHT } from './UaiTofuBrandIntro';
 import { GoshenNaCozinhaIntro, DURATION as GOSHEN_DURATION, FPS as GOSHEN_FPS, WIDTH as GOSHEN_WIDTH, HEIGHT as GOSHEN_HEIGHT } from './GoshenNaCozinhaIntro';
 import { QueijosDaTerraBrandIntro, DURATION as QDT_DURATION, FPS as QDT_FPS, WIDTH as QDT_WIDTH, HEIGHT as QDT_HEIGHT } from './QueijosDaTerraBrandIntro';
+import { UaiTofuQueijosColab, DURATION as COLAB_DURATION, FPS as COLAB_FPS, WIDTH as COLAB_WIDTH, HEIGHT as COLAB_HEIGHT } from './UaiTofuQueijosColab';
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -76,6 +77,14 @@ export const RemotionRoot: React.FC = () => {
         fps={QDT_FPS}
         width={QDT_WIDTH}
         height={QDT_HEIGHT}
+      />
+      <Composition
+        id="UaiTofuQueijosColab"
+        component={UaiTofuQueijosColab}
+        durationInFrames={COLAB_DURATION}
+        fps={COLAB_FPS}
+        width={COLAB_WIDTH}
+        height={COLAB_HEIGHT}
       />
       <Composition
         id="UaiCienciaIntro"
